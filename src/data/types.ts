@@ -41,7 +41,8 @@ export const RegionSchema = z.object({
 function hasNoOverlap(spans: z.infer<typeof SeasonSpanSchema>[]): boolean {
   const claimed = new Set<number>();
   for (const span of spans) {
-    if (span.from < MIN_WEEK || span.from > MAX_WEEK || span.to < MIN_WEEK || span.to > MAX_WEEK) continue; // out-of-range reported by WeekSchema
+    if (span.from < MIN_WEEK || span.from > MAX_WEEK || span.to < MIN_WEEK || span.to > MAX_WEEK)
+      continue; // out-of-range reported by WeekSchema
     for (const w of weeksCovered(span.from, span.to)) {
       if (claimed.has(w)) return false;
       claimed.add(w);

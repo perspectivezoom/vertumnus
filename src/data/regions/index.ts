@@ -1,4 +1,4 @@
-import sfbay from './sfbay';
+import sfbay from '@/data/regions/sfbay';
 
 /**
  * Explicit list of all regions. Values are unvalidated — parse with

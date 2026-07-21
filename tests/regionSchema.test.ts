@@ -1,6 +1,8 @@
-import { describe, test, expect } from 'bun:test';
+import { describe, expect, test } from 'bun:test';
+
 import { z } from 'zod';
-import { RegionSchema, ProduceSchema } from '@data/types';
+
+import { ProduceSchema, RegionSchema } from '@/data/types';
 
 type Span = { level: 'available' | 'peak'; from: number; to: number };
 
