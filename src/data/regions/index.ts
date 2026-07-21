@@ -1,4 +1,4 @@
-import sfbay from './sfbay.jsonc';
+import sfbay from './sfbay';
 
 /**
  * Explicit list of all regions. Values are unvalidated — parse with
