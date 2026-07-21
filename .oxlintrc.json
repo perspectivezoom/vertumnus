@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "import"],
+  "jsPlugins": ["oxlint-tailwindcss"],
+  "settings": {
+    "tailwindcss": {
+      "entryPoint": "src/styles/global.css"
+    }
+  },
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["./**", "../**"],
+            "message": "No relative imports — use an absolute alias (e.g. @/...)."
+          }
+        ]
+      }
+    ],
+    "tailwindcss/no-unknown-classes": "error"
+  }
+}
