@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { WEEKS_PER_YEAR } from '@/lib/calendar';
+
 export type Region = z.infer<typeof RegionSchema>;
 
 export const Availability = {
@@ -8,7 +10,7 @@ export const Availability = {
 } as const;
 
 const MIN_WEEK = 1;
-const MAX_WEEK = 52;
+const MAX_WEEK = WEEKS_PER_YEAR;
 
 const WeekSchema = z.number().int().min(MIN_WEEK).max(MAX_WEEK);
 

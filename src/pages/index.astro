@@ -1,17 +1,27 @@
 ---
+import Poster from '@/components/Poster.astro';
+import { regions } from '@/data/regions';
+import { RegionSchema } from '@/data/types';
 
+const region = RegionSchema.parse(regions[0]);
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>In-season produce — {region.name}</title>
+  </head>
+  <body>
+    <main>
+      <Poster region={region} />
+    </main>
+  </body>
 </html>
+
+<style>
+  body {
+    margin: 0;
+  }
+</style>
