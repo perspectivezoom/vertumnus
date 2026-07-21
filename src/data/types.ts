@@ -23,7 +23,7 @@ const SeasonSpanSchema = z.object({
   to: WeekSchema, // inclusive; wraps the year when to < from
 });
 
-const ProduceSchema = z.object({
+export const ProduceSchema = z.object({
   name: z.string().min(1),
   spans: z.array(SeasonSpanSchema).refine(hasNoOverlap, { error: 'week spans overlap' }),
   sources: z.array(SourceSchema).min(1),
