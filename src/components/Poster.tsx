@@ -1,4 +1,3 @@
-import styles from '@/components/Poster.module.css';
 import type { Region } from '@/data/types';
 import { dimensions, LEVEL_FILL, monthTicks, spanRects } from '@/lib/poster/geometry';
 
@@ -12,13 +11,19 @@ export function Poster({ region }: PosterProps) {
 
   return (
     <svg
-      className={styles.poster}
+      className="block h-auto w-full font-sans"
       viewBox={`0 0 ${d.width} ${d.height}`}
       role="img"
       aria-label={`In-season produce for ${region.name}`}
     >
       {months.map((m) => (
-        <text key={m.label} className={styles.month} x={m.x} y={d.gridTop - 18} textAnchor="middle">
+        <text
+          key={m.label}
+          className="fill-[#555] text-[13px]"
+          x={m.x}
+          y={d.gridTop - 18}
+          textAnchor="middle"
+        >
           {m.label}
         </text>
       ))}
@@ -27,7 +32,11 @@ export function Poster({ region }: PosterProps) {
         const y = d.gridTop + i * d.rowHeight;
         return (
           <g key={item.name}>
-            <text className={styles.produce} x={8} y={y + d.rowHeight / 2}>
+            <text
+              className="fill-[#222] text-[15px] [dominant-baseline:middle]"
+              x={8}
+              y={y + d.rowHeight / 2}
+            >
               {item.name}
             </text>
             {item.spans.map((s) =>

@@ -1,0 +1,3 @@
+# Tailwind for the `bun ./index.html` dev server (production build uses scripts/build.ts).
+[serve.static]
+plugins = ["bun-plugin-tailwind"]
