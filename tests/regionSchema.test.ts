@@ -75,4 +75,58 @@ describe('RegionSchema', () => {
       expect(error.issues[0]?.path).toEqual(['spans']);
     });
   });
+
+  describe('peak-midpoint ordering', () => {
+    type ProduceInput = z.input<typeof ProduceSchema>;
+    const ORDER_ERROR = 'items must be ordered by ascending peak midpoint';
+
+    const peakProduce = (name: string, from: number, to: number): ProduceInput => ({
+      name,
+      spans: [{ level: 'peak', from, to }],
+      sources: [{ title: 'src', url: null }],
+    });
+
+    const region = (items: ProduceInput[]): z.input<typeof RegionSchema> => ({
+      id: 'sort',
+      name: 'Sort',
+      generatedAt: '2026-01-01T00:00:00Z',
+      schemaVersion: 1,
+      items,
+    });
+
+    test('valid: items in ascending peak-midpoint order', () => {
+      expect(() =>
+        RegionSchema.parse(
+          region([
+            peakProduce('Early', 4, 8),
+            peakProduce('Mid', 22, 26),
+            peakProduce('Late', 40, 44),
+          ]),
+        ),
+      ).not.toThrow();
+    });
+
+    test('invalid: items out of peak-midpoint order', () => {
+      expect(() =>
+        RegionSchema.parse(
+          region([
+            peakProduce('Late', 40, 44),
+            peakProduce('Early', 4, 8),
+            peakProduce('Mid', 22, 26),
+          ]),
+        ),
+      ).toThrow(ORDER_ERROR);
+    });
+
+    test('invalid: a produce with no peak span must be authored last', () => {
+      const noPeak: ProduceInput = {
+        name: 'NoPeak',
+        spans: [{ level: 'available', from: 1, to: 10 }],
+        sources: [{ title: 'src', url: null }],
+      };
+      expect(() => RegionSchema.parse(region([noPeak, peakProduce('HasPeak', 20, 24)]))).toThrow(
+        ORDER_ERROR,
+      );
+    });
+  });
 });

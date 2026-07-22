@@ -1,10 +1,11 @@
-// Synthetic 5-produce sample for developing the streamgraph layout.
+// Synthetic 5-produce region used for layout development and the schema test.
 // NOT real seasonality data — spans are chosen to spread peaks across the year
-// (and include a year-wrapping winter peak). Swap App back to the real region
-// once the layout is dialed in.
-export default {
-  id: 'sample',
-  name: 'Sample (layout dev)',
+// (and include a year-wrapping winter peak) so the streamgraph exercises every
+// case. It is validated like any real region but kept out of the production
+// `regions` list.
+export const testRegion = {
+  id: 'test',
+  name: 'Test Region (layout dev)',
   generatedAt: '2026-07-21T00:00:00Z',
   schemaVersion: 1,
   items: [

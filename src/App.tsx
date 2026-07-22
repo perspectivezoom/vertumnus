@@ -1,14 +1,15 @@
-import { Poster } from '@/components/Poster';
-// TODO: swap back to the real region (regions[0]) once the streamgraph layout is dialed in.
-import devRegion from '@/data/dev-region';
+import { Ribbons } from '@/components/Ribbons';
+import { testRegion } from '@/data/testRegion';
 import { RegionSchema } from '@/data/types';
 
-const region = RegionSchema.parse(devRegion);
+// Renders the synthetic test region while the layout is being dialed in; swap to
+// a real region (regions[0]) once the seasonality data is filled out.
+const region = RegionSchema.parse(testRegion);
 
 export function App() {
   return (
     <main>
-      <Poster region={region} />
+      <Ribbons region={region} />
     </main>
   );
 }
