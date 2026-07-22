@@ -18,8 +18,11 @@ const SeasonSpanSchema = z.object({
   to: WeekSchema, // inclusive; wraps the year when to < from
 });
 
+const HexColorSchema = z.string().regex(/^#[0-9a-f]{6}$/i); // 6-digit hex, e.g. #2a78d6
+
 export const ProduceSchema = z.object({
   name: z.string().min(1),
+  color: HexColorSchema,
   spans: z.array(SeasonSpanSchema).refine(hasNoOverlap, { error: 'week spans overlap' }),
   sources: z.array(SourceSchema).min(1),
 });

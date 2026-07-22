@@ -1,4 +1,4 @@
-// Synthetic 5-produce region used for layout development and the schema test.
+// Synthetic 6-produce region used for layout development and the schema test.
 // NOT real seasonality data — spans are chosen to spread peaks across the year
 // (and include a year-wrapping winter peak) so the streamgraph exercises every
 // case. It is validated like any real region but kept out of the production
@@ -11,6 +11,7 @@ export const testRegion = {
   items: [
     {
       name: 'Meyer Lemon',
+      color: '#2a78d6',
       spans: [
         { level: 'available', from: 45, to: 48 }, // late Nov
         { level: 'peak', from: 49, to: 6 }, // early Dec – mid Feb (wraps)
@@ -20,6 +21,7 @@ export const testRegion = {
     },
     {
       name: 'Asparagus',
+      color: '#3aa76d',
       spans: [
         { level: 'available', from: 11, to: 13 },
         { level: 'peak', from: 14, to: 19 }, // spring
@@ -29,6 +31,7 @@ export const testRegion = {
     },
     {
       name: 'Strawberries',
+      color: '#e0902b',
       spans: [
         { level: 'available', from: 18, to: 22 },
         { level: 'peak', from: 23, to: 33 }, // early summer
@@ -38,6 +41,7 @@ export const testRegion = {
     },
     {
       name: 'Tomatoes',
+      color: '#d1495b',
       spans: [
         { level: 'available', from: 26, to: 29 },
         { level: 'peak', from: 30, to: 38 }, // late summer
@@ -47,6 +51,7 @@ export const testRegion = {
     },
     {
       name: 'Winter Squash',
+      color: '#7a5bd0',
       spans: [
         { level: 'available', from: 37, to: 39 },
         { level: 'peak', from: 40, to: 48 }, // fall
@@ -56,6 +61,7 @@ export const testRegion = {
     },
     {
       name: 'Jerusalem Artichoke',
+      color: '#2f9c95',
       spans: [
         { level: 'available', from: 44, to: 46 },
         { level: 'peak', from: 47, to: 52 }, // early winter — long name on the right edge

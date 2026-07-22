@@ -6,6 +6,7 @@ export default {
   items: [
     {
       name: 'Strawberries',
+      color: '#d1495b',
       spans: [
         { level: 'available', from: 18, to: 22 }, // 30-Apr – early June (ramp-up, >=25% of peak volume)
         { level: 'peak', from: 23, to: 33 }, // early June – mid-August (4-Jun to 13-Aug on Fig. 5)

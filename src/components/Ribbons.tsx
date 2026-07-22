@@ -30,9 +30,6 @@ const GRID_W = WEEKS_PER_YEAR * CELL_W;
 const WIDTH = PAD_X * 2 + GRID_W;
 const PEAK_HEIGHT = LEVEL_WEIGHT[Level.Peak] * WEIGHT_SCALE; // vertical room inside a peak
 
-// Placeholder categorical palette (pending dataviz validation with the art pass).
-const PALETTE = ['#2a78d6', '#3aa76d', '#e0902b', '#d1495b', '#7a5bd0', '#2f9c95', '#b5651d'];
-
 /** One week's vertical slice of a ribbon: its top and bottom edges at position x. */
 interface Slice {
   x: number;
@@ -170,7 +167,7 @@ function layout(items: Produce[]): { height: number; ribbons: Ribbon[] } {
 
     return {
       name: item.name,
-      color: PALETTE[i % PALETTE.length] ?? '#888888',
+      color: item.color,
       path: areaGen(fullSlices) ?? '',
       spans: item.spans,
       slices,
