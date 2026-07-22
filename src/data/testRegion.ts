@@ -54,5 +54,13 @@ export const testRegion = {
       ],
       sources: [{ title: 'Synthetic sample data (layout dev)', url: null }],
     },
+    {
+      name: 'Jerusalem Artichoke',
+      spans: [
+        { level: 'available', from: 44, to: 46 },
+        { level: 'peak', from: 47, to: 52 }, // early winter — long name on the right edge
+      ],
+      sources: [{ title: 'Synthetic sample data (layout dev)', url: null }],
+    },
   ],
 };
