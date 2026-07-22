@@ -1,3 +1,4 @@
+import { Banner } from '@/components/Banner';
 import { Poster } from '@/components/Poster';
 import { testRegion } from '@/data/testRegion';
 import { RegionSchema } from '@/data/types';
@@ -10,6 +11,7 @@ export function App() {
   return (
     <main className="min-h-screen bg-neutral-100 p-6">
       <Poster region={region} />
+      <Banner />
     </main>
   );
 }
