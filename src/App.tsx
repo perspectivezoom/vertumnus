@@ -1,4 +1,4 @@
-import { Ribbons } from '@/components/Ribbons';
+import { Poster } from '@/components/Poster';
 import { testRegion } from '@/data/testRegion';
 import { RegionSchema } from '@/data/types';
 
@@ -8,8 +8,8 @@ const region = RegionSchema.parse(testRegion);
 
 export function App() {
   return (
-    <main>
-      <Ribbons region={region} />
+    <main className="min-h-screen bg-neutral-100 p-6">
+      <Poster region={region} />
     </main>
   );
 }
