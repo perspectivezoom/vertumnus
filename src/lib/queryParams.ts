@@ -2,6 +2,8 @@ import { useSyncExternalStore } from 'react';
 
 import { z } from 'zod';
 
+import { DEFAULT_PAPER, UNITS } from '@/lib/paper';
+
 const QUERY_CHANGE_EVENT = 'vertumnus:querychange';
 
 /**
@@ -16,8 +18,17 @@ function flagParam(whenAbsent: boolean) {
     .default(whenAbsent); // absent
 }
 
+/** A positive-number URL param that falls back to `whenAbsent` when absent or invalid.
+ * (`z.number()` already rejects NaN/Infinity in zod v4, so no `.finite()` is needed.) */
+function numberParam(whenAbsent: number) {
+  return z.coerce.number().positive().catch(whenAbsent).default(whenAbsent);
+}
+
 const QueryParamsSchema = z.object({
   hideBanner: flagParam(false),
+  w: numberParam(DEFAULT_PAPER.w),
+  h: numberParam(DEFAULT_PAPER.h),
+  unit: z.enum(UNITS).catch(DEFAULT_PAPER.unit).default(DEFAULT_PAPER.unit),
 });
 
 export type QueryParams = z.infer<typeof QueryParamsSchema>;
@@ -45,11 +56,13 @@ export function useQueryParams(): QueryParams {
   return parseParams(search);
 }
 
-/** Set (or, with `null`, remove) a query param, then notify subscribers. */
-export function setQueryParam(key: keyof QueryParams, value: string | null): void {
+/** Set (or, with `null`, remove) one or more query params in a single history update. */
+export function setQueryParams(updates: Partial<Record<keyof QueryParams, string | null>>): void {
   const url = new URL(window.location.href);
-  if (value === null) url.searchParams.delete(key);
-  else url.searchParams.set(key, value);
+  for (const [key, value] of Object.entries(updates)) {
+    if (value == null) url.searchParams.delete(key);
+    else url.searchParams.set(key, value);
+  }
   window.history.replaceState(null, '', url);
   window.dispatchEvent(new Event(QUERY_CHANGE_EVENT));
 }

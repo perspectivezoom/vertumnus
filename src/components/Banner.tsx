@@ -1,7 +1,8 @@
 import { Info, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
-import { setQueryParam, useQueryParams } from '@/lib/queryParams';
+import { PaperSizeSelector } from '@/components/PaperSizeSelector';
+import { setQueryParams, useQueryParams } from '@/lib/queryParams';
 
 // All banner timing derives from one morph duration.
 const MORPH_S = 0.35;
@@ -30,7 +31,7 @@ export function Banner() {
             key="icon"
             layoutId="banner"
             type="button"
-            onClick={() => setQueryParam('hideBanner', null)}
+            onClick={() => setQueryParams({ hideBanner: null })}
             aria-label="Open controls"
             initial={{ backgroundColor: '#ffffff' }}
             animate={{ backgroundColor: '#15803d' }}
@@ -51,11 +52,11 @@ export function Banner() {
             key="card"
             layoutId="banner"
             transition={{ layout: boxMorph }}
-            className="pointer-events-auto relative w-80 max-w-[90vw] rounded-lg border border-neutral-200 bg-white p-6 shadow-xl"
+            className="pointer-events-auto relative max-w-[90vw] rounded-lg border border-neutral-200 bg-white p-6 shadow-xl"
           >
             <button
               type="button"
-              onClick={() => setQueryParam('hideBanner', 'true')}
+              onClick={() => setQueryParams({ hideBanner: 'true' })}
               aria-label="Dismiss"
               className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
             >
@@ -69,10 +70,20 @@ export function Banner() {
   );
 }
 
-/** The banner's informational content — title and intro copy; grows over time. */
+/** Lays out the banner's (growing) content: the intro, then the controls. */
 function BannerContent() {
   return (
-    <div>
+    <div className="min-w-[32rem] max-w-[36rem]">
+      <Intro />
+      <PaperSizeSelector />
+    </div>
+  );
+}
+
+/** The banner's title and description. */
+function Intro() {
+  return (
+    <>
       <h2 className="text-center text-lg font-semibold text-neutral-900">Vertumnus</h2>
       <p className="mt-3 text-sm leading-relaxed text-neutral-600">
         Printable posters of what&rsquo;s in season at farmers&rsquo; markets. Data is specific to
@@ -90,6 +101,6 @@ function BannerContent() {
         </a>
         .
       </p>
-    </div>
+    </>
   );
 }
