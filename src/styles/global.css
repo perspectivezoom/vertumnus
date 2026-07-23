@@ -1,1 +1,10 @@
 @import 'tailwindcss';
+
+@layer base {
+  /* Tailwind v4's Preflight dropped the implicit button cursor; restore it app-wide.
+     https://tailwindcss.com/docs/upgrade-guide#buttons-use-the-default-cursor */
+  button:not(:disabled),
+  [role='button'] {
+    cursor: pointer;
+  }
+}

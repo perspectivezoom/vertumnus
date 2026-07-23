@@ -1,3 +1,4 @@
+import { Info, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
 import { setQueryParam, useQueryParams } from '@/lib/queryParams';
@@ -34,10 +35,15 @@ export function Banner() {
             initial={{ backgroundColor: '#ffffff' }}
             animate={{ backgroundColor: '#15803d' }}
             transition={{ layout: boxMorph, backgroundColor: revealLate }}
-            className="pointer-events-auto absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full font-serif text-lg text-white shadow-lg"
+            className="pointer-events-auto absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-[filter] duration-150 hover:brightness-90"
           >
-            <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={revealLate}>
-              i
+            <motion.span
+              className="flex"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={revealLate}
+            >
+              <Info className="h-5 w-5" />
             </motion.span>
           </motion.button>
         ) : (
@@ -51,9 +57,9 @@ export function Banner() {
               type="button"
               onClick={() => setQueryParam('hideBanner', 'true')}
               aria-label="Dismiss"
-              className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded text-neutral-400 hover:text-neutral-700"
+              className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
             >
-              ×
+              <X className="h-4 w-4" />
             </button>
             <h2 className="text-lg font-semibold text-neutral-900">Vertumnus</h2>
           </motion.aside>
