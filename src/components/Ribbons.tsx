@@ -1,4 +1,5 @@
 import { area, curveBasis } from 'd3-shape';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import type { Produce, Region } from '@/data/types';
 import {
@@ -11,13 +12,11 @@ import {
   weeklyWeights,
 } from '@/lib/season';
 
-// Logical SVG units.
+// Fixed padding; the viewBox is the measured pixel box, so these are real px.
 const PAD_X = 12;
 const PAD_TOP = 40; // room for the month axis
 const PAD_BOTTOM = 16;
-const CELL_W = 18; // x-width per week
 const ROW_GAP = 6; // min spacing between ribbons (keeps flat lines distinct)
-const WEIGHT_SCALE = 0.55; // logical px per weight unit (peak 100 -> 55px tall)
 
 // Label sizing/placement.
 const MAX_FONT = 12; // ceiling font size (logical px)
@@ -26,10 +25,6 @@ const CHAR_W_RATIO = 0.6; // approx glyph advance ÷ font size for the medium sa
 const LABEL_WINDOW = 3; // ± weeks around the peak midpoint to average the label's y
 const LINE_H = 1.15; // line-height multiple for wrapped labels
 
-const GRID_W = WEEKS_PER_YEAR * CELL_W;
-const WIDTH = PAD_X * 2 + GRID_W;
-const PEAK_HEIGHT = LEVEL_WEIGHT[Level.Peak] * WEIGHT_SCALE; // vertical room inside a peak
-
 /** One week's vertical slice of a ribbon: its top and bottom edges at position x. */
 interface Slice {
   x: number;
@@ -37,12 +32,26 @@ interface Slice {
   bottom: number;
 }
 
+interface Label {
+  x: number;
+  y: number;
+  font: number;
+  lines: string[];
+}
+
 interface Ribbon {
   name: string;
   color: string;
   path: string;
-  spans: Produce['spans'];
-  slices: Slice[];
+  label: Label;
+}
+
+/** Horizontal scale + label geometry derived from the measured box. */
+interface Geometry {
+  cellW: number;
+  gridW: number;
+  peakHeight: number;
+  weekToX: (week: number) => number;
 }
 
 const areaGen = area<Slice>()
@@ -51,17 +60,41 @@ const areaGen = area<Slice>()
   .y1((d) => d.top)
   .curve(curveBasis);
 
+/** Self-sizing wrapper: measures its box and renders the streamgraph to fill it. */
 export function Ribbons({ region }: { region: Region }) {
-  const { height, ribbons } = layout(region.items);
-  const months = MONTHS.map((label, m) => ({
-    label,
-    x: weekToX(1 + ((m + 0.5) * WEEKS_PER_YEAR) / 12),
-  }));
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => {
+      const rect = el.getBoundingClientRect();
+      setSize({ width: rect.width, height: rect.height });
+    };
+    measure(); // synchronous first measure so the initial paint is filled, not empty
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="h-full w-full">
+      {size.width > 0 && size.height > 0 && (
+        <Streamgraph region={region} width={size.width} height={size.height} />
+      )}
+    </div>
+  );
+}
+
+/** The streamgraph, sized to fill `width` × `height` (the measured pixel box). */
+function Streamgraph({ region, width, height }: { region: Region; width: number; height: number }) {
+  const { ribbons, months } = buildStreamgraph(region.items, width, height);
 
   return (
     <svg
-      className="block h-auto w-full font-sans"
-      viewBox={`0 0 ${WIDTH} ${height}`}
+      className="block h-full w-full font-sans"
+      viewBox={`0 0 ${width} ${height}`}
       role="img"
       aria-label={`In-season produce for ${region.name}`}
     >
@@ -80,32 +113,15 @@ export function Ribbons({ region }: { region: Region }) {
             strokeWidth={1.5}
             strokeLinejoin="round"
           />
-          <RibbonLabel name={r.name} spans={r.spans} slices={r.slices} />
+          <RibbonLabel {...r.label} />
         </g>
       ))}
     </svg>
   );
 }
 
-/** The produce name, word-wrapped and centered inside its peak. */
-function RibbonLabel({ name, spans, slices }: Pick<Ribbon, 'name' | 'spans' | 'slices'>) {
-  const pm = peakMidpoint(spans);
-  const mid = Number.isFinite(pm) ? pm : WEEKS_PER_YEAR / 2;
-  const midIdx = clamp(Math.round(mid) - 1, 0, WEEKS_PER_YEAR - 1);
-
-  // Fit the name into the widest peak span — the tall region it sits in.
-  const peakWeeks = Math.max(
-    0,
-    ...spans.filter((s) => s.level === Level.Peak).map((s) => spanWidth(s.from, s.to)),
-  );
-  const { lines, font } = fitLabel(name, peakWeeks * CELL_W);
-
-  // Center on the peak midpoint (x) and the peak's visual center (y), keeping the
-  // widest line in-frame.
-  const half = (Math.max(...lines.map((line) => line.length)) * font * CHAR_W_RATIO) / 2;
-  const x = clamp(weekToX(mid), PAD_X + half, PAD_X + GRID_W - half);
-  const y = averageCenter(slices, midIdx);
-
+/** The produce name, word-wrapped, centered at its resolved position. */
+function RibbonLabel({ x, y, font, lines }: Label) {
   return (
     <text
       className="fill-white font-medium"
@@ -129,32 +145,47 @@ function RibbonLabel({ name, spans, slices }: Pick<Ribbon, 'name' | 'spans' | 's
 }
 
 /**
- * Stack the (pre-sorted) produce into constant-total-height ribbons. Each week's
- * slack is spread as equal inter-ribbon gaps, so the bottom row stays anchored and
- * lean weeks fan into an even grid instead of collapsing upward. It also stabilizes
- * each ribbon: a sibling thinning out is offset by the gaps above it widening.
+ * Stack the (pre-sorted) produce into ribbons that fill the box. The scale is derived
+ * so the fattest week exactly fills the content height; each week's slack is spread as
+ * equal inter-ribbon gaps, so the bottom row stays anchored and lean weeks fan into an
+ * even grid instead of collapsing upward.
  */
-function layout(items: Produce[]): { height: number; ribbons: Ribbon[] } {
+function buildStreamgraph(
+  items: Produce[],
+  width: number,
+  height: number,
+): { ribbons: Ribbon[]; months: { label: string; x: number }[] } {
+  const gridW = width - PAD_X * 2;
+  const weekToX = (week: number) => PAD_X + ((week - 1) / WEEKS_PER_YEAR) * gridW;
+
   const n = items.length;
-  const heights = items.map((item) => weeklyWeights(item.spans).map((w) => w * WEIGHT_SCALE));
-
-  // Total ribbon height per week; the year's fattest week sets the fixed envelope.
+  const weights = items.map((item) => weeklyWeights(item.spans));
   const sumPerWeek = Array.from({ length: WEEKS_PER_YEAR }, (_, wk) =>
-    heights.reduce((acc, h) => acc + (h[wk] ?? 0), 0),
+    weights.reduce((acc, w) => acc + (w[wk] ?? 0), 0),
   );
-  const maxSum = Math.max(0, ...sumPerWeek);
+  const maxWeight = Math.max(0, ...sumPerWeek);
 
-  const content = maxSum + Math.max(0, n - 1) * ROW_GAP;
-  const height = PAD_TOP + content + PAD_BOTTOM;
-  const gapAt = (wk: number) => (n > 1 ? ROW_GAP + (maxSum - (sumPerWeek[wk] ?? 0)) / (n - 1) : 0);
+  // Derive the scale so the fattest week fills the content height (ribbons fill the paper).
+  const content = height - PAD_TOP - PAD_BOTTOM;
+  const scale = maxWeight > 0 ? Math.max(0, content - Math.max(0, n - 1) * ROW_GAP) / maxWeight : 0;
+  const geometry: Geometry = {
+    cellW: gridW / WEEKS_PER_YEAR,
+    gridW,
+    peakHeight: LEVEL_WEIGHT[Level.Peak] * scale,
+    weekToX,
+  };
+
+  const maxSum = maxWeight * scale;
+  const gapAt = (wk: number) =>
+    n > 1 ? ROW_GAP + (maxSum - (sumPerWeek[wk] ?? 0) * scale) / (n - 1) : 0;
 
   const runningTop = new Array<number>(WEEKS_PER_YEAR).fill(PAD_TOP);
   const ribbons = items.map((item, i) => {
-    const h = heights[i] ?? [];
+    const w = weights[i] ?? [];
     const slices: Slice[] = [];
     for (let wk = 0; wk < WEEKS_PER_YEAR; wk++) {
       const top = runningTop[wk] ?? PAD_TOP;
-      const bottom = top + (h[wk] ?? 0);
+      const bottom = top + (w[wk] ?? 0) * scale;
       slices.push({ x: weekToX(wk + 1), top, bottom });
       runningTop[wk] = bottom + (i < n - 1 ? gapAt(wk) : 0);
     }
@@ -169,12 +200,38 @@ function layout(items: Produce[]): { height: number; ribbons: Ribbon[] } {
       name: item.name,
       color: item.color,
       path: areaGen(fullSlices) ?? '',
-      spans: item.spans,
-      slices,
+      label: placeLabel(item, slices, geometry),
     };
   });
 
-  return { height, ribbons };
+  const months = MONTHS.map((label, m) => ({
+    label,
+    x: weekToX(1 + ((m + 0.5) * WEEKS_PER_YEAR) / 12),
+  }));
+
+  return { ribbons, months };
+}
+
+/** Resolve a produce label's font, wrapped lines, and centered position. */
+function placeLabel(item: Produce, slices: Slice[], geo: Geometry): Label {
+  const pm = peakMidpoint(item.spans);
+  const mid = Number.isFinite(pm) ? pm : WEEKS_PER_YEAR / 2;
+  const midIdx = clamp(Math.round(mid) - 1, 0, WEEKS_PER_YEAR - 1);
+
+  // Fit the name into the widest peak span — the tall region it sits in.
+  const peakWeeks = Math.max(
+    0,
+    ...item.spans.filter((s) => s.level === Level.Peak).map((s) => spanWidth(s.from, s.to)),
+  );
+  const { lines, font } = fitLabel(item.name, peakWeeks * geo.cellW, geo.peakHeight);
+
+  // Center on the peak midpoint (x) and the peak's visual center (y), keeping the
+  // widest line in-frame.
+  const half = (Math.max(...lines.map((line) => line.length)) * font * CHAR_W_RATIO) / 2;
+  const x = clamp(geo.weekToX(mid), PAD_X + half, PAD_X + geo.gridW - half);
+  const y = averageCenter(slices, midIdx);
+
+  return { x, y, font, lines };
 }
 
 /** Average ribbon center over the in-season weeks within LABEL_WINDOW of `centerIdx`. */
@@ -194,13 +251,17 @@ function averageCenter(slices: Slice[], centerIdx: number): number {
 }
 
 /** Largest font (with word-wrapped lines) that fits the name inside the peak box. */
-function fitLabel(name: string, peakPx: number): { lines: string[]; font: number } {
+function fitLabel(
+  name: string,
+  peakPx: number,
+  peakHeight: number,
+): { lines: string[]; font: number } {
   const words = name.split(/\s+/);
   for (let font = MAX_FONT; font > MIN_FONT; font -= 0.5) {
     const maxChars = peakPx / (font * CHAR_W_RATIO);
     const lines = wrapWords(words, maxChars);
     const widest = Math.max(...lines.map((line) => line.length));
-    if (widest <= maxChars && lines.length * font * LINE_H <= PEAK_HEIGHT) return { lines, font };
+    if (widest <= maxChars && lines.length * font * LINE_H <= peakHeight) return { lines, font };
   }
   return { lines: wrapWords(words, peakPx / (MIN_FONT * CHAR_W_RATIO)), font: MIN_FONT };
 }
@@ -220,11 +281,6 @@ function wrapWords(words: string[], maxChars: number): string[] {
   }
   if (current) lines.push(current);
   return lines;
-}
-
-/** Week 1..53 (53 = year end) -> x. */
-function weekToX(week: number): number {
-  return PAD_X + ((week - 1) / WEEKS_PER_YEAR) * GRID_W;
 }
 
 function clamp(v: number, lo: number, hi: number): number {
