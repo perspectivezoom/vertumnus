@@ -61,10 +61,35 @@ export function Banner() {
             >
               <X className="h-4 w-4" />
             </button>
-            <h2 className="text-lg font-semibold text-neutral-900">Vertumnus</h2>
+            <BannerContent />
           </motion.aside>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+/** The banner's informational content — title and intro copy; grows over time. */
+function BannerContent() {
+  return (
+    <div>
+      <h2 className="text-center text-lg font-semibold text-neutral-900">Vertumnus</h2>
+      <p className="mt-3 text-sm leading-relaxed text-neutral-600">
+        Printable posters of what&rsquo;s in season at farmers&rsquo; markets. Data is specific to
+        your region, with week-level granularity.
+      </p>
+      <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+        Etymology: Vertumnus is the{' '}
+        <a
+          className="text-green-700 underline underline-offset-2 hover:text-green-900"
+          href="https://en.wikipedia.org/wiki/Vertumnus"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Roman god of seasons, change and plant growth
+        </a>
+        .
+      </p>
     </div>
   );
 }
