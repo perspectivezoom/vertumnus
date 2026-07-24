@@ -1,17 +1,39 @@
+import { BrowserRouter, Outlet, Route, Routes } from 'react-router';
+
 import { Banner } from '@/components/Banner';
 import { Poster } from '@/components/Poster';
-import { testRegion } from '@/data/testRegion';
-import { RegionSchema } from '@/data/types';
+import { useRegion } from '@/lib/params';
 
-// Renders the synthetic test region while the layout is being dialed in; swap to
-// a real region (regions[0]) once the seasonality data is filled out.
-const region = RegionSchema.parse(testRegion);
+// `__APP_BASE__` is injected at build time (the `define` in scripts/build.ts); in dev
+// the guard yields '/'. React Router wants a basename without a trailing slash.
+declare const __APP_BASE__: string | undefined;
+const basename =
+  (typeof __APP_BASE__ === 'undefined' ? '/' : __APP_BASE__).replace(/\/$/, '') || '/';
+
+/** Shell shared by every route: the page surface plus the floating controls banner. */
+function AppShell() {
+  return (
+    <main className="min-h-screen bg-neutral-100 p-6">
+      <Outlet />
+      <Banner />
+    </main>
+  );
+}
+
+/** The poster for the region named in the path (the default region at "/"). */
+function RegionView() {
+  return <Poster region={useRegion()} />;
+}
 
 export function App() {
   return (
-    <main className="min-h-screen bg-neutral-100 p-6">
-      <Poster region={region} />
-      <Banner />
-    </main>
+    <BrowserRouter basename={basename}>
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route index element={<RegionView />} />
+          <Route path=":region" element={<RegionView />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }

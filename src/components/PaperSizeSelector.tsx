@@ -2,11 +2,12 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { type ComponentProps, useEffect, useState } from 'react';
 
 import { convertLength, matchPaperSize, PAPER_SIZES, type Unit, UNITS } from '@/lib/paper';
-import { setQueryParams, useQueryParams } from '@/lib/queryParams';
+import { useQueryParams, useSetQueryParams } from '@/lib/params';
 
 /** Collapsible paper-size control: the current size, expanding to presets + a custom size. */
 export function PaperSizeSelector() {
   const { w, h, unit } = useQueryParams();
+  const setQueryParams = useSetQueryParams();
   const [expanded, setExpanded] = useState(false);
   const activeName = matchPaperSize(w, h, unit);
 
@@ -66,6 +67,7 @@ function CustomPaperRow({
   unit: Unit;
   active: boolean;
 }) {
+  const setQueryParams = useSetQueryParams();
   const [draftW, setDraftW] = useState(formatNum(w));
   const [draftH, setDraftH] = useState(formatNum(h));
 

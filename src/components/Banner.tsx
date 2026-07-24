@@ -2,7 +2,8 @@ import { Info, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
 import { PaperSizeSelector } from '@/components/PaperSizeSelector';
-import { setQueryParams, useQueryParams } from '@/lib/queryParams';
+import { RegionPicker } from '@/components/RegionPicker';
+import { useQueryParams, useSetQueryParams } from '@/lib/params';
 
 // All banner timing derives from one morph duration.
 const MORPH_S = 0.35;
@@ -22,6 +23,7 @@ const revealLate = { delay: MORPH_S * 0.8, duration: MORPH_S * 0.5 };
  */
 export function Banner() {
   const { hideBanner } = useQueryParams();
+  const setQueryParams = useSetQueryParams();
 
   return (
     <div className="pointer-events-none fixed inset-0 flex items-center justify-center p-6">
@@ -75,6 +77,7 @@ function BannerContent() {
   return (
     <div className="min-w-[32rem] max-w-[36rem]">
       <Intro />
+      <RegionPicker />
       <PaperSizeSelector />
     </div>
   );
