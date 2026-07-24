@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { convertLength, matchPaperSize } from '@/lib/paper';
+import { convertLength, matchPaperSize } from '@/src/lib/paper';
 
 describe('paper', () => {
   test('matchPaperSize names an exact preset, else null', () => {

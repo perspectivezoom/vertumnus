@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router';
 
-import { Expander, optionClass } from '@/components/Expander';
-import { defaultRegion, regions } from '@/data/regions';
+import { Expander, optionClass } from '@/src/components/Expander';
+import { defaultRegion, regions } from '@/src/data/regions';
 
 /** Collapsible region control: the current region, expanding to a clickable list. */
 export function RegionPicker() {

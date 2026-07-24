@@ -1,9 +1,9 @@
 import { Info, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
-import { PaperSizeSelector } from '@/components/PaperSizeSelector';
-import { RegionPicker } from '@/components/RegionPicker';
-import { useQueryParams, useSetQueryParams } from '@/lib/params';
+import { PaperSizeSelector } from '@/src/components/PaperSizeSelector';
+import { RegionPicker } from '@/src/components/RegionPicker';
+import { useQueryParams, useSetQueryParams } from '@/src/lib/params';
 
 // All banner timing derives from one morph duration.
 const MORPH_S = 0.35;

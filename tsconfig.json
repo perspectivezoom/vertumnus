@@ -8,7 +8,7 @@
     "jsxImportSource": "react",
     "types": ["bun"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./*"]
     },
 
     "noEmit": true,

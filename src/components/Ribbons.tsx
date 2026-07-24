@@ -1,7 +1,7 @@
 import { area, curveBasis } from 'd3-shape';
 import { useLayoutEffect, useRef, useState } from 'react';
 
-import type { Produce, Region } from '@/data/types';
+import type { Produce, Region } from '@/src/data/types';
 import {
   LEVEL_WEIGHT,
   Level,
@@ -10,7 +10,7 @@ import {
   spanWidth,
   WEEKS_PER_YEAR,
   weeklyWeights,
-} from '@/lib/season';
+} from '@/src/lib/season';
 
 // Fixed padding; the viewBox is the measured pixel box, so these are real px.
 const PAD_X = 12;

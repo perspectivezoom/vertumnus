@@ -1,6 +1,6 @@
-import { Ribbons } from '@/components/Ribbons';
-import type { Region } from '@/data/types';
-import { useQueryParams } from '@/lib/params';
+import { Ribbons } from '@/src/components/Ribbons';
+import type { Region } from '@/src/data/types';
+import { useQueryParams } from '@/src/lib/params';
 
 /** The printable poster: a faded sage frame at the paper's aspect ratio, titled, wrapping the chart. */
 export function Poster({ region }: { region: Region }) {

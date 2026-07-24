@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { coveredWeeks, Level, MAX_WEEK, MIN_WEEK, peakMidpoint } from '@/lib/season';
+import { coveredWeeks, Level, MAX_WEEK, MIN_WEEK, peakMidpoint } from '@/src/lib/season';
 
 export type Region = z.infer<typeof RegionSchema>;
 export type Produce = z.infer<typeof ProduceSchema>;

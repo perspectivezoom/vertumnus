@@ -1,8 +1,8 @@
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router';
 
-import { Banner } from '@/components/Banner';
-import { Poster } from '@/components/Poster';
-import { useRegion } from '@/lib/params';
+import { Banner } from '@/src/components/Banner';
+import { Poster } from '@/src/components/Poster';
+import { useRegion } from '@/src/lib/params';
 
 // `__APP_BASE__` is injected at build time (the `define` in scripts/build.ts); in dev
 // the guard yields '/'. React Router wants a basename without a trailing slash.

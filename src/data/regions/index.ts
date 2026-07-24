@@ -1,5 +1,5 @@
-import ny from '@/data/regions/ny';
-import sfbay from '@/data/regions/sfbay';
+import ny from '@/src/data/regions/ny';
+import sfbay from '@/src/data/regions/sfbay';
 
 /**
  * Explicit list of all regions. Raw values are unvalidated — validate with

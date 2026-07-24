@@ -1,8 +1,8 @@
 import { type ComponentProps, useEffect, useState } from 'react';
 
-import { Expander, optionClass, ROW } from '@/components/Expander';
-import { convertLength, matchPaperSize, PAPER_SIZES, type Unit, UNITS } from '@/lib/paper';
-import { useQueryParams, useSetQueryParams } from '@/lib/params';
+import { Expander, optionClass, ROW } from '@/src/components/Expander';
+import { convertLength, matchPaperSize, PAPER_SIZES, type Unit, UNITS } from '@/src/lib/paper';
+import { useQueryParams, useSetQueryParams } from '@/src/lib/params';
 
 /** Collapsible paper-size control: the current size, expanding to presets + a custom size. */
 export function PaperSizeSelector() {
