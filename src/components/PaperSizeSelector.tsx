@@ -1,6 +1,6 @@
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { type ComponentProps, useEffect, useState } from 'react';
 
+import { Expander, optionClass, ROW } from '@/components/Expander';
 import { convertLength, matchPaperSize, PAPER_SIZES, type Unit, UNITS } from '@/lib/paper';
 import { useQueryParams, useSetQueryParams } from '@/lib/params';
 
@@ -8,50 +8,31 @@ import { useQueryParams, useSetQueryParams } from '@/lib/params';
 export function PaperSizeSelector() {
   const { w, h, unit } = useQueryParams();
   const setQueryParams = useSetQueryParams();
-  const [expanded, setExpanded] = useState(false);
   const activeName = matchPaperSize(w, h, unit);
 
   return (
-    <div className="mt-4">
-      <button
-        type="button"
-        onClick={() => setExpanded((open) => !open)}
-        aria-expanded={expanded}
-        className="flex w-full items-center justify-between rounded-md border border-neutral-200 px-3 py-2 text-sm hover:bg-neutral-50"
-      >
-        <span className="text-neutral-500">Paper size</span>
-        <span className="flex items-center gap-1 text-neutral-900 tabular-nums">
-          {activeName ?? 'Custom'} · {formatNum(w)} × {formatNum(h)} {unit}
-          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </span>
-      </button>
-
-      {expanded && (
-        <ul className="mt-1 space-y-0.5">
-          {PAPER_SIZES.map((size) => (
-            <li key={size.name}>
-              <button
-                type="button"
-                onClick={() =>
-                  setQueryParams({ w: String(size.w), h: String(size.h), unit: size.unit })
-                }
-                className={`flex w-full items-center justify-between rounded px-3 py-1.5 text-sm ${
-                  activeName === size.name ? 'bg-green-50' : 'hover:bg-neutral-100'
-                }`}
-              >
-                <span>{size.name}</span>
-                <span className="text-neutral-500 tabular-nums">
-                  {formatNum(size.w)} × {formatNum(size.h)} {size.unit}
-                </span>
-              </button>
-            </li>
-          ))}
-          <li>
-            <CustomPaperRow w={w} h={h} unit={unit} active={activeName === null} />
-          </li>
-        </ul>
-      )}
-    </div>
+    <Expander
+      label="Paper size"
+      summary={`${activeName ?? 'Custom'} · ${formatNum(w)} × ${formatNum(h)} ${unit}`}
+    >
+      {PAPER_SIZES.map((size) => (
+        <li key={size.name}>
+          <button
+            type="button"
+            onClick={() =>
+              setQueryParams({ w: String(size.w), h: String(size.h), unit: size.unit })
+            }
+            className={optionClass(activeName === size.name)}
+          >
+            <span>{size.name}</span>
+            <span className="text-neutral-500 tabular-nums">
+              {formatNum(size.w)} × {formatNum(size.h)} {size.unit}
+            </span>
+          </button>
+        </li>
+      ))}
+      <CustomPaperRow w={w} h={h} unit={unit} active={activeName === null} />
+    </Expander>
   );
 }
 
@@ -89,9 +70,7 @@ function CustomPaperRow({
   };
 
   return (
-    <div
-      className={`flex items-center justify-between rounded px-3 py-1.5 text-sm ${active ? 'bg-green-50' : ''}`}
-    >
+    <li className={`${ROW} ${active ? 'bg-green-50' : ''}`}>
       <span>Custom</span>
       <div className="flex items-center gap-1">
         <DimensionInput
@@ -133,7 +112,7 @@ function CustomPaperRow({
           ))}
         </div>
       </div>
-    </div>
+    </li>
   );
 }
 
