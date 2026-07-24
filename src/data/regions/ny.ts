@@ -7,6 +7,7 @@ export default {
     {
       name: 'Blueberries',
       color: '#4a6fa5',
+      generated: false,
       spans: [
         { level: 'available', from: 28, to: 29 }, // mid-July: farms open, first pickings (Hall's Hill 9-Jul, Vern Negus 11-Jul, Glenhaven 15-Jul)
         { level: 'peak', from: 30, to: 33 }, // late July – mid-August: main abundance

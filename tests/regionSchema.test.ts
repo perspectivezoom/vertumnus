@@ -9,6 +9,7 @@ type Span = { level: 'available' | 'peak'; from: number; to: number };
 const produceWith = (spans: Span[]) => ({
   name: 'Widget',
   color: '#2a78d6',
+  generated: false,
   spans,
   sources: [{ title: 'src', url: null }],
 });
@@ -84,6 +85,7 @@ describe('RegionSchema', () => {
     const peakProduce = (name: string, from: number, to: number): ProduceInput => ({
       name,
       color: '#2a78d6',
+      generated: false,
       spans: [{ level: 'peak', from, to }],
       sources: [{ title: 'src', url: null }],
     });
@@ -124,6 +126,7 @@ describe('RegionSchema', () => {
       const noPeak: ProduceInput = {
         name: 'NoPeak',
         color: '#2a78d6',
+        generated: false,
         spans: [{ level: 'available', from: 1, to: 10 }],
         sources: [{ title: 'src', url: null }],
       };

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun ./index.html",
     "build": "bun scripts/build.ts",
+    "regions": "bun scripts/regions/run.ts",
     "check": "tsc --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",

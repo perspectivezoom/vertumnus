@@ -5,8 +5,26 @@ export default {
   schemaVersion: 1,
   items: [
     {
+      name: 'Cherries',
+      color: '#7a1f2b',
+      generated: true,
+      spans: [
+        { level: 'available', from: 19, to: 19 }, // May 7 – May 13
+        { level: 'peak', from: 20, to: 24 }, // May 14 – Jun 17
+        { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
+      ],
+      sources: [
+        {
+          title:
+            'USDA AMS Market News — Fresno Shipping Point Fruit Prices (FR_FV110), 2023–2025 seasons; peak derived from weekly listing density (raw cache: src/data/raw/mars/ca/cherries.jsonc)',
+          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
+        },
+      ],
+    },
+    {
       name: 'Strawberries',
       color: '#d1495b',
+      generated: false,
       spans: [
         { level: 'available', from: 18, to: 22 }, // 30-Apr – early June (ramp-up, >=25% of peak volume)
         { level: 'peak', from: 23, to: 33 }, // early June – mid-August (4-Jun to 13-Aug on Fig. 5)
