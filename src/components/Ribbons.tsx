@@ -1,7 +1,6 @@
 import { area, curveBasis } from 'd3-shape';
-import { useLayoutEffect, useRef, useState } from 'react';
 
-import type { Produce, Region } from '@/src/data/types';
+import type { Produce } from '@/src/data/types';
 import {
   LEVEL_WEIGHT,
   Level,
@@ -12,15 +11,16 @@ import {
   weeklyWeights,
 } from '@/src/lib/season';
 
-// Fixed padding; the viewBox is the measured pixel box, so these are real px.
+// All lengths are poster units (see Poster.tsx), which scale with the printed poster.
 const PAD_X = 12;
 const PAD_TOP = 40; // room for the month axis
 const PAD_BOTTOM = 16;
 const ROW_GAP = 6; // min spacing between ribbons (keeps flat lines distinct)
 
 // Label sizing/placement.
-const MAX_FONT = 12; // ceiling font size (logical px)
+const MAX_FONT = 12; // ceiling font size
 const MIN_FONT = 8; // floor before a label is unreadable
+const AXIS_FONT = 11; // month labels
 const CHAR_W_RATIO = 0.6; // approx glyph advance ÷ font size for the medium sans
 const LABEL_WINDOW = 3; // ± weeks around the peak midpoint to average the label's y
 const LINE_H = 1.15; // line-height multiple for wrapped labels
@@ -46,7 +46,7 @@ interface Ribbon {
   label: Label;
 }
 
-/** Horizontal scale + label geometry derived from the measured box. */
+/** Horizontal scale + label geometry derived from the chart box. */
 interface Geometry {
   cellW: number;
   gridW: number;
@@ -60,46 +60,22 @@ const areaGen = area<Slice>()
   .y1((d) => d.top)
   .curve(curveBasis);
 
-/** Self-sizing wrapper: measures its box and renders the streamgraph to fill it. */
-export function Ribbons({ region }: { region: Region }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const measure = () => {
-      const rect = el.getBoundingClientRect();
-      setSize({ width: rect.width, height: rect.height });
-    };
-    measure(); // synchronous first measure so the initial paint is filled, not empty
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+/** The streamgraph, drawn to fill `width` × `height` of the enclosing poster's coordinate space. */
+export function Ribbons({
+  items,
+  width,
+  height,
+}: {
+  items: Produce[];
+  width: number;
+  height: number;
+}) {
+  const { ribbons, months } = buildStreamgraph(items, width, height);
 
   return (
-    <div ref={ref} className="h-full w-full">
-      {size.width > 0 && size.height > 0 && (
-        <Streamgraph region={region} width={size.width} height={size.height} />
-      )}
-    </div>
-  );
-}
-
-/** The streamgraph, sized to fill `width` × `height` (the measured pixel box). */
-function Streamgraph({ region, width, height }: { region: Region; width: number; height: number }) {
-  const { ribbons, months } = buildStreamgraph(region.items, width, height);
-
-  return (
-    <svg
-      className="block h-full w-full font-sans"
-      viewBox={`0 0 ${width} ${height}`}
-      role="img"
-      aria-label={`In-season produce for ${region.name}`}
-    >
+    <g>
       {months.map((m) => (
-        <text key={m.label} className="fill-[#888] text-[11px]" x={m.x} y={24} textAnchor="middle">
+        <text key={m.label} x={m.x} y={24} textAnchor="middle" fontSize={AXIS_FONT} fill="#888888">
           {m.label}
         </text>
       ))}
@@ -116,7 +92,7 @@ function Streamgraph({ region, width, height }: { region: Region; width: number;
           <RibbonLabel {...r.label} />
         </g>
       ))}
-    </svg>
+    </g>
   );
 }
 
@@ -124,10 +100,11 @@ function Streamgraph({ region, width, height }: { region: Region; width: number;
 function RibbonLabel({ x, y, font, lines }: Label) {
   return (
     <text
-      className="fill-white font-medium"
       x={x}
       y={y}
       fontSize={font}
+      fontWeight={500}
+      fill="#ffffff"
       textAnchor="middle"
       dominantBaseline="central"
     >
