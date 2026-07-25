@@ -13,9 +13,9 @@ export const sfbay: RegionSources = {
       type: 'mars',
       name: 'Cherries',
       color: '#7a1f2b',
-      report: 'FR_FV110',
+      report: 'SX_FV010',
       commodity: 'Cherries',
-      years: [2023, 2024, 2025],
+      years: [2022, 2023, 2024],
     },
   ],
 };

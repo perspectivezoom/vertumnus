@@ -1,7 +1,7 @@
 import { mkdir } from 'node:fs/promises';
 
 import { type CacheMeta, serializeCache, toColumnar } from '@/scripts/mars/columnar';
-import { MARS_REPORTS, type MarsReportId } from '@/scripts/mars/reports';
+import { MARS_REPORTS, type MarsReport, type MarsReportId } from '@/scripts/mars/reports';
 
 const API_BASE = 'https://marsapi.ams.usda.gov/services/v1.2';
 
@@ -44,10 +44,12 @@ export async function pull(src: MarsSource): Promise<string> {
       'Set MARS_API_KEY — free key at https://mymarketnews.ams.usda.gov/mymarketnews-api',
     );
   }
-  const report = MARS_REPORTS[src.report];
+  const report: MarsReport = MARS_REPORTS[src.report];
   const from = `01/01/${Math.min(...src.years)}`;
   const to = `12/31/${Math.max(...src.years)}`;
-  const query = `commodity=${src.commodity};report_begin_date=${from}:${to}`;
+  // Terminal reports list every origin, so narrow them to locally grown produce.
+  const origin = report.originFilter ? `origin=${report.originFilter};` : '';
+  const query = `${origin}commodity=${src.commodity};report_begin_date=${from}:${to}`;
   const url = `${API_BASE}/reports/${report.slug}/Report%20Details?q=${query}`;
 
   const res = await fetch(url, { headers: { authorization: `Basic ${btoa(`${key}:`)}` } });

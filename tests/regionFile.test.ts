@@ -154,6 +154,18 @@ describe('rewriteRegionSource', () => {
       expect(out).toContain('unbalanced: {{{');
     });
 
+    test('refuses to overwrite a hand-authored entry rather than clobbering it', () => {
+      // Strawberries is hand-authored from a better source; a crop list naming it must fail
+      // loudly instead of quietly replacing a cited entry.
+      const collision: GeneratedProduce = {
+        name: 'Strawberries',
+        color: '#d1495b',
+        spans: [{ level: 'peak', from: 30, to: 40 }],
+        sources: [{ title: 'derived', url: null }],
+      };
+      expect(() => rewriteRegionSource(source, [collision], currentSpans)).toThrow(/hand-authored/);
+    });
+
     test('preserves entries it was given no generated data for', () => {
       const out = rewriteRegionSource(source, [], currentSpans);
       expect(block(out, 'Cherries')).toBe(block(source, 'Cherries'));

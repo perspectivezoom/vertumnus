@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { spansFromCounts } from '@/scripts/mars/season';
+import { scoreByWeek, spansFromCounts } from '@/scripts/mars/season';
 
 /** Build a 53-slot week-count array (index 0 unused) from {week: count} entries. */
 function counts(byWeek: Record<number, number>): number[] {
@@ -66,5 +66,50 @@ describe('spansFromCounts', () => {
 
   test('no reported weeks yields no spans', () => {
     expect(spansFromCounts(counts({}))).toEqual([]);
+  });
+});
+
+// Dates below pair non-leap years (2023/2025) so the same calendar date lands in the same
+// week — a leap year shifts day-of-year by one and can push it into the next bucket.
+describe('scoreByWeek', () => {
+  /** Repeat a date `n` times, as `n` listings reported that day. */
+  const listings = (date: string, n: number) => Array.from({ length: n }, () => date);
+
+  test("scores a season's own busiest week as 1", () => {
+    const scores = scoreByWeek(['05/09/2023', '05/09/2025']);
+    expect(scores[19]).toBe(1);
+  });
+
+  test('discards a week that appears in only one season', () => {
+    // A stray August quote in a single year — real seasons recur, one-off listings do not.
+    const scores = scoreByWeek(['05/09/2023', '05/09/2025', '08/08/2022']);
+    expect(scores[32]).toBe(0);
+    // Week 19 survives, but 2022 has nothing there and votes 0, so it scores 2 of 3 seasons.
+    expect(scores[19]).toBeCloseTo(2 / 3, 5);
+  });
+
+  test('keeps a low-volume week that recurs, where a magnitude cutoff would not', () => {
+    // One listing per year is a genuine shoulder week; two seasons corroborate it.
+    const scores = scoreByWeek(['04/25/2023', '04/25/2025']);
+    expect(scores[17]).toBe(1);
+  });
+
+  test('gives each season an equal vote regardless of its reporting volume', () => {
+    // 2023 reports 20x more than 2024, but week 19 is 2023's peak and week 20 is 2024's,
+    // so both weeks score alike — raw summing would have let 2023 bury week 20.
+    const scores = scoreByWeek([
+      ...listings('05/09/2023', 100),
+      ...listings('05/16/2023', 50),
+      ...listings('05/09/2025', 5),
+      ...listings('05/16/2025', 10),
+    ]);
+    expect(scores[19]).toBeCloseTo((1 + 0.5) / 2, 5);
+    expect(scores[20]).toBeCloseTo((0.5 + 1) / 2, 5);
+  });
+
+  test('accepts every week when only one season is cached', () => {
+    const scores = scoreByWeek(['05/09/2024', '08/08/2024']);
+    expect(scores[19]).toBe(1);
+    expect(scores[32]).toBe(1);
   });
 });

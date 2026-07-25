@@ -1,6 +1,6 @@
 import type { GeneratedProduce } from '@/scripts/lib/regionFile';
 import { cachePath, type MarsSource } from '@/scripts/mars/client';
-import { MARS_REPORTS } from '@/scripts/mars/reports';
+import { MARS_REPORTS, type MarsReport } from '@/scripts/mars/reports';
 import { deriveSeason } from '@/scripts/mars/season';
 
 export interface MarsCrop extends MarsSource {
@@ -19,8 +19,10 @@ export async function buildMarsProduce(crop: MarsCrop): Promise<GeneratedProduce
     throw new Error(`No raw cache at ${path} — re-run with --pull (needs MARS_API_KEY).`);
   }
   const spans = await deriveSeason(crop);
-  const report = MARS_REPORTS[crop.report];
+  const report: MarsReport = MARS_REPORTS[crop.report];
   const years = `${Math.min(...crop.years)}–${Math.max(...crop.years)}`;
+  const origin = report.originFilter ? `${report.originFilter}-grown, ` : '';
+  const note = report.note ? ` (${report.note})` : '';
   return {
     name: crop.name,
     color: crop.color,
@@ -28,8 +30,9 @@ export async function buildMarsProduce(crop: MarsCrop): Promise<GeneratedProduce
     sources: [
       {
         title:
-          `USDA AMS Market News — ${report.name} (${crop.report}), ${years} seasons; ` +
-          `peak derived from weekly listing density (raw cache: ${cachePath(crop)})`,
+          `USDA AMS Market News — ${report.name} (${crop.report})${note}; ` +
+          `${origin}${years} seasons; peak derived from weekly listing density ` +
+          `(raw cache: ${cachePath(crop)})`,
         url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
       },
     ],

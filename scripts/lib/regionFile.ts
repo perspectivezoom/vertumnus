@@ -89,6 +89,7 @@ function matchBracket(text: string, open: number): number {
 
 interface Segment {
   name: string;
+  generated: boolean; // false marks a hand-authored entry this writer must not touch
   text: string; // the entry's source, including any comments that lead it
 }
 
@@ -126,7 +127,11 @@ function splitEntries(inner: string): Segment[] {
       while (end < inner.length && /\s/.test(inner[end] as string)) end++;
       if (inner[end] === ',') end++;
       const text = inner.slice(start, end).trim();
-      segments.push({ name: /name:\s*'([^']*)'/.exec(text)?.[1] ?? '', text });
+      segments.push({
+        name: /name:\s*'([^']*)'/.exec(text)?.[1] ?? '',
+        generated: /generated:\s*true/.test(text),
+        text,
+      });
       start = end;
     }
   }
@@ -156,6 +161,16 @@ export function rewriteRegionSource(
   const pending = new Map(generated.map((produce) => [produce.name, produce]));
   const blocks = segments.map((segment) => {
     const fresh = pending.get(segment.name);
+    // A hand-authored entry outranks anything a source can derive — it exists precisely
+    // because someone found better data. Refuse rather than silently replace it: losing a
+    // cited entry to a name collision would be near-invisible in review.
+    if (fresh && !segment.generated) {
+      throw new Error(
+        `'${segment.name}' is hand-authored (generated: false) in the region file, but a ` +
+          `source also produces it. Refusing to overwrite. Either remove '${segment.name}' ` +
+          `from the region's crop list, or delete the hand-authored entry to let the source own it.`,
+      );
+    }
     pending.delete(segment.name);
     const spans = fresh ? fresh.spans : (currentSpans.get(segment.name) ?? []);
     return {

@@ -9,14 +9,13 @@ export default {
       color: '#7a1f2b',
       generated: true,
       spans: [
-        { level: 'available', from: 19, to: 19 }, // May 7 – May 13
-        { level: 'peak', from: 20, to: 24 }, // May 14 – Jun 17
-        { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
+        { level: 'available', from: 18, to: 19 }, // Apr 30 – May 13
+        { level: 'peak', from: 20, to: 26 }, // May 14 – Jul 1
       ],
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno Shipping Point Fruit Prices (FR_FV110), 2023–2025 seasons; peak derived from weekly listing density (raw cache: src/data/raw/mars/ca/cherries.jsonc)',
+            'USDA AMS Market News — San Francisco Terminal Market Fruit Prices (SX_FV010) (discontinued 1 May 2025); California-grown, 2022–2024 seasons; peak derived from weekly listing density (raw cache: src/data/raw/mars/ca/cherries.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
