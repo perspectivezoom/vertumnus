@@ -29,11 +29,15 @@ export function Poster({ region }: { region: Region }) {
   const cardW = POSTER_W - FRAME * 2;
   const cardH = posterH - cardY - FRAME;
 
-  // The SVG fits the viewport on both axes: wide posters cap at max-w, tall ones cap at the
-  // screen height (less the shell's padding), with width shrinking to keep the paper's ratio.
+  // Fit the viewport on both axes. The height limit is expressed as a *width* cap derived from
+  // the paper ratio, because a plain max-height would clamp the height while leaving the width
+  // at its maximum — letterboxing the poster inside an oversized box (and drawing the shadow
+  // around that box rather than the paper). Height then follows from the ratio via h-auto.
+  const maxWidth = `min(64rem, calc((100vh - 3rem) * ${w} / ${h}))`;
   return (
     <svg
-      className="mx-auto block h-auto max-h-[calc(100vh-3rem)] w-full max-w-5xl font-sans shadow-lg"
+      className="mx-auto block h-auto w-full font-sans shadow-lg"
+      style={{ maxWidth }}
       viewBox={`0 0 ${POSTER_W} ${posterH}`}
       role="img"
       aria-label={`In-season produce for ${region.name}`}

@@ -4,10 +4,11 @@ import { convertLength, matchPaperSize } from '@/src/lib/paper';
 
 describe('paper', () => {
   test('matchPaperSize names an exact preset, else null', () => {
-    expect(matchPaperSize(11, 8.5, 'in')).toBe('Letter');
-    expect(matchPaperSize(29.7, 21, 'cm')).toBe('A4');
+    expect(matchPaperSize(8.5, 11, 'in')).toBe('Letter');
+    expect(matchPaperSize(21, 29.7, 'cm')).toBe('A4');
     expect(matchPaperSize(10, 8, 'in')).toBeNull(); // not a preset
-    expect(matchPaperSize(11, 8.5, 'cm')).toBeNull(); // right dims, wrong unit
+    expect(matchPaperSize(8.5, 11, 'cm')).toBeNull(); // right dims, wrong unit
+    expect(matchPaperSize(11, 8.5, 'in')).toBeNull(); // presets are portrait, not landscape
   });
 
   test('convertLength preserves physical size and round-trips', () => {

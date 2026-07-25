@@ -8,17 +8,19 @@ export interface PaperSize {
   unit: Unit;
 }
 
-// Landscape (the poster is wide, so w >= h). US sizes in inches, ISO A-series in cm.
+// Portrait (h >= w). The poster stacks one ribbon per produce, so height is what limits how
+// many crops fit — a taller sheet is worth more than a wider one. US sizes in inches, ISO
+// A-series in cm; a landscape poster is a custom size with the dimensions swapped.
 export const PAPER_SIZES = [
-  { name: 'Letter', w: 11, h: 8.5, unit: 'in' },
-  { name: 'Legal', w: 14, h: 8.5, unit: 'in' },
-  { name: 'Tabloid', w: 17, h: 11, unit: 'in' },
-  { name: 'A5', w: 21, h: 14.8, unit: 'cm' },
-  { name: 'A4', w: 29.7, h: 21, unit: 'cm' },
-  { name: 'A3', w: 42, h: 29.7, unit: 'cm' },
+  { name: 'Letter', w: 8.5, h: 11, unit: 'in' },
+  { name: 'Legal', w: 8.5, h: 14, unit: 'in' },
+  { name: 'Tabloid', w: 11, h: 17, unit: 'in' },
+  { name: 'A5', w: 14.8, h: 21, unit: 'cm' },
+  { name: 'A4', w: 21, h: 29.7, unit: 'cm' },
+  { name: 'A3', w: 29.7, h: 42, unit: 'cm' },
 ] as const satisfies readonly PaperSize[];
 
-export const DEFAULT_PAPER = PAPER_SIZES[0]; // Letter, 11 × 8.5 in
+export const DEFAULT_PAPER = PAPER_SIZES[0]; // Letter, 8.5 × 11 in
 
 const MATCH_EPSILON = 0.05;
 const CM_PER_IN = 2.54;
