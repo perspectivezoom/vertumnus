@@ -2,7 +2,7 @@ import tailwind from 'bun-plugin-tailwind';
 
 // Deploy base: '/' for a root or custom-domain site, '/<repo>/' for a GitHub project page.
 // publicPath makes asset URLs absolute (so they load at any route depth); the define feeds
-// the same value to the client router (see src/lib/base.ts).
+// the same value to the client router (see src/App.tsx).
 const BASE = '/';
 
 const result = await Bun.build({
@@ -10,7 +10,12 @@ const result = await Bun.build({
   outdir: './dist',
   minify: true,
   publicPath: BASE,
-  define: { __APP_BASE__: JSON.stringify(BASE) },
+  define: {
+    __APP_BASE__: JSON.stringify(BASE),
+    // Without this React bundles its development build: larger, and slower at runtime
+    // from the extra validation it does on every render.
+    'process.env.NODE_ENV': JSON.stringify('production'),
+  },
   plugins: [tailwind],
 });
 
