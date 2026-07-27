@@ -153,31 +153,37 @@ export function rewriteRegionSource(
   text: string,
   generated: GeneratedProduce[],
   currentSpans: Map<string, Span[]>,
+  known: ReadonlySet<string>,
 ): string {
   const arrayStart = text.indexOf('[', text.indexOf('items:'));
   const arrayEnd = matchBracket(text, arrayStart);
   const segments = splitEntries(text.slice(arrayStart + 1, arrayEnd));
 
   const pending = new Map(generated.map((produce) => [produce.name, produce]));
-  const blocks = segments.map((segment) => {
-    const fresh = pending.get(segment.name);
-    // A hand-authored entry outranks anything a source can derive — it exists precisely
-    // because someone found better data. Refuse rather than silently replace it: losing a
-    // cited entry to a name collision would be near-invisible in review.
-    if (fresh && !segment.generated) {
-      throw new Error(
-        `'${segment.name}' is hand-authored (generated: false) in the region file, but a ` +
-          `source also produces it. Refusing to overwrite. Either remove '${segment.name}' ` +
-          `from the region's crop list, or delete the hand-authored entry to let the source own it.`,
-      );
-    }
-    pending.delete(segment.name);
-    const spans = fresh ? fresh.spans : (currentSpans.get(segment.name) ?? []);
-    return {
-      midpoint: peakMidpoint(spans),
-      text: fresh ? serializeProduce(fresh) : segment.text,
-    };
-  });
+  // `known` lists every crop the region claims, hand-authored ones included, so an entry
+  // missing from it has been retired rather than merely unhandled by this run. Dropping it
+  // keeps the file from accumulating produce nothing accounts for.
+  const blocks = segments
+    .filter((segment) => known.has(segment.name))
+    .map((segment) => {
+      const fresh = pending.get(segment.name);
+      // A hand-authored entry outranks anything a source can derive — it exists precisely
+      // because someone found better data. Refuse rather than silently replace it: losing a
+      // cited entry to a name collision would be near-invisible in review.
+      if (fresh && !segment.generated) {
+        throw new Error(
+          `'${segment.name}' is hand-authored (generated: false) in the region file, but a ` +
+            `source also produces it. Refusing to overwrite. Either remove '${segment.name}' ` +
+            `from the region's crop list, or delete the hand-authored entry to let the source own it.`,
+        );
+      }
+      pending.delete(segment.name);
+      const spans = fresh ? fresh.spans : (currentSpans.get(segment.name) ?? []);
+      return {
+        midpoint: peakMidpoint(spans),
+        text: fresh ? serializeProduce(fresh) : segment.text,
+      };
+    });
   // Generated crops not yet in the file get inserted at their sorted position.
   for (const produce of pending.values()) {
     blocks.push({ midpoint: peakMidpoint(produce.spans), text: serializeProduce(produce) });
@@ -192,6 +198,7 @@ export function rewriteRegionSource(
 export async function updateRegionFile(
   regionId: string,
   generated: GeneratedProduce[],
+  known: ReadonlySet<string>,
 ): Promise<void> {
   const path = `src/data/regions/${regionId}.ts`;
   const text = await Bun.file(path).text();
@@ -202,6 +209,6 @@ export async function updateRegionFile(
   };
   const currentSpans = new Map(region.default.items.map((item) => [item.name, item.spans]));
 
-  await Bun.write(path, rewriteRegionSource(text, generated, currentSpans));
+  await Bun.write(path, rewriteRegionSource(text, generated, currentSpans, known));
   await Bun.$`bunx oxfmt ${path}`.quiet(); // only the file we wrote
 }

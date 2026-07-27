@@ -2,36 +2,41 @@ export interface MarsReport {
   slug: number; // MARS report slug (the API's numeric id)
   name: string; // human-readable title, used in generated citations
   origin: string; // namespaces the raw cache ('ca', 'ny') — the produce origin, not the consuming region
-  originFilter?: string; // MARS `origin` value to filter on; terminal reports carry every origin
-  note?: string; // provenance caveat worth carrying into citations
+  originPrefix: string; // keep rows whose `origin` starts with this (the API cannot prefix-match)
+  volumeField: string; // row field holding the shipped quantity
 }
 
 /**
- * MARS reports we pull from, keyed by their AMS report code. Regions point at a report by
- * code, so the slug/origin mapping lives here rather than in region triggers.
+ * MARS movement reports, keyed by their AMS report code. Movement reports state shipped
+ * quantity by commodity and growing district, which is what peak season means — the weeks a
+ * crop floods the market.
  *
- * Terminal reports (arrivals at a city's wholesale market) are preferred over shipping-point
- * reports: they measure produce where the shopper meets it rather than at the farm gate, and
- * a single market covers far more crops. They do carry every origin, so `originFilter` narrows
- * them to locally grown produce.
+ * MARS also publishes price reports covering far more commodities, but a row there is a price
+ * *quote*, so counting rows measures how long a crop is offered rather than how much of it
+ * arrives. Checked against an independently published Salinas-Watsonville strawberry curve,
+ * shipped volume put the peak at weeks 23–34 against that curve's 23–33, while counting quotes
+ * stretched it to 18–48. Prefer volume; if a crop is missing here, find another source rather
+ * than falling back to quote counting.
+ *
+ * The two reports share no commodities: Fresno carries berries, stone fruit and grapes; El
+ * Centro carries vegetables, melons and citrus (despite its name, its largest district is
+ * Salinas-Watsonville).
  */
 export const MARS_REPORTS = {
-  SX_FV010: {
-    slug: 2322,
-    name: 'San Francisco Terminal Market Fruit Prices',
+  FR_FV170: {
+    slug: 2899,
+    name: 'Fresno, CA Truck, Air and Boat Movement Report',
     origin: 'ca',
-    originFilter: 'California',
-    note: 'discontinued 1 May 2025',
+    originPrefix: 'California',
+    volumeField: '1 lb units',
   },
-  SX_FV020: {
-    slug: 2323,
-    name: 'San Francisco Terminal Market Vegetables Prices',
+  EL_FV170: {
+    slug: 3119,
+    name: 'El Centro, CA Truck, Air and Boat Movement Report',
     origin: 'ca',
-    originFilter: 'California',
-    note: 'discontinued 1 May 2025',
+    originPrefix: 'California',
+    volumeField: '1 lb units',
   },
-  FR_FV110: { slug: 2390, name: 'Fresno Shipping Point Fruit Prices', origin: 'ca' },
-  FR_FV120: { slug: 2391, name: 'Fresno Shipping Point Vegetables Prices', origin: 'ca' },
 } as const satisfies Record<string, MarsReport>;
 
 export type MarsReportId = keyof typeof MARS_REPORTS;

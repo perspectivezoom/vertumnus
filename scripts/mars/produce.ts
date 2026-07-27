@@ -21,8 +21,6 @@ export async function buildMarsProduce(crop: MarsCrop): Promise<GeneratedProduce
   const spans = await deriveSeason(crop);
   const report: MarsReport = MARS_REPORTS[crop.report];
   const years = `${Math.min(...crop.years)}–${Math.max(...crop.years)}`;
-  const origin = report.originFilter ? `${report.originFilter}-grown, ` : '';
-  const note = report.note ? ` (${report.note})` : '';
   return {
     name: crop.name,
     color: crop.color,
@@ -30,8 +28,8 @@ export async function buildMarsProduce(crop: MarsCrop): Promise<GeneratedProduce
     sources: [
       {
         title:
-          `USDA AMS Market News — ${report.name} (${crop.report})${note}; ` +
-          `${origin}${years} seasons; peak derived from weekly listing density ` +
+          `USDA AMS Market News — ${report.name} (${crop.report}); ` +
+          `${report.originPrefix}-grown, ${years} seasons; season from weekly shipped weight ` +
           `(raw cache: ${cachePath(crop)})`,
         url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
       },

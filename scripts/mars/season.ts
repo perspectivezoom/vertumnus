@@ -1,10 +1,17 @@
 import type { Span } from '@/scripts/lib/regionFile';
 import { cachePath, type MarsSource } from '@/scripts/mars/client';
 import { parseCache, rehydrate } from '@/scripts/mars/columnar';
+import { MARS_REPORTS, type MarsReport } from '@/scripts/mars/reports';
 
 const WEEKS = 52;
-const PEAK_FRACTION = 0.5; // a week counts as peak at >= 50% of the busiest week's listings
-const MIN_YEARS = 2; // a week must recur in this many seasons to count as in-season
+const SEASON_FLOOR = 0.25; // below this share of the crop's best week it is not in season
+const PEAK_FRACTION = 0.75; // at or above this share it is peak
+
+/** One reported observation: when it was reported, and how much was shipped. */
+export interface Sample {
+  date: string;
+  weight: number;
+}
 
 /** Our poster week for a MM/DD/YYYY date: ceil(dayOfYear / 7), clamped to 1..52. */
 export function weekOf(date: string): number {
@@ -13,63 +20,39 @@ export function weekOf(date: string): number {
   return Math.min(WEEKS, Math.max(1, Math.ceil(dayOfYear / 7)));
 }
 
-/**
- * Score each week (index 0 unused) from 0..1 by how strongly the crop was listed, averaged
- * across the cached seasons.
- *
- * Two corrections matter here, both learned from real data:
- *
- * - **Normalize per season before averaging.** Reporting volume varies wildly year to year
- *   (cherries ran 18–20 listings/day in 2023 but 1–6 in 2024), so summing raw counts lets the
- *   busiest year dictate the shape — one year was 93% of a week's total, hiding another year's
- *   genuine taper. Scaling each season to its own peak gives every season an equal vote.
- * - **Require a week to recur in MIN_YEARS seasons.** Terminal data carries stray one-off
- *   quotes far outside a crop's season, which would otherwise become spurious spans. Real
- *   seasonality repeats annually; noise does not. Recurrence separates them without a
- *   magnitude cutoff, which would instead erase genuine low-volume shoulder weeks.
- */
-export function scoreByWeek(dates: string[]): number[] {
-  const bySeason = new Map<number, number[]>();
-  for (const date of dates) {
-    const year = Number(date.split('/')[2]);
-    const weeks = bySeason.get(year) ?? new Array<number>(WEEKS + 1).fill(0);
+/** Total shipped weight per week (index 0 unused), summed over every cached season. */
+export function weeklyVolume(samples: Sample[]): number[] {
+  const weeks = new Array<number>(WEEKS + 1).fill(0);
+  for (const { date, weight } of samples) {
     const week = weekOf(date);
-    weeks[week] = (weeks[week] ?? 0) + 1;
-    bySeason.set(year, weeks);
+    weeks[week] = (weeks[week] ?? 0) + weight;
   }
-
-  const seasons = [...bySeason.values()];
-  // With only one season cached there is nothing to corroborate against, so accept every week.
-  const required = Math.min(MIN_YEARS, Math.max(1, seasons.length));
-
-  const peaks = seasons.map((weeks) => Math.max(...weeks));
-  const scores = new Array<number>(WEEKS + 1).fill(0);
-  for (let week = 1; week <= WEEKS; week++) {
-    const present = seasons.filter((weeks) => (weeks[week] ?? 0) > 0).length;
-    if (present < required) continue;
-    const total = seasons.reduce((sum, weeks, i) => {
-      const peak = peaks[i] ?? 0;
-      return peak > 0 ? sum + (weeks[week] ?? 0) / peak : sum;
-    }, 0);
-    scores[week] = total / seasons.length;
-  }
-  return scores;
+  return weeks;
 }
 
 /**
- * Classify weekly season scores into peak/available spans: weeks at or above
- * PEAK_FRACTION of the strongest week are peak, any other reported week is available, and
- * contiguous weeks of the same level merge. Weeks 1..52 only — a season crossing the new
- * year yields two spans rather than one wrapping span.
+ * Classify weekly shipped volume into peak/available spans, merging contiguous weeks of the
+ * same level.
+ *
+ * Deliberately naive: both cut-offs are shares of the crop's own best week, with no smoothing
+ * or cross-season weighting. The floor matters because California ships a trickle of many
+ * crops year-round, and treating any non-zero week as "available" put berries in season in
+ * January; 25% is the rule used by the published strawberry curve this was checked against.
+ *
+ * Crops this does not describe well are left out of the region's list rather than patched
+ * around — every attempt to rescue them (smoothing, recurrence filters, contrast-relative
+ * thresholds) distorted the crops that already worked. Weeks 1..52 only, so a season crossing
+ * the new year yields two spans rather than one wrapping span.
  */
-export function spansFromCounts(counts: number[]): Span[] {
-  const max = Math.max(0, ...counts);
-  const levelAt = (count: number): Span['level'] | null =>
-    count === 0 ? null : count >= PEAK_FRACTION * max ? 'peak' : 'available';
+export function spansFromVolume(volume: number[]): Span[] {
+  const high = Math.max(0, ...volume.slice(1, WEEKS + 1));
+  if (high === 0) return [];
+  const levelAt = (v: number): Span['level'] | null =>
+    v < SEASON_FLOOR * high ? null : v >= PEAK_FRACTION * high ? 'peak' : 'available';
 
   const spans: Span[] = [];
   for (let week = 1; week <= WEEKS; week++) {
-    const level = levelAt(counts[week] ?? 0);
+    const level = levelAt(volume[week] ?? 0);
     if (!level) continue;
     const last = spans.at(-1);
     if (last && last.level === level && last.to === week - 1) last.to = week;
@@ -81,5 +64,12 @@ export function spansFromCounts(counts: number[]): Span[] {
 /** Derive peak/available week spans from a commodity's cached raw data. */
 export async function deriveSeason(src: MarsSource): Promise<Span[]> {
   const rows = rehydrate(parseCache(await Bun.file(cachePath(src)).text()));
-  return spansFromCounts(scoreByWeek(rows.map((row) => String(row.report_date))));
+  const report: MarsReport = MARS_REPORTS[src.report];
+  const { volumeField } = report;
+  if (!volumeField) throw new Error(`${src.report} reports no shipped volume`);
+  const samples: Sample[] = rows.map((row) => ({
+    date: String(row.report_date),
+    weight: Number(row[volumeField]) || 0,
+  }));
+  return spansFromVolume(weeklyVolume(samples));
 }

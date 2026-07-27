@@ -41,6 +41,9 @@ const currentSpans = new Map<string, Span[]>([
   ['Strawberries', [{ level: 'peak', from: 23, to: 33 }]],
 ]);
 
+/** Every crop the region claims — derived and hand-authored alike. */
+const known = new Set(['Cherries', 'Strawberries', 'Kiwis']);
+
 const cherries = (spans: Span[]): GeneratedProduce => ({
   name: 'Cherries',
   color: '#7a1f2b',
@@ -62,6 +65,7 @@ describe('rewriteRegionSource', () => {
       source,
       [cherries([{ level: 'peak', from: 20, to: 24 }])],
       currentSpans,
+      known,
     );
     expect(block(out, 'Strawberries')).toBe(block(source, 'Strawberries'));
     expect(out).toContain('// A hand-authored entry: these comments must survive verbatim.');
@@ -73,6 +77,7 @@ describe('rewriteRegionSource', () => {
       source,
       [cherries([{ level: 'peak', from: 18, to: 21 }])],
       currentSpans,
+      known,
     );
     expect(out).toContain("{ level: 'peak', from: 18, to: 21 }");
     expect(out).not.toContain("{ level: 'peak', from: 20, to: 24 }");
@@ -83,6 +88,7 @@ describe('rewriteRegionSource', () => {
       source,
       [cherries([{ level: 'peak', from: 20, to: 24 }])],
       currentSpans,
+      known,
     );
     expect(out).toContain('// May 14 – Jun 17');
   });
@@ -93,6 +99,7 @@ describe('rewriteRegionSource', () => {
       source,
       [cherries([{ level: 'peak', from: 40, to: 44 }])],
       currentSpans,
+      known,
     );
     expect(out.indexOf("name: 'Strawberries'")).toBeLessThan(out.indexOf("name: 'Cherries'"));
     expect(block(out, 'Strawberries')).toBe(block(source, 'Strawberries'));
@@ -100,8 +107,8 @@ describe('rewriteRegionSource', () => {
 
   test('is idempotent — rewriting unchanged data reproduces the same source', () => {
     const spans: Span[] = [{ level: 'peak', from: 20, to: 24 }];
-    const once = rewriteRegionSource(source, [cherries(spans)], currentSpans);
-    expect(rewriteRegionSource(once, [cherries(spans)], currentSpans)).toBe(once);
+    const once = rewriteRegionSource(source, [cherries(spans)], currentSpans, known);
+    expect(rewriteRegionSource(once, [cherries(spans)], currentSpans, known)).toBe(once);
   });
 
   test('inserts a brand-new generated crop at its sorted position', () => {
@@ -111,7 +118,7 @@ describe('rewriteRegionSource', () => {
       spans: [{ level: 'peak', from: 45, to: 50 }],
       sources: [{ title: 'USDA', url: null }],
     };
-    const out = rewriteRegionSource(source, [kiwi], currentSpans);
+    const out = rewriteRegionSource(source, [kiwi], currentSpans, known);
     expect(out.indexOf("name: 'Kiwis'")).toBeGreaterThan(out.indexOf("name: 'Strawberries'"));
     expect(block(out, 'Strawberries')).toBe(block(source, 'Strawberries'));
   });
@@ -121,6 +128,7 @@ describe('rewriteRegionSource', () => {
       source,
       [cherries([{ level: 'available', from: 5, to: 9 }])],
       currentSpans,
+      known,
     );
     expect(out.indexOf("name: 'Strawberries'")).toBeLessThan(out.indexOf("name: 'Cherries'"));
   });
@@ -135,6 +143,7 @@ describe('rewriteRegionSource', () => {
         tricky,
         [cherries([{ level: 'peak', from: 20, to: 24 }])],
         currentSpans,
+        known,
       );
       expect(block(out, 'Strawberries')).toBe(block(tricky, 'Strawberries'));
       expect(out).toContain("Figure {3}, O\\'Neal\\'s survey");
@@ -149,6 +158,7 @@ describe('rewriteRegionSource', () => {
         tricky,
         [cherries([{ level: 'peak', from: 20, to: 24 }])],
         currentSpans,
+        known,
       );
       expect(block(out, 'Strawberries')).toBe(block(tricky, 'Strawberries'));
       expect(out).toContain('unbalanced: {{{');
@@ -163,12 +173,25 @@ describe('rewriteRegionSource', () => {
         spans: [{ level: 'peak', from: 30, to: 40 }],
         sources: [{ title: 'derived', url: null }],
       };
-      expect(() => rewriteRegionSource(source, [collision], currentSpans)).toThrow(/hand-authored/);
+      expect(() => rewriteRegionSource(source, [collision], currentSpans, known)).toThrow(
+        /hand-authored/,
+      );
     });
 
-    test('preserves entries it was given no generated data for', () => {
-      const out = rewriteRegionSource(source, [], currentSpans);
+    test('keeps a claimed crop this run produced no data for', () => {
+      // Another source may own it, or its cache may simply be missing — either way the crop is
+      // still claimed, so its entry stands.
+      const out = rewriteRegionSource(source, [], currentSpans, known);
       expect(block(out, 'Cherries')).toBe(block(source, 'Cherries'));
+      expect(block(out, 'Strawberries')).toBe(block(source, 'Strawberries'));
+    });
+
+    test('retires an entry the region no longer claims', () => {
+      // The crop list is comprehensive, so dropping a crop from it retires the entry rather
+      // than leaving produce behind that nothing accounts for.
+      const withoutCherries = new Set(['Strawberries']);
+      const out = rewriteRegionSource(source, [], currentSpans, withoutCherries);
+      expect(out).not.toContain("name: 'Cherries'");
       expect(block(out, 'Strawberries')).toBe(block(source, 'Strawberries'));
     });
   });
