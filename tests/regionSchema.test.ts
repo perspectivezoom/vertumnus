@@ -19,7 +19,6 @@ describe('RegionSchema', () => {
     const region = {
       id: 'test',
       name: 'Test Region',
-      generatedAt: '2026-01-01T00:00:00Z',
       schemaVersion: 1,
       items: [produceWith([{ level: 'peak', from: 1, to: 10 }])],
     };
@@ -93,7 +92,6 @@ describe('RegionSchema', () => {
     const region = (items: ProduceInput[]): z.input<typeof RegionSchema> => ({
       id: 'sort',
       name: 'Sort',
-      generatedAt: '2026-01-01T00:00:00Z',
       schemaVersion: 1,
       items,
     });

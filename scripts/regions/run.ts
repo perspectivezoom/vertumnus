@@ -1,9 +1,16 @@
-import { cachePath, pull } from '@/scripts/mars/client';
-import { type GeneratedProduce, updateRegionFile } from '@/scripts/lib/regionFile';
-import { buildMarsProduce } from '@/scripts/mars/produce';
-import { type Crop, regionSources } from '@/scripts/regions/index';
+import { mkdir } from 'node:fs/promises';
 
-// Regenerate the `generated: true` produce entries in src/data/regions/*.ts.
+import { pull } from '@/scripts/mars/client';
+import {
+  cropCachePath,
+  type DerivedCrop,
+  isDerived,
+  regionFilePath,
+  renderRegion,
+} from '@/scripts/regions/build';
+import { regionSources } from '@/scripts/regions/index';
+
+// Regenerate src/data/regions/__generated__/*.ts from the crop lists in scripts/regions/.
 //
 //   bun run regions                 every region, derived from the committed raw caches
 //   bun run regions sfbay           just one region
@@ -11,11 +18,11 @@ import { type Crop, regionSources } from '@/scripts/regions/index';
 //   bun run regions --pull --limit=10   ...at most 10 of them this run
 //   bun run regions --pull --force  refetch even crops that are already cached
 //
-// Deriving is offline by default so the everyday run needs no API key and leaves the
-// committed caches untouched — refetching would rewrite `fetchedAt` and churn the diff.
-// `--pull` only fetches what is missing, so it is resumable: run it again after a failure
-// (or to add newly listed crops) and it picks up where it left off. `--limit` keeps a large
-// backfill to polite batches rather than hammering the API.
+// Deriving is offline by default so the everyday run needs no API key and leaves the committed
+// caches untouched — refetching would rewrite `fetchedAt` and churn the diff. `--pull` only
+// fetches what is missing, so it is resumable: run it again after a failure (or to add newly
+// listed crops) and it picks up where it left off. `--limit` keeps a large backfill to polite
+// batches rather than hammering the API.
 
 const PULL_DELAY_MS = 500; // spacing between requests, to stay well inside any rate limit
 
@@ -33,10 +40,6 @@ if (selected.length === 0) {
   process.exit(1);
 }
 
-/** Crops a source derives. Manual ones are declared only so the crop list stays complete. */
-type DerivedCrop = Exclude<Crop, { type: 'manual' }>;
-const isDerived = (crop: Crop): crop is DerivedCrop => crop.type !== 'manual';
-
 /** Refresh a crop's raw cache from its source API. */
 function pullCrop(crop: DerivedCrop): Promise<string> {
   switch (crop.type) {
@@ -45,29 +48,11 @@ function pullCrop(crop: DerivedCrop): Promise<string> {
   }
 }
 
-/** Build a crop's produce entry from its cached raw data. */
-function buildCrop(crop: DerivedCrop): Promise<GeneratedProduce> {
-  switch (crop.type) {
-    case 'mars':
-      return buildMarsProduce(crop);
-  }
-}
-
-/** Where a crop's raw cache lives, so we can tell what still needs fetching. */
-function cropCachePath(crop: DerivedCrop): string {
-  switch (crop.type) {
-    case 'mars':
-      return cachePath(crop);
-  }
-}
-
 let budget = limit;
 for (const region of selected) {
-  const derived = region.crops.filter(isDerived);
-
   if (shouldPull) {
     const pending: DerivedCrop[] = [];
-    for (const crop of derived) {
+    for (const crop of region.crops.filter(isDerived)) {
       if (force || !(await Bun.file(cropCachePath(crop)).exists())) pending.push(crop);
     }
     const batch = pending.slice(0, Math.max(0, budget));
@@ -82,16 +67,8 @@ for (const region of selected) {
     }
   }
 
-  const cached = derived.filter((crop) => Bun.file(cropCachePath(crop)).size > 0);
-  const produce = await Promise.all(cached.map(buildCrop));
-  // The crop list is comprehensive, so it doubles as the set of entries the region file may
-  // keep — anything else has been retired and the writer drops it.
-  const known = new Set(region.crops.map((crop) => crop.name));
-  await updateRegionFile(region.id, produce, known);
-
-  console.log(`${region.id}:`);
-  for (const item of produce) {
-    const spans = item.spans.map((s) => `${s.level} ${s.from}-${s.to}`).join(', ');
-    console.log(`  ${item.name}: ${spans}`);
-  }
+  const path = regionFilePath(region.id);
+  await mkdir(path.slice(0, path.lastIndexOf('/')), { recursive: true });
+  await Bun.write(path, await renderRegion(region));
+  console.log(`${region.id}: wrote ${region.crops.length} produce → ${path}`);
 }

@@ -1,10 +1,10 @@
-import ny from '@/src/data/regions/ny';
-import sfbay from '@/src/data/regions/sfbay';
+import ny from '@/src/data/regions/__generated__/ny';
+import sfbay from '@/src/data/regions/__generated__/sfbay';
 
 /**
- * Explicit list of all regions. Raw values are unvalidated — validate with
- * RegionSchema before use (see useRegion). Add new regions here; nothing is
- * auto-discovered.
+ * Explicit list of all regions. Values are unvalidated — validate with RegionSchema before
+ * use (see useRegion). The modules under __generated__ are written by `bun run regions` from
+ * the crop lists in scripts/regions/; edit those, never the output.
  */
 export const regions = [sfbay, ny];
 
