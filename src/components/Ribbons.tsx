@@ -15,12 +15,15 @@ import {
 const PAD_X = 12;
 const PAD_TOP = 40; // room for the month axis
 const PAD_BOTTOM = 16;
-const ROW_GAP = 6; // min spacing between ribbons (keeps flat lines distinct)
 
 // Label sizing/placement.
 const MAX_FONT = 12; // ceiling font size
 const MIN_FONT = 8; // floor before a label is unreadable
 const AXIS_FONT = 11; // month labels
+
+// How many row-spacings tall a full peak ridge is. Above 1 the ridges overlap, which is what
+// reclaims the empty space one-row-per-crop would otherwise waste.
+const RIDGE_OVERLAP = 1.5;
 const CHAR_W_RATIO = 0.6; // approx glyph advance ÷ font size for the medium sans
 const LABEL_WINDOW = 3; // ± weeks around the peak midpoint to average the label's y
 const LINE_H = 1.15; // line-height multiple for wrapped labels
@@ -82,13 +85,7 @@ export function Ribbons({
 
       {ribbons.map((r) => (
         <g key={r.name}>
-          <path
-            d={r.path}
-            fill={r.color}
-            stroke={r.color}
-            strokeWidth={1.5}
-            strokeLinejoin="round"
-          />
+          <path d={r.path} fill={r.color} stroke="#ffffff" strokeWidth={1} strokeLinejoin="round" />
           <RibbonLabel {...r.label} />
         </g>
       ))}
@@ -122,10 +119,19 @@ function RibbonLabel({ x, y, font, lines }: Label) {
 }
 
 /**
- * Stack the (pre-sorted) produce into ribbons that fill the box. The scale is derived
- * so the fattest week exactly fills the content height; each week's slack is spread as
- * equal inter-ribbon gaps, so the bottom row stays anchored and lean weeks fan into an
- * even grid instead of collapsing upward.
+ * Lay the (pre-sorted) produce out as a ridgeline: one crop per row, each on a **fixed**
+ * baseline, rising above it in proportion to how strongly it is in season.
+ *
+ * A stacked layout puts every ribbon on top of the sum of the ones above it, so a crop coming
+ * into season shoves everything below it down — measured at over 40% of the poster's height
+ * for the middle rows, even for crops whose own season never changes. Fixed baselines remove
+ * that entirely: a row's position encodes only which crop it is.
+ *
+ * Rows are spaced closer than a peak ribbon is tall (RIDGE_OVERLAP), so peaks rise into the
+ * row above and the drawing reclaims the vertical space that plain lanes would waste. Later
+ * rows paint over earlier ones, which is what makes the overlaps read as depth. Out-of-season
+ * weeks sit flat on the baseline, so an empty January reads as "nothing yet" rather than as a
+ * hole left by the mass drifting elsewhere.
  */
 function buildStreamgraph(
   items: Produce[],
@@ -135,37 +141,29 @@ function buildStreamgraph(
   const gridW = width - PAD_X * 2;
   const weekToX = (week: number) => PAD_X + ((week - 1) / WEEKS_PER_YEAR) * gridW;
 
-  const n = items.length;
   const weights = items.map((item) => weeklyWeights(item.spans));
-  const sumPerWeek = Array.from({ length: WEEKS_PER_YEAR }, (_, wk) =>
-    weights.reduce((acc, w) => acc + (w[wk] ?? 0), 0),
-  );
-  const maxWeight = Math.max(0, ...sumPerWeek);
-
-  // Derive the scale so the fattest week fills the content height (ribbons fill the paper).
+  const n = items.length;
   const content = height - PAD_TOP - PAD_BOTTOM;
-  const scale = maxWeight > 0 ? Math.max(0, content - Math.max(0, n - 1) * ROW_GAP) / maxWeight : 0;
+  // Reserve room for the topmost ridge to rise above its baseline without leaving the box.
+  const spacing = content / (n - 1 + RIDGE_OVERLAP);
+  const ridgeHeight = spacing * RIDGE_OVERLAP;
+  const baselineOf = (i: number) => PAD_TOP + ridgeHeight + i * spacing;
+
   const geometry: Geometry = {
     cellW: gridW / WEEKS_PER_YEAR,
     gridW,
-    peakHeight: LEVEL_WEIGHT[Level.Peak] * scale,
+    peakHeight: ridgeHeight,
     weekToX,
   };
 
-  const maxSum = maxWeight * scale;
-  const gapAt = (wk: number) =>
-    n > 1 ? ROW_GAP + (maxSum - (sumPerWeek[wk] ?? 0) * scale) / (n - 1) : 0;
-
-  const runningTop = new Array<number>(WEEKS_PER_YEAR).fill(PAD_TOP);
   const ribbons = items.map((item, i) => {
     const w = weights[i] ?? [];
-    const slices: Slice[] = [];
-    for (let wk = 0; wk < WEEKS_PER_YEAR; wk++) {
-      const top = runningTop[wk] ?? PAD_TOP;
-      const bottom = top + (w[wk] ?? 0) * scale;
-      slices.push({ x: weekToX(wk + 1), top, bottom });
-      runningTop[wk] = bottom + (i < n - 1 ? gapAt(wk) : 0);
-    }
+    const baseline = baselineOf(i);
+    const slices: Slice[] = Array.from({ length: WEEKS_PER_YEAR }, (_, wk) => ({
+      x: weekToX(wk + 1),
+      top: baseline - ((w[wk] ?? 0) / LEVEL_WEIGHT[Level.Peak]) * ridgeHeight,
+      bottom: baseline,
+    }));
 
     // Extend a flat step to the year-end edge so the fill spans the full width.
     const last = slices.at(-1);
