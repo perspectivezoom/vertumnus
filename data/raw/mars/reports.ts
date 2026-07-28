@@ -28,15 +28,15 @@ export const MARS_REPORTS = {
     name: 'Fresno, CA Truck, Air and Boat Movement Report',
     origin: 'ca',
     originPrefix: 'California',
-    volumeField: '1 lb units',
+    volumeField: '1 lb units'
   },
   EL_FV170: {
     slug: 3119,
     name: 'El Centro, CA Truck, Air and Boat Movement Report',
     origin: 'ca',
     originPrefix: 'California',
-    volumeField: '1 lb units',
-  },
+    volumeField: '1 lb units'
+  }
 } as const satisfies Record<string, MarsReport>;
 
 export type MarsReportId = keyof typeof MARS_REPORTS;

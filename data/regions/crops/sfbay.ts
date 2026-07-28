@@ -1,5 +1,5 @@
-import type { MarsCrop } from '@/scripts/mars/produce';
-import type { Crop, RegionSources } from '@/scripts/regions/index';
+import type { MarsCrop } from '@/data/regions/sources/mars';
+import type { Crop, RegionSources } from '@/data/regions/crops';
 
 const YEARS = [2022, 2023, 2024];
 
@@ -85,9 +85,7 @@ const crops: Crop[] = [
 ];
 
 /**
- * San Francisco Bay Area. The region owns its source list (pull-based — the region decides
- * what it pulls, so nothing central can clobber a produce). Only the crops listed here are
- * written to src/data/regions/sfbay.ts, and only as `generated: true` entries; hand-authored
- * produce in that file is left alone.
+ * San Francisco Bay Area. Every crop the poster shows is listed above — derived and
+ * hand-authored alike — and data/regions/__generated__/sfbay.ts is built from it.
  */
 export const sfbay: RegionSources = { id: 'sfbay', name: 'San Francisco Bay Area', crops };

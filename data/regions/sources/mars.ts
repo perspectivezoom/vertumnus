@@ -1,17 +1,17 @@
-import type { Span } from '@/scripts/lib/regionFile';
-import { cachePath, type MarsSource } from '@/scripts/mars/client';
-import { parseCache, rehydrate } from '@/scripts/mars/columnar';
-import { MARS_REPORTS, type MarsReport } from '@/scripts/mars/reports';
+import { cachePath, type MarsSource } from '@/data/raw/mars/client';
+import { MARS_REPORTS, type MarsReport } from '@/data/raw/mars/reports';
+import { parseCache, rehydrate } from '@/data/raw/format';
+import type { GeneratedProduce, Span } from '@/data/regions/render';
 
-const WEEKS = 52;
-const SEASON_FLOOR = 0.25; // below this share of the crop's best week it is not in season
-const PEAK_FRACTION = 0.75; // at or above this share it is peak
-
-/** One reported observation: when it was reported, and how much was shipped. */
+/** One reported shipment: when it moved, and how much. */
 export interface Sample {
   date: string;
   weight: number;
 }
+
+const WEEKS = 52;
+const SEASON_FLOOR = 0.25; // below this share of the crop's best week it is not in season
+const PEAK_FRACTION = 0.75; // at or above this share it is peak
 
 /** Our poster week for a MM/DD/YYYY date: ceil(dayOfYear / 7), clamped to 1..52. */
 export function weekOf(date: string): number {
@@ -72,4 +72,38 @@ export async function deriveSeason(src: MarsSource): Promise<Span[]> {
     weight: Number(row[volumeField]) || 0,
   }));
   return spansFromVolume(weeklyVolume(samples));
+}
+
+export interface MarsCrop extends MarsSource {
+  type: 'mars';
+  name: string; // produce name as it appears on the poster
+  color: string; // ribbon color
+}
+
+/**
+ * Build a crop's produce entry from its committed raw cache — no network. Refreshing the
+ * cache is a separate, opt-in step (see {@link pull}).
+ */
+export async function buildMarsProduce(crop: MarsCrop): Promise<GeneratedProduce> {
+  const path = cachePath(crop);
+  if (!(await Bun.file(path).exists())) {
+    throw new Error(`No raw cache at ${path} — re-run with --pull (needs MARS_API_KEY).`);
+  }
+  const spans = await deriveSeason(crop);
+  const report: MarsReport = MARS_REPORTS[crop.report];
+  const years = `${Math.min(...crop.years)}–${Math.max(...crop.years)}`;
+  return {
+    name: crop.name,
+    color: crop.color,
+    spans,
+    sources: [
+      {
+        title:
+          `USDA AMS Market News — ${report.name} (${crop.report}); ` +
+          `${report.originPrefix}-grown, ${years} seasons; season from weekly shipped weight ` +
+          `(raw cache: ${cachePath(crop)})`,
+        url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
+      },
+    ],
+  };
 }

@@ -29,6 +29,6 @@
     "allowUnusedLabels": false,
     "allowUnreachableCode": false
   },
-  "include": ["src", "tests", "scripts"],
+  "include": ["src", "tests", "scripts", "data"],
   "exclude": ["dist", "node_modules"]
 }

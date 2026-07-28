@@ -3,8 +3,8 @@ import { useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 import { z } from 'zod';
 
-import { defaultRegion, regions } from '@/src/data/regions';
-import { type Region, RegionSchema } from '@/src/data/types';
+import { defaultRegion, regions } from '@/data/regions';
+import { type Region, RegionSchema } from '@/data/regions/schema';
 import { DEFAULT_PAPER, UNITS } from '@/src/lib/paper';
 
 // --- Query params (paper size + banner) ---

@@ -1,4 +1,4 @@
-import type { Crop, RegionSources } from '@/scripts/regions/index';
+import type { Crop, RegionSources } from '@/data/regions/crops';
 
 /**
  * New York State. Entirely hand-authored so far — the MARS movement reports we use for

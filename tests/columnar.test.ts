@@ -6,7 +6,7 @@ import {
   rehydrate,
   serializeCache,
   toColumnar,
-} from '@/scripts/mars/columnar';
+} from '@/data/raw/format';
 
 const meta: CacheMeta = {
   url: 'https://example.test/reports/1',

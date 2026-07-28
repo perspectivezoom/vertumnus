@@ -1,5 +1,5 @@
 import { Ribbons } from '@/src/components/Ribbons';
-import type { Region } from '@/src/data/types';
+import type { Region } from '@/data/regions/schema';
 import { useQueryParams } from '@/src/lib/params';
 
 /**

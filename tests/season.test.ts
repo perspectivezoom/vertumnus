@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { spansFromVolume, weeklyVolume, weekOf } from '@/scripts/mars/season';
+import { spansFromVolume, weeklyVolume, weekOf } from '@/data/regions/sources/mars';
 
 /** Build a 53-slot weekly-volume array (index 0 unused) from {week: pounds} entries. */
 function volume(byWeek: Record<number, number>): number[] {

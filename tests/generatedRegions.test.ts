@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 
-import { regionFilePath, renderRegion } from '@/scripts/regions/build';
-import { regionSources } from '@/scripts/regions/index';
+import { regionFilePath, renderRegion } from '@/data/regions/build';
+import { regionSources } from '@/data/regions/crops';
 
 /**
  * The committed region modules are build output. This regenerates them from the crop lists and

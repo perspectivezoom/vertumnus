@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 
 import { z } from 'zod';
 
-import { ProduceSchema, RegionSchema } from '@/src/data/types';
+import { ProduceSchema, RegionSchema } from '@/data/regions/schema';
 
 type Span = { level: 'available' | 'peak'; from: number; to: number };
 

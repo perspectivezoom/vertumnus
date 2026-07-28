@@ -1,6 +1,6 @@
 import { area, curveBasis } from 'd3-shape';
 
-import type { Produce } from '@/src/data/types';
+import type { Produce } from '@/data/regions/schema';
 import {
   LEVEL_WEIGHT,
   Level,

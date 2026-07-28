@@ -14,9 +14,9 @@
   "ignorePatterns": ["public", ".claude"],
   "overrides": [
     {
-      // Raw data caches (written by scripts/mars/columnar.ts). oxfmt formats these, but they
+      // Raw data caches (written by data/raw/format.ts). oxfmt formats these, but they
       // are read back with strict JSON.parse, so trailing commas would make them unparseable.
-      "files": ["src/data/raw/**"],
+      "files": ["data/raw/**"],
       "options": { "trailingComma": "none" }
     }
   ]
