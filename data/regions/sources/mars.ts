@@ -3,15 +3,17 @@ import { MARS_REPORTS, type MarsReport } from '@/data/raw/mars/reports';
 import { parseCache, rehydrate } from '@/data/raw/format';
 import type { GeneratedProduce, Span } from '@/data/regions/render';
 
-/** One reported shipment: when it moved, and how much. */
+/** One reported shipment: the season it belongs to, the week it moved, and how much. */
 export interface Sample {
   date: string;
   weight: number;
 }
 
 const WEEKS = 52;
-const SEASON_FLOOR = 0.25; // below this share of the crop's best week it is not in season
-const PEAK_FRACTION = 0.75; // at or above this share it is peak
+const SEASON_FLOOR = 0.25; // below this share of a season's best week the crop is not in season
+const PEAK_FRACTION = 0.75; // at or above this share of a season's best week it is peak
+const MIN_SEASON_SHARE = 0.1; // a season carrying less than this of the median gets no vote
+const MAX_GAP = 3; // an interior gap this short is reporting noise, not a break in the season
 
 /** Our poster week for a MM/DD/YYYY date: ceil(dayOfYear / 7), clamped to 1..52. */
 export function weekOf(date: string): number {
@@ -20,45 +22,97 @@ export function weekOf(date: string): number {
   return Math.min(WEEKS, Math.max(1, Math.ceil(dayOfYear / 7)));
 }
 
-/** Total shipped weight per week (index 0 unused), summed over every cached season. */
-export function weeklyVolume(samples: Sample[]): number[] {
-  const weeks = new Array<number>(WEEKS + 1).fill(0);
+/** Shipped weight per week (index 0 unused), one array per season. */
+export function weeklyVolumeBySeason(samples: Sample[]): number[][] {
+  const bySeason = new Map<number, number[]>();
   for (const { date, weight } of samples) {
+    const year = Number(date.split('/')[2]);
+    const weeks = bySeason.get(year) ?? new Array<number>(WEEKS + 1).fill(0);
     const week = weekOf(date);
     weeks[week] = (weeks[week] ?? 0) + weight;
+    bySeason.set(year, weeks);
   }
-  return weeks;
+  return [...bySeason.entries()].sort(([a], [b]) => a - b).map(([, weeks]) => weeks);
 }
 
 /**
- * Classify weekly shipped volume into peak/available spans, merging contiguous weeks of the
- * same level.
+ * Decide each week's level by asking every season separately and taking the majority.
  *
- * Deliberately naive: both cut-offs are shares of the crop's own best week, with no smoothing
- * or cross-season weighting. The floor matters because California ships a trickle of many
- * crops year-round, and treating any non-zero week as "available" put berries in season in
- * January; 25% is the rule used by the published strawberry curve this was checked against.
+ * Seasons shift. Peaches peaked in weeks 21–31, 24–34 and 29–35 across three years — each a
+ * clean single peak, but eight weeks apart. Pooling the volume first and thresholding after
+ * turns that into a smear with holes where one year is fading and the next has not started;
+ * the same arithmetic collapsed tomatoes to a single week. So classify within a season, where
+ * "its best week" is meaningful, and only then combine.
  *
- * Crops this does not describe well are left out of the region's list rather than patched
- * around — every attempt to rescue them (smoothing, recurrence filters, contrast-relative
- * thresholds) distorted the crops that already worked. Weeks 1..52 only, so a season crossing
- * the new year yields two spans rather than one wrapping span.
+ * That makes the two bands mean something a shopper can act on: **peak** is "most years this is
+ * at its best", **available** is "some years yes, some no" — which is the honest rendering of a
+ * harvest that does not arrive on the same date twice. A genuine second harvest survives,
+ * because it wins its own vote every year; a one-off gap does not.
  */
-export function spansFromVolume(volume: number[]): Span[] {
-  const high = Math.max(0, ...volume.slice(1, WEEKS + 1));
-  if (high === 0) return [];
-  const levelAt = (v: number): Span['level'] | null =>
-    v < SEASON_FLOOR * high ? null : v >= PEAK_FRACTION * high ? 'peak' : 'available';
+export function spansFromSeasons(seasons: number[][]): Span[] {
+  // A season with barely any data (a stray row or two) would otherwise vote as loudly as a
+  // full one, so ignore the ones carrying almost nothing next to their peers.
+  const totals = seasons.map((weeks) => weeks.reduce((sum, v) => sum + v, 0));
+  const median = [...totals].sort((a, b) => a - b)[Math.floor(totals.length / 2)] ?? 0;
+  const voting = seasons.filter((_, i) => (totals[i] ?? 0) >= MIN_SEASON_SHARE * median);
+  if (voting.length === 0) return [];
+
+  const majority = Math.ceil(voting.length / 2);
+  const levels = voting.map((weeks) => {
+    const high = Math.max(0, ...weeks.slice(1, WEEKS + 1));
+    return weeks.map((v) =>
+      high === 0 || v < SEASON_FLOOR * high ? 0 : v >= PEAK_FRACTION * high ? 2 : 1,
+    );
+  });
+
+  const peakVotes = (week: number) => levels.filter((s) => (s[week] ?? 0) === 2).length;
+  const seasonVotes = (week: number) => levels.filter((s) => (s[week] ?? 0) > 0).length;
+
+  // When a crop's peaks never line up — blueberries peaked in weeks 20–22, 24 and 23 across
+  // three seasons, overlapping in none — no week can win a majority, and the crop would come
+  // out with no peak at all. Fall back to any week that peaked in some season: the band widens
+  // to cover the disagreement, which is the truthful answer to "when is it best?".
+  const peakThreshold = Array.from({ length: WEEKS }, (_, i) => peakVotes(i + 1)).some(
+    (votes) => votes >= majority,
+  )
+    ? majority
+    : 1;
+
+  const weekly = Array.from({ length: WEEKS + 1 }, (_, week) =>
+    week === 0 ? 0 : peakVotes(week) >= peakThreshold ? 2 : seasonVotes(week) >= majority ? 1 : 0,
+  );
+  bridge(weekly, 1); // a short hole inside a season is noise
+  bridge(weekly, 2); // ...as is a short dip out of peak
 
   const spans: Span[] = [];
   for (let week = 1; week <= WEEKS; week++) {
-    const level = levelAt(volume[week] ?? 0);
+    const level: Span['level'] | null =
+      weekly[week] === 2 ? 'peak' : weekly[week] === 1 ? 'available' : null;
     if (!level) continue;
     const last = spans.at(-1);
     if (last && last.level === level && last.to === week - 1) last.to = week;
     else spans.push({ level, from: week, to: week });
   }
   return spans;
+}
+
+/**
+ * Raise runs shorter than MAX_GAP that sit between two weeks already at `level`.
+ *
+ * Seasons rarely align exactly, so a consensus can dip for a week or two mid-season purely
+ * because the years disagree there. Bridging those keeps a season whole while leaving a
+ * genuine second harvest — separated by many weeks — as two distinct spans.
+ */
+function bridge(weekly: number[], level: number): void {
+  let run = 0;
+  for (let week = 1; week <= WEEKS + 1; week++) {
+    if ((weekly[week] ?? 0) >= level) {
+      if (run > 0 && run <= MAX_GAP && week - run - 1 >= 1) {
+        for (let w = week - run; w < week; w++) weekly[w] = level;
+      }
+      run = 0;
+    } else run += 1;
+  }
 }
 
 /** Derive peak/available week spans from a commodity's cached raw data. */
@@ -68,10 +122,12 @@ export async function deriveSeason(src: MarsSource): Promise<Span[]> {
   const { volumeField } = report;
   if (!volumeField) throw new Error(`${src.report} reports no shipped volume`);
   const samples: Sample[] = rows.map((row) => ({
-    date: String(row.report_date),
+    // The period the shipment moved in, not when the report was published: a report dated
+    // 2 Jan can cover 31 Dec, which would otherwise open a phantom season in the new year.
+    date: String(row.report_begin_date),
     weight: Number(row[volumeField]) || 0,
   }));
-  return spansFromVolume(weeklyVolume(samples));
+  return spansFromSeasons(weeklyVolumeBySeason(samples));
 }
 
 export interface MarsCrop extends MarsSource {

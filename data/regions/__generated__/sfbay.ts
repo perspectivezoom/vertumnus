@@ -10,9 +10,9 @@ export default {
       color: '#7a1f2b',
       generated: true,
       spans: [
-        { level: 'available', from: 19, to: 20 }, // May 7 – May 20
-        { level: 'peak', from: 21, to: 23 }, // May 21 – Jun 10
-        { level: 'available', from: 24, to: 24 }, // Jun 11 – Jun 17
+        { level: 'available', from: 19, to: 19 }, // May 7 – May 13
+        { level: 'peak', from: 20, to: 22 }, // May 14 – Jun 3
+        { level: 'available', from: 23, to: 23 }, // Jun 4 – Jun 10
       ],
       sources: [
         {
@@ -27,9 +27,8 @@ export default {
       color: '#4a6fa5',
       generated: true,
       spans: [
-        { level: 'available', from: 18, to: 20 }, // Apr 30 – May 20
-        { level: 'peak', from: 21, to: 24 }, // May 21 – Jun 17
-        { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
+        { level: 'available', from: 19, to: 19 }, // May 7 – May 13
+        { level: 'peak', from: 20, to: 26 }, // May 14 – Jul 1
       ],
       sources: [
         {
@@ -44,10 +43,9 @@ export default {
       color: '#f0a83c',
       generated: true,
       spans: [
-        { level: 'peak', from: 21, to: 21 }, // May 21 – May 27
-        { level: 'available', from: 22, to: 22 }, // May 28 – Jun 3
-        { level: 'peak', from: 23, to: 25 }, // Jun 4 – Jun 24
-        { level: 'available', from: 26, to: 26 }, // Jun 25 – Jul 1
+        { level: 'available', from: 21, to: 22 }, // May 21 – Jun 3
+        { level: 'peak', from: 23, to: 24 }, // Jun 4 – Jun 17
+        { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
       ],
       sources: [
         {
@@ -58,18 +56,20 @@ export default {
       ],
     },
     {
-      name: 'Raspberries',
-      color: '#c73e5a',
+      name: 'Tomatoes',
+      color: '#d1402f',
       generated: true,
       spans: [
-        { level: 'available', from: 19, to: 23 }, // May 7 – Jun 10
-        { level: 'peak', from: 24, to: 30 }, // Jun 11 – Jul 29
-        { level: 'available', from: 31, to: 43 }, // Jul 30 – Oct 28
+        { level: 'available', from: 25, to: 25 }, // Jun 18 – Jun 24
+        { level: 'peak', from: 26, to: 29 }, // Jun 25 – Jul 22
+        { level: 'available', from: 30, to: 40 }, // Jul 23 – Oct 7
+        { level: 'peak', from: 41, to: 41 }, // Oct 8 – Oct 14
+        { level: 'available', from: 42, to: 43 }, // Oct 15 – Oct 28
       ],
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2022–2024 seasons; season from weekly shipped weight (raw cache: data/raw/mars/ca/raspberries.jsonc)',
+            'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2022–2024 seasons; season from weekly shipped weight (raw cache: data/raw/mars/ca/tomatoes.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -92,13 +92,30 @@ export default {
       ],
     },
     {
+      name: 'Raspberries',
+      color: '#c73e5a',
+      generated: true,
+      spans: [
+        { level: 'available', from: 20, to: 23 }, // May 14 – Jun 10
+        { level: 'peak', from: 24, to: 32 }, // Jun 11 – Aug 12
+        { level: 'available', from: 33, to: 43 }, // Aug 13 – Oct 28
+      ],
+      sources: [
+        {
+          title:
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2022–2024 seasons; season from weekly shipped weight (raw cache: data/raw/mars/ca/raspberries.jsonc)',
+          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
+        },
+      ],
+    },
+    {
       name: 'Nectarines',
       color: '#e8703a',
       generated: true,
       spans: [
-        { level: 'available', from: 21, to: 22 }, // May 21 – Jun 3
-        { level: 'peak', from: 23, to: 33 }, // Jun 4 – Aug 19
-        { level: 'available', from: 34, to: 38 }, // Aug 20 – Sep 23
+        { level: 'available', from: 21, to: 23 }, // May 21 – Jun 10
+        { level: 'peak', from: 24, to: 33 }, // Jun 11 – Aug 19
+        { level: 'available', from: 34, to: 37 }, // Aug 20 – Sep 16
       ],
       sources: [
         {
@@ -109,18 +126,18 @@ export default {
       ],
     },
     {
-      name: 'Tomatoes',
-      color: '#d1402f',
+      name: 'Watermelons',
+      color: '#e05c6e',
       generated: true,
       spans: [
-        { level: 'available', from: 26, to: 28 }, // Jun 25 – Jul 15
-        { level: 'peak', from: 29, to: 29 }, // Jul 16 – Jul 22
-        { level: 'available', from: 30, to: 43 }, // Jul 23 – Oct 28
+        { level: 'available', from: 26, to: 26 }, // Jun 25 – Jul 1
+        { level: 'peak', from: 27, to: 32 }, // Jul 2 – Aug 12
+        { level: 'available', from: 33, to: 40 }, // Aug 13 – Oct 7
       ],
       sources: [
         {
           title:
-            'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2022–2024 seasons; season from weekly shipped weight (raw cache: data/raw/mars/ca/tomatoes.jsonc)',
+            'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2022–2024 seasons; season from weekly shipped weight (raw cache: data/raw/mars/ca/watermelons.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -130,9 +147,9 @@ export default {
       color: '#8e3b5a',
       generated: true,
       spans: [
-        { level: 'available', from: 23, to: 24 }, // Jun 4 – Jun 17
-        { level: 'peak', from: 25, to: 34 }, // Jun 18 – Aug 26
-        { level: 'available', from: 35, to: 41 }, // Aug 27 – Oct 14
+        { level: 'available', from: 23, to: 28 }, // Jun 4 – Jul 15
+        { level: 'peak', from: 29, to: 31 }, // Jul 16 – Aug 5
+        { level: 'available', from: 32, to: 41 }, // Aug 6 – Oct 14
       ],
       sources: [
         {
@@ -147,11 +164,9 @@ export default {
       color: '#f2a25c',
       generated: true,
       spans: [
-        { level: 'available', from: 21, to: 22 }, // May 21 – Jun 3
-        { level: 'peak', from: 23, to: 25 }, // Jun 4 – Jun 24
-        { level: 'available', from: 26, to: 26 }, // Jun 25 – Jul 1
-        { level: 'peak', from: 27, to: 35 }, // Jul 2 – Sep 2
-        { level: 'available', from: 36, to: 44 }, // Sep 3 – Nov 4
+        { level: 'available', from: 21, to: 28 }, // May 21 – Jul 15
+        { level: 'peak', from: 29, to: 34 }, // Jul 16 – Aug 26
+        { level: 'available', from: 35, to: 41 }, // Aug 27 – Oct 14
       ],
       sources: [
         {
@@ -162,33 +177,12 @@ export default {
       ],
     },
     {
-      name: 'Watermelons',
-      color: '#e05c6e',
-      generated: true,
-      spans: [
-        { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
-        { level: 'peak', from: 27, to: 28 }, // Jul 2 – Jul 15
-        { level: 'available', from: 29, to: 31 }, // Jul 16 – Aug 5
-        { level: 'peak', from: 32, to: 35 }, // Aug 6 – Sep 2
-        { level: 'available', from: 36, to: 40 }, // Sep 3 – Oct 7
-      ],
-      sources: [
-        {
-          title:
-            'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2022–2024 seasons; season from weekly shipped weight (raw cache: data/raw/mars/ca/watermelons.jsonc)',
-          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
-        },
-      ],
-    },
-    {
       name: 'Cantaloupes',
       color: '#eda15e',
       generated: true,
       spans: [
         { level: 'available', from: 21, to: 29 }, // May 21 – Jul 22
-        { level: 'peak', from: 30, to: 30 }, // Jul 23 – Jul 29
-        { level: 'available', from: 31, to: 31 }, // Jul 30 – Aug 5
-        { level: 'peak', from: 32, to: 35 }, // Aug 6 – Sep 2
+        { level: 'peak', from: 30, to: 35 }, // Jul 23 – Sep 2
         { level: 'available', from: 36, to: 42 }, // Sep 3 – Oct 21
       ],
       sources: [
@@ -204,11 +198,9 @@ export default {
       color: '#3d2b45',
       generated: true,
       spans: [
-        { level: 'available', from: 21, to: 25 }, // May 21 – Jun 24
-        { level: 'peak', from: 26, to: 27 }, // Jun 25 – Jul 8
-        { level: 'available', from: 28, to: 30 }, // Jul 9 – Jul 29
-        { level: 'peak', from: 31, to: 37 }, // Jul 30 – Sep 16
-        { level: 'available', from: 38, to: 43 }, // Sep 17 – Oct 28
+        { level: 'available', from: 21, to: 30 }, // May 21 – Jul 29
+        { level: 'peak', from: 31, to: 36 }, // Jul 30 – Sep 9
+        { level: 'available', from: 37, to: 42 }, // Sep 10 – Oct 21
       ],
       sources: [
         {
@@ -225,7 +217,7 @@ export default {
       spans: [
         { level: 'available', from: 28, to: 30 }, // Jul 9 – Jul 29
         { level: 'peak', from: 31, to: 43 }, // Jul 30 – Oct 28
-        { level: 'available', from: 44, to: 51 }, // Oct 29 – Dec 23
+        { level: 'available', from: 44, to: 50 }, // Oct 29 – Dec 16
       ],
       sources: [
         {
@@ -241,8 +233,8 @@ export default {
       generated: true,
       spans: [
         { level: 'available', from: 38, to: 39 }, // Sep 17 – Sep 30
-        { level: 'peak', from: 40, to: 40 }, // Oct 1 – Oct 7
-        { level: 'available', from: 41, to: 49 }, // Oct 8 – Dec 9
+        { level: 'peak', from: 40, to: 41 }, // Oct 1 – Oct 14
+        { level: 'available', from: 42, to: 49 }, // Oct 15 – Dec 9
       ],
       sources: [
         {
@@ -257,10 +249,8 @@ export default {
       color: '#d95f18',
       generated: true,
       spans: [
-        { level: 'available', from: 43, to: 43 }, // Oct 22 – Oct 28
-        { level: 'peak', from: 44, to: 46 }, // Oct 29 – Nov 18
-        { level: 'available', from: 47, to: 47 }, // Nov 19 – Nov 25
-        { level: 'peak', from: 48, to: 49 }, // Nov 26 – Dec 9
+        { level: 'available', from: 43, to: 44 }, // Oct 22 – Nov 4
+        { level: 'peak', from: 45, to: 49 }, // Nov 5 – Dec 9
         { level: 'available', from: 50, to: 51 }, // Dec 10 – Dec 23
       ],
       sources: [

@@ -65,19 +65,16 @@ export function weeklyWeights(spans: Span[]): number[] {
   return weights;
 }
 
-/** Midpoint week of the widest peak span (first wins ties); Infinity if no peak. */
+/**
+ * Midpoint week of the earliest peak span; Infinity if the produce never peaks.
+ *
+ * This orders the poster, so it answers "when does this arrive at its best?" — the earliest
+ * peak, not the longest one. A crop with two harvests belongs beside the others sharing its
+ * first, rather than being placed by whichever of its peaks happens to run longer.
+ */
 export function peakMidpoint(spans: Span[]): number {
-  let best: Span | undefined;
-  let bestWidth = -1;
-  for (const s of spans) {
-    if (s.level !== Level.Peak) continue;
-    const width = spanWidth(s.from, s.to);
-    if (width > bestWidth) {
-      bestWidth = width;
-      best = s;
-    }
-  }
-  if (!best) return Number.POSITIVE_INFINITY;
-  const mid = best.from + (spanWidth(best.from, best.to) - 1) / 2;
+  const first = spans.find((s) => s.level === Level.Peak);
+  if (!first) return Number.POSITIVE_INFINITY;
+  const mid = first.from + (spanWidth(first.from, first.to) - 1) / 2;
   return mid > WEEKS_PER_YEAR ? mid - WEEKS_PER_YEAR : mid;
 }
