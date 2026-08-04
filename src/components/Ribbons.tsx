@@ -2,11 +2,10 @@ import { area, curveBasis } from 'd3-shape';
 
 import type { Produce } from '@/data/regions/schema';
 import {
+  coveredWeeks,
   Level,
   MONTHS,
   PEAK_HEIGHT,
-  peakMidpoint,
-  spanWidth,
   WEEKS_PER_YEAR,
   weeklyBand,
 } from '@/src/lib/season';
@@ -16,17 +15,27 @@ const PAD_X = 12;
 const PAD_TOP = 40; // room for the month axis
 const PAD_BOTTOM = 16;
 
-// Label sizing/placement.
-const MAX_FONT = 12; // ceiling font size
-const MIN_FONT = 8; // floor before a label is unreadable
-const AXIS_FONT = 11; // month labels
-
 // How many row-spacings tall a full peak ridge is. Above 1 the ridges overlap, which is what
 // reclaims the empty space one-row-per-crop would otherwise waste.
 const RIDGE_OVERLAP = 1.5;
+
+// Label sizing/placement.
+const LABEL_FONT = 12;
+const LABEL_GAP = 7; // clear space between a name and the ribbon it sits beside
+const CURVE_LEAD = 1; // weeks the smoothed curve starts climbing before the week it belongs to
+const MIN_CONTRAST = 4.5; // WCAG AA for body text, against CHART_BG
+const AXIS_FONT = 11; // month labels
 const CHAR_W_RATIO = 0.6; // approx glyph advance ÷ font size for the medium sans
-const LABEL_WINDOW = 3; // ± weeks around the peak midpoint to average the label's y
-const LINE_H = 1.15; // line-height multiple for wrapped labels
+
+/**
+ * How far above its own baseline a name sits, in row spacings.
+ *
+ * Ridges rise RIDGE_OVERLAP spacings from their baselines, so the row below tops out
+ * `RIDGE_OVERLAP - 1` above this row's baseline and the row above bottoms out `1` above it.
+ * Between those is a strip no neighbour can paint into, whatever any of them are doing; a name
+ * in the middle of it needs no collision test, only to clear its own ridge.
+ */
+const LABEL_RISE = (RIDGE_OVERLAP - 1 + 1) / 2;
 
 const CHART_BG = '#ffffff'; // the card the ribbons sit on, and the colour uncertainty fades toward
 const UNCERTAIN_TINT = 0.55; // how far the drift curve's fill moves toward CHART_BG
@@ -41,8 +50,9 @@ interface Slice {
 interface Label {
   x: number;
   y: number;
-  font: number;
-  lines: string[];
+  text: string;
+  color: string;
+  anchor: 'start' | 'end';
 }
 
 interface Ribbon {
@@ -58,9 +68,7 @@ interface Ribbon {
 
 /** Horizontal scale + label geometry derived from the chart box. */
 interface Geometry {
-  cellW: number;
   gridW: number;
-  peakHeight: number;
   weekToX: (week: number) => number;
 }
 
@@ -108,34 +116,31 @@ export function Ribbons({
             strokeWidth={1}
             strokeLinejoin="round"
           />
-          <RibbonLabel {...r.label} />
         </g>
+      ))}
+
+      {/* After every ribbon: rows are painted in order, so a label drawn with its own row
+          would be buried by the next one down. Placement keeps them clear regardless. */}
+      {ribbons.map((r) => (
+        <RibbonLabel key={r.name} {...r.label} />
       ))}
     </g>
   );
 }
 
-/** The produce name, word-wrapped, centered at its resolved position. */
-function RibbonLabel({ x, y, font, lines }: Label) {
+/** The produce name, set in its own colour beside the ridge it belongs to. */
+function RibbonLabel({ x, y, text, color, anchor }: Label) {
   return (
     <text
       x={x}
       y={y}
-      fontSize={font}
-      fontWeight={500}
-      fill="#ffffff"
-      textAnchor="middle"
+      fontSize={LABEL_FONT}
+      fontWeight={600}
+      fill={color}
+      textAnchor={anchor}
       dominantBaseline="central"
     >
-      {lines.map((line, li) => (
-        <tspan
-          key={line}
-          x={x}
-          dy={li === 0 ? -(((lines.length - 1) / 2) * font * LINE_H) : font * LINE_H}
-        >
-          {line}
-        </tspan>
-      ))}
+      {text}
     </text>
   );
 }
@@ -179,12 +184,7 @@ function buildStreamgraph(
   const ridgeHeight = spacing * RIDGE_OVERLAP;
   const baselineOf = (i: number) => PAD_TOP + ridgeHeight + i * spacing;
 
-  const geometry: Geometry = {
-    cellW: gridW / WEEKS_PER_YEAR,
-    gridW,
-    peakHeight: ridgeHeight,
-    weekToX,
-  };
+  const geometry: Geometry = { gridW, weekToX };
 
   const ribbons = items.map((item, i) => {
     const baseline = baselineOf(i);
@@ -202,16 +202,15 @@ function buildStreamgraph(
     };
 
     const { lower, upper } = weeklyBand(item.spans);
-    const solid = slice(lower);
     const drifts = item.spans.some((s) => s.level === Level.Uncertain);
 
     return {
       name: item.name,
       color: item.color,
-      path: areaGen(solid) ?? '',
+      path: areaGen(slice(lower)) ?? '',
       driftPath: drifts ? (areaGen(slice(upper)) ?? '') : null,
       driftColor: mix(item.color, CHART_BG, UNCERTAIN_TINT),
-      label: placeLabel(item, solid, geometry),
+      label: placeLabel(item, geometry, baseline - spacing * LABEL_RISE),
     };
   });
 
@@ -235,77 +234,62 @@ function mix(from: string, to: string, amount: number): string {
   return `#${channels.join('')}`;
 }
 
-/** Resolve a produce label's font, wrapped lines, and centered position. */
-function placeLabel(item: Produce, slices: Slice[], geo: Geometry): Label {
-  const pm = peakMidpoint(item.spans);
-  const mid = Number.isFinite(pm) ? pm : WEEKS_PER_YEAR / 2;
-  const midIdx = clamp(Math.round(mid) - 1, 0, WEEKS_PER_YEAR - 1);
+/**
+ * Put the crop's name in the margin beside its ridge, on that ridge's own baseline.
+ *
+ * Names used to sit inside the peak, which is where the ink is — but the rows deliberately
+ * overlap, so a tall neighbour rising from below buries the name of the crop above it, and the
+ * fix is not more spacing (that gives back the space the overlap exists to reclaim). Out here
+ * nothing can cover them: ridges only ever rise from their baselines, so the one row that can
+ * reach into this band is the next one down, and in the empty margin it is out of season and
+ * lying flat.
+ *
+ * At LABEL_RISE only a full-height ridge reaches the text, so the crop's own available weeks
+ * pass harmlessly beneath it and the name only has to clear the weeks it is at — or might be
+ * at — its best. The name goes to the left of those, which is empty for all but the earliest
+ * crops, and falls back to the right of them otherwise. Set in the crop's own colour, darkened
+ * only as far as legibility against the card demands, so it reads as belonging to its ribbon.
+ */
+function placeLabel(item: Produce, geo: Geometry, y: number): Label {
+  const weeks = item.spans
+    .filter((s) => s.level !== Level.Available)
+    .flatMap((s) => coveredWeeks(s.from, s.to));
+  const first = weeks.length > 0 ? Math.min(...weeks) : 1;
+  const last = weeks.length > 0 ? Math.max(...weeks) : WEEKS_PER_YEAR;
+  const width = item.name.length * LABEL_FONT * CHAR_W_RATIO;
 
-  // Fit the name into the widest peak span — the tall region it sits in.
-  const peakWeeks = Math.max(
-    0,
-    ...item.spans.filter((s) => s.level === Level.Peak).map((s) => spanWidth(s.from, s.to)),
-  );
-  const { lines, font } = fitLabel(item.name, peakWeeks * geo.cellW, geo.peakHeight);
+  const before = geo.weekToX(Math.max(1, first - CURVE_LEAD)) - LABEL_GAP;
+  const after = geo.weekToX(Math.min(WEEKS_PER_YEAR + 1, last + 1 + CURVE_LEAD)) + LABEL_GAP;
+  const [x, anchor]: [number, Label['anchor']] =
+    before - width >= PAD_X
+      ? [before, 'end']
+      : after + width <= PAD_X + geo.gridW
+        ? [after, 'start']
+        : [PAD_X, 'start']; // a season filling the year leaves no margin; keep it on the canvas
 
-  // Center on the peak midpoint (x) and the peak's visual center (y), keeping the
-  // widest line in-frame.
-  const half = (Math.max(...lines.map((line) => line.length)) * font * CHAR_W_RATIO) / 2;
-  const x = clamp(geo.weekToX(mid), PAD_X + half, PAD_X + geo.gridW - half);
-  const y = averageCenter(slices, midIdx);
-
-  return { x, y, font, lines };
+  return { x, y, text: item.name, color: readable(item.color), anchor };
 }
 
-/** Average ribbon center over the in-season weeks within LABEL_WINDOW of `centerIdx`. */
-function averageCenter(slices: Slice[], centerIdx: number): number {
-  let sum = 0;
-  let count = 0;
-  for (let d = -LABEL_WINDOW; d <= LABEL_WINDOW; d++) {
-    const s = slices[centerIdx + d];
-    if (s && s.bottom - s.top > 0) {
-      sum += (s.top + s.bottom) / 2;
-      count += 1;
-    }
+/** Darken a colour until it clears MIN_CONTRAST against the card, keeping its hue. */
+function readable(color: string): string {
+  let out = color;
+  while (contrast(out, CHART_BG) < MIN_CONTRAST && out !== '#000000') {
+    out = mix(out, '#000000', 0.08);
   }
-  if (count > 0) return sum / count;
-  const at = slices[centerIdx];
-  return at ? (at.top + at.bottom) / 2 : PAD_TOP;
+  return out;
 }
 
-/** Largest font (with word-wrapped lines) that fits the name inside the peak box. */
-function fitLabel(
-  name: string,
-  peakPx: number,
-  peakHeight: number,
-): { lines: string[]; font: number } {
-  const words = name.split(/\s+/);
-  for (let font = MAX_FONT; font > MIN_FONT; font -= 0.5) {
-    const maxChars = peakPx / (font * CHAR_W_RATIO);
-    const lines = wrapWords(words, maxChars);
-    const widest = Math.max(...lines.map((line) => line.length));
-    if (widest <= maxChars && lines.length * font * LINE_H <= peakHeight) return { lines, font };
-  }
-  return { lines: wrapWords(words, peakPx / (MIN_FONT * CHAR_W_RATIO)), font: MIN_FONT };
+/** WCAG contrast ratio between two #rrggbb colours. */
+function contrast(a: string, b: string): number {
+  const [la, lb] = [luminance(a), luminance(b)] as [number, number];
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
 
-/** Greedily pack words into lines no wider than `maxChars` (a long word overflows alone). */
-function wrapWords(words: string[], maxChars: number): string[] {
-  const lines: string[] = [];
-  let current = '';
-  for (const word of words) {
-    const trial = current ? `${current} ${word}` : word;
-    if (!current || trial.length <= maxChars) {
-      current = trial;
-    } else {
-      lines.push(current);
-      current = word;
-    }
-  }
-  if (current) lines.push(current);
-  return lines;
-}
-
-function clamp(v: number, lo: number, hi: number): number {
-  return Math.max(lo, Math.min(hi, v));
+/** WCAG relative luminance of a #rrggbb colour. */
+function luminance(hex: string): number {
+  const [r = 0, g = 0, b = 0] = [1, 3, 5].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
