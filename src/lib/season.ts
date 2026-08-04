@@ -20,8 +20,18 @@ export const MONTHS = [
   'Dec',
 ] as const;
 
+/**
+ * How strongly a crop is in season, in ascending order.
+ *
+ * `Uncertain` is the honest middle: weeks a meaningful minority of seasons called best, but not
+ * most of them. A harvest does not arrive on the same date twice, so a crop that drifts year to
+ * year gets a narrow certain core with uncertain shoulders, while one that lands reliably gets
+ * none at all — the width of that band *is* the uncertainty, with no separate confidence number
+ * to encode or to read.
+ */
 export const Level = {
   Available: 'available',
+  Uncertain: 'uncertain',
   Peak: 'peak',
 } as const;
 
@@ -33,11 +43,22 @@ interface Span {
   to: number;
 }
 
-/** Relative volume weight per availability level; 0 = out of season. */
-export const LEVEL_WEIGHT: Record<Level, number> = {
-  [Level.Peak]: 100,
-  [Level.Available]: 25,
+/**
+ * Ribbon height per level, as a range; 0 = out of season.
+ *
+ * The definite levels are a single height. `Uncertain` is drawn as the whole gap between them,
+ * because that is literally what it means: in some years the crop has already reached its best
+ * by that week, in others it has not. Rendering it as one intermediate height would instead
+ * claim a middling harvest that no year actually had.
+ */
+export const LEVEL_BAND: Record<Level, { lower: number; upper: number }> = {
+  [Level.Peak]: { lower: 100, upper: 100 },
+  [Level.Uncertain]: { lower: 25, upper: 100 },
+  [Level.Available]: { lower: 25, upper: 25 },
 };
+
+/** The height a full peak reaches; ribbon heights are drawn as a fraction of this. */
+export const PEAK_HEIGHT = LEVEL_BAND[Level.Peak].upper;
 
 /** Length of a span in weeks, wrap-aware (to < from wraps the year end). */
 export function spanWidth(from: number, to: number): number {
@@ -56,13 +77,24 @@ export function coveredWeeks(from: number, to: number): number[] {
   return weeks;
 }
 
-/** Per-week weight (0 / 25 / 100), index 0 = week 1. */
-export function weeklyWeights(spans: Span[]): number[] {
-  const weights = new Array<number>(WEEKS_PER_YEAR).fill(0);
+/**
+ * The two curves bounding a produce's season, per week (index 0 = week 1).
+ *
+ * `upper` is the season as an early or late year would run it — rising sooner and falling later;
+ * `lower` is the part that holds whichever way the year goes. They coincide except across
+ * uncertain weeks, so a crop that arrives on schedule every year yields one curve, twice.
+ */
+export function weeklyBand(spans: Span[]): { lower: number[]; upper: number[] } {
+  const lower = new Array<number>(WEEKS_PER_YEAR).fill(0);
+  const upper = new Array<number>(WEEKS_PER_YEAR).fill(0);
   for (const s of spans) {
-    for (const w of coveredWeeks(s.from, s.to)) weights[w - 1] = LEVEL_WEIGHT[s.level];
+    const band = LEVEL_BAND[s.level];
+    for (const w of coveredWeeks(s.from, s.to)) {
+      lower[w - 1] = band.lower;
+      upper[w - 1] = band.upper;
+    }
   }
-  return weights;
+  return { lower, upper };
 }
 
 /**

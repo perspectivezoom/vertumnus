@@ -14,6 +14,7 @@ const SEASON_FLOOR = 0.25; // below this share of a season's best week the crop 
 const PEAK_FRACTION = 0.75; // at or above this share of a season's best week it is peak
 const MIN_SEASON_SHARE = 0.1; // a season carrying less than this of the median gets no vote
 const MAX_GAP = 3; // an interior gap this short is reporting noise, not a break in the season
+const UNCERTAIN_SHARE = 1 / 3; // seasons that must call a week best for it to read as maybe-peak
 
 /** Our poster week for a MM/DD/YYYY date: ceil(dayOfYear / 7), clamped to 1..52. */
 export function weekOf(date: string): number {
@@ -44,10 +45,10 @@ export function weeklyVolumeBySeason(samples: Sample[]): number[][] {
  * the same arithmetic collapsed tomatoes to a single week. So classify within a season, where
  * "its best week" is meaningful, and only then combine.
  *
- * That makes the two bands mean something a shopper can act on: **peak** is "most years this is
- * at its best", **available** is "some years yes, some no" — which is the honest rendering of a
- * harvest that does not arrive on the same date twice. A genuine second harvest survives,
- * because it wins its own vote every year; a one-off gap does not.
+ * Counting the votes rather than just checking for a majority gives three bands a shopper can
+ * act on: **peak** is "most years this is at its best", **uncertain** is "a fair few years, but
+ * not most", **available** is "it ships". A genuine second harvest survives, because it wins
+ * its own vote every year; a one-off gap does not.
  */
 export function spansFromSeasons(seasons: number[][]): Span[] {
   // A season with barely any data (a stray row or two) would otherwise vote as loudly as a
@@ -57,6 +58,8 @@ export function spansFromSeasons(seasons: number[][]): Span[] {
   const voting = seasons.filter((_, i) => (totals[i] ?? 0) >= MIN_SEASON_SHARE * median);
   if (voting.length === 0) return [];
 
+  // Each season's own verdict, per week: 0 out of season, 1 in season, 2 at its best. Note this
+  // is a season's ballot, not the poster's three levels — the tally below produces those.
   const majority = Math.ceil(voting.length / 2);
   const levels = voting.map((weeks) => {
     const high = Math.max(0, ...weeks.slice(1, WEEKS + 1));
@@ -68,26 +71,43 @@ export function spansFromSeasons(seasons: number[][]): Span[] {
   const peakVotes = (week: number) => levels.filter((s) => (s[week] ?? 0) === 2).length;
   const seasonVotes = (week: number) => levels.filter((s) => (s[week] ?? 0) > 0).length;
 
+  const uncertain = Math.max(1, Math.ceil(UNCERTAIN_SHARE * voting.length));
   const weekly = Array.from({ length: WEEKS + 1 }, (_, week) =>
-    week === 0 ? 0 : peakVotes(week) >= majority ? 2 : seasonVotes(week) >= majority ? 1 : 0,
+    week === 0
+      ? 0
+      : peakVotes(week) >= majority
+        ? 3
+        : peakVotes(week) >= uncertain
+          ? 2
+          : seasonVotes(week) >= majority
+            ? 1
+            : 0,
   );
 
   // When a crop's peaks never line up — blueberries peaked in weeks 20–22, 24 and 23 across
   // three seasons, overlapping in none — no week wins a majority and the crop comes out with no
   // peak at all. Average the seasons' peaks instead: a best guess sited where they cluster,
   // rather than a band stretched to cover every week any one season ever called its best.
-  if (!weekly.includes(2)) {
+  if (!weekly.includes(3)) {
     const guess = averagePeak(voting, levels);
-    if (guess) for (let week = guess.from; week <= guess.to; week++) weekly[week] = 2;
+    if (guess) for (let week = guess.from; week <= guess.to; week++) weekly[week] = 3;
   }
 
   bridge(weekly, 1); // a short hole inside a season is noise
-  bridge(weekly, 2); // ...as is a short dip out of peak
+  bridge(weekly, 3); // ...as is a short dip out of peak
+  // The uncertain band is deliberately *not* bridged: it marks where the seasons disagree, so
+  // smoothing it erases the signal. Bridging it welded tomatoes' two harvests into one mass.
 
   const spans: Span[] = [];
   for (let week = 1; week <= WEEKS; week++) {
     const level: Span['level'] | null =
-      weekly[week] === 2 ? 'peak' : weekly[week] === 1 ? 'available' : null;
+      weekly[week] === 3
+        ? 'peak'
+        : weekly[week] === 2
+          ? 'uncertain'
+          : weekly[week] === 1
+            ? 'available'
+            : null;
     if (!level) continue;
     const last = spans.at(-1);
     if (last && last.level === level && last.to === week - 1) last.to = week;

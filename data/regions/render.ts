@@ -1,7 +1,7 @@
-import { peakMidpoint } from '@/src/lib/season';
+import { type Level, peakMidpoint } from '@/src/lib/season';
 
 export interface Span {
-  level: 'peak' | 'available';
+  level: Level;
   from: number;
   to: number;
 }

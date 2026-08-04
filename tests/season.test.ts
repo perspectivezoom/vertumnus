@@ -44,6 +44,21 @@ describe('spansFromSeasons', () => {
     expect(spans).toContainEqual({ level: 'peak', from: 20, to: 24 });
   });
 
+  test('a crop that peaks on the same weeks every year gets no uncertain band', () => {
+    const spans = spansFromSeasons([peakingAt(20, 24), peakingAt(20, 24), peakingAt(20, 24)]);
+    expect(spans.some((s) => s.level === 'uncertain')).toBe(false);
+  });
+
+  test('a peak that drifts year to year keeps a certain core and uncertain shoulders', () => {
+    // Two of three seasons peak in weeks 22-26; the weeks either side are claimed by one season
+    // each. That spread is the uncertainty — no separate confidence number needed to see it.
+    expect(spansFromSeasons([peakingAt(20, 24), peakingAt(22, 26), peakingAt(24, 28)])).toEqual([
+      { level: 'uncertain', from: 20, to: 21 },
+      { level: 'peak', from: 22, to: 26 },
+      { level: 'uncertain', from: 27, to: 28 },
+    ]);
+  });
+
   test('narrows the peak to where shifted seasons agree', () => {
     // The real failure: peaches peaked in weeks 21-31, 24-34 and 29-35 — one clean peak each,
     // but eight weeks apart. Pooling first smeared them into a band full of holes.

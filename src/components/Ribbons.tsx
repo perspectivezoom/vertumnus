@@ -2,13 +2,13 @@ import { area, curveBasis } from 'd3-shape';
 
 import type { Produce } from '@/data/regions/schema';
 import {
-  LEVEL_WEIGHT,
   Level,
   MONTHS,
+  PEAK_HEIGHT,
   peakMidpoint,
   spanWidth,
   WEEKS_PER_YEAR,
-  weeklyWeights,
+  weeklyBand,
 } from '@/src/lib/season';
 
 // All lengths are poster units (see Poster.tsx), which scale with the printed poster.
@@ -28,6 +28,9 @@ const CHAR_W_RATIO = 0.6; // approx glyph advance ÷ font size for the medium sa
 const LABEL_WINDOW = 3; // ± weeks around the peak midpoint to average the label's y
 const LINE_H = 1.15; // line-height multiple for wrapped labels
 
+const CHART_BG = '#ffffff'; // the card the ribbons sit on, and the colour uncertainty fades toward
+const UNCERTAIN_TINT = 0.55; // how far the drift curve's fill moves toward CHART_BG
+
 /** One week's vertical slice of a ribbon: its top and bottom edges at position x. */
 interface Slice {
   x: number;
@@ -45,7 +48,11 @@ interface Label {
 interface Ribbon {
   name: string;
   color: string;
+  /** The season as it holds whichever way the year goes — drawn solid. */
   path: string;
+  /** The season an early or late year would run; null when the two curves coincide. */
+  driftPath: string | null;
+  driftColor: string;
   label: Label;
 }
 
@@ -85,7 +92,22 @@ export function Ribbons({
 
       {ribbons.map((r) => (
         <g key={r.name}>
-          <path d={r.path} fill={r.color} stroke="#ffffff" strokeWidth={1} strokeLinejoin="round" />
+          {r.driftPath && (
+            <path
+              d={r.driftPath}
+              fill={r.driftColor}
+              stroke={CHART_BG}
+              strokeWidth={1}
+              strokeLinejoin="round"
+            />
+          )}
+          <path
+            d={r.path}
+            fill={r.color}
+            stroke={CHART_BG}
+            strokeWidth={1}
+            strokeLinejoin="round"
+          />
           <RibbonLabel {...r.label} />
         </g>
       ))}
@@ -132,6 +154,15 @@ function RibbonLabel({ x, y, font, lines }: Label) {
  * rows paint over earlier ones, which is what makes the overlaps read as depth. Out-of-season
  * weeks sit flat on the baseline, so an empty January reads as "nothing yet" rather than as a
  * hole left by the mass drifting elsewhere.
+ *
+ * Each crop is drawn as two curves rather than one: the pale one is the season as an early or
+ * late year would run it, rising sooner and falling later, and the solid one is the part that
+ * holds whichever way the year goes. Where a crop keeps to the same weeks every year the two
+ * coincide and only the solid one is drawn, so the pale margin appears exactly where the
+ * harvest is known to wander — and its width is how far. Both fills are opaque: the ridges
+ * overlap by design, and a transparent margin would let the neighbour behind it show through,
+ * making the least certain parts of the poster the muddiest and printing as a screen rather
+ * than as a lighter ink.
  */
 function buildStreamgraph(
   items: Produce[],
@@ -141,7 +172,6 @@ function buildStreamgraph(
   const gridW = width - PAD_X * 2;
   const weekToX = (week: number) => PAD_X + ((week - 1) / WEEKS_PER_YEAR) * gridW;
 
-  const weights = items.map((item) => weeklyWeights(item.spans));
   const n = items.length;
   const content = height - PAD_TOP - PAD_BOTTOM;
   // Reserve room for the topmost ridge to rise above its baseline without leaving the box.
@@ -157,25 +187,31 @@ function buildStreamgraph(
   };
 
   const ribbons = items.map((item, i) => {
-    const w = weights[i] ?? [];
     const baseline = baselineOf(i);
-    const slices: Slice[] = Array.from({ length: WEEKS_PER_YEAR }, (_, wk) => ({
-      x: weekToX(wk + 1),
-      top: baseline - ((w[wk] ?? 0) / LEVEL_WEIGHT[Level.Peak]) * ridgeHeight,
-      bottom: baseline,
-    }));
+    const slice = (weekly: number[]): Slice[] => {
+      const slices = Array.from({ length: WEEKS_PER_YEAR }, (_, wk) => ({
+        x: weekToX(wk + 1),
+        top: baseline - ((weekly[wk] ?? 0) / PEAK_HEIGHT) * ridgeHeight,
+        bottom: baseline,
+      }));
+      // Extend a flat step to the year-end edge so the fill spans the full width.
+      const last = slices.at(-1);
+      return last
+        ? [...slices, { x: weekToX(WEEKS_PER_YEAR + 1), top: last.top, bottom: last.bottom }]
+        : slices;
+    };
 
-    // Extend a flat step to the year-end edge so the fill spans the full width.
-    const last = slices.at(-1);
-    const fullSlices = last
-      ? [...slices, { x: weekToX(WEEKS_PER_YEAR + 1), top: last.top, bottom: last.bottom }]
-      : slices;
+    const { lower, upper } = weeklyBand(item.spans);
+    const solid = slice(lower);
+    const drifts = item.spans.some((s) => s.level === Level.Uncertain);
 
     return {
       name: item.name,
       color: item.color,
-      path: areaGen(fullSlices) ?? '',
-      label: placeLabel(item, slices, geometry),
+      path: areaGen(solid) ?? '',
+      driftPath: drifts ? (areaGen(slice(upper)) ?? '') : null,
+      driftColor: mix(item.color, CHART_BG, UNCERTAIN_TINT),
+      label: placeLabel(item, solid, geometry),
     };
   });
 
@@ -185,6 +221,18 @@ function buildStreamgraph(
   }));
 
   return { ribbons, months };
+}
+
+/** Blend two #rrggbb colours, `amount` of the way from `from` to `to`. */
+function mix(from: string, to: string, amount: number): string {
+  const channels = [1, 3, 5].map((i) => {
+    const a = parseInt(from.slice(i, i + 2), 16);
+    const b = parseInt(to.slice(i, i + 2), 16);
+    return Math.round(a + (b - a) * amount)
+      .toString(16)
+      .padStart(2, '0');
+  });
+  return `#${channels.join('')}`;
 }
 
 /** Resolve a produce label's font, wrapped lines, and centered position. */
