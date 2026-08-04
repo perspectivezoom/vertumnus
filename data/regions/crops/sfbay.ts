@@ -1,7 +1,7 @@
 import type { MarsCrop } from '@/data/regions/sources/mars';
 import type { Crop, RegionSources } from '@/data/regions/crops';
 
-const YEARS = [2022, 2023, 2024];
+const YEARS = [2019, 2020, 2021, 2022, 2023, 2024];
 
 // Fresno carries berries, stone fruit and grapes; El Centro carries vegetables and melons.
 // The two reports share no commodities, so each crop has exactly one source.
