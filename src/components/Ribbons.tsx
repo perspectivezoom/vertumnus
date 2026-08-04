@@ -12,8 +12,11 @@ import {
 
 // All lengths are poster units (see Poster.tsx), which scale with the printed poster.
 const PAD_X = 12;
-const PAD_TOP = 40; // room for the month axis
-const PAD_BOTTOM = 16;
+// The plot is inset by a month axis at each end. The last row's baseline lands exactly on the
+// bottom inset, so both reserves are the same and the two axes sit the same distance out.
+const PAD_TOP = 40;
+const PAD_BOTTOM = 40;
+const AXIS_INSET = 16; // from the plot edge out to the centre of the month labels
 
 // How many row-spacings tall a full peak ridge is. Above 1 the ridges overlap, which is what
 // reclaims the empty space one-row-per-crop would otherwise waste.
@@ -21,11 +24,19 @@ const RIDGE_OVERLAP = 1.5;
 
 // Label sizing/placement.
 const LABEL_FONT = 12;
-const LABEL_GAP = 7; // clear space between a name and the ribbon it sits beside
+const LABEL_WEIGHT = 600;
+const LABEL_GAP = 7; // clear space between a name's chip and the ribbon it sits beside
+// A name sits on a card of its own, so a month rule passing behind it does not run through the
+// text. The outline is the crop's colour, which ties the name to its ribbon a second time.
+const CHIP_PAD_X = 7;
+const CHIP_PAD_Y = 4;
+const CHIP_RADIUS = 5;
 const CURVE_LEAD = 1; // weeks the smoothed curve starts climbing before the week it belongs to
 const MIN_CONTRAST = 4.5; // WCAG AA for body text, against CHART_BG
 const AXIS_FONT = 11; // month labels
-const CHAR_W_RATIO = 0.6; // approx glyph advance ÷ font size for the medium sans
+// Advance ÷ font size, used only where there is no DOM to measure against. Deliberately generous:
+// a chip narrower than its name clips it, whereas a wide one just carries roomier padding.
+const FALLBACK_CHAR_W = 0.65;
 
 /**
  * How far above its own baseline a name sits, in row spacings.
@@ -38,6 +49,8 @@ const CHAR_W_RATIO = 0.6; // approx glyph advance ÷ font size for the medium sa
 const LABEL_RISE = (RIDGE_OVERLAP - 1 + 1) / 2;
 
 const CHART_BG = '#ffffff'; // the card the ribbons sit on, and the colour uncertainty fades toward
+const AXIS_COLOR = '#888888';
+const GRID_COLOR = '#d9d9d9'; // recessive against the ribbons, but a hairline that survives print
 const UNCERTAIN_TINT = 0.55; // how far the drift curve's fill moves toward CHART_BG
 
 /** One week's vertical slice of a ribbon: its top and bottom edges at position x. */
@@ -48,11 +61,12 @@ interface Slice {
 }
 
 interface Label {
+  /** Centre of the chip, so an imprecise width estimate shows as even padding either side. */
   x: number;
   y: number;
+  width: number;
   text: string;
   color: string;
-  anchor: 'start' | 'end';
 }
 
 interface Ribbon {
@@ -64,6 +78,11 @@ interface Ribbon {
   driftPath: string | null;
   driftColor: string;
   label: Label;
+}
+
+interface Month {
+  label: string;
+  x: number;
 }
 
 /** Horizontal scale + label geometry derived from the chart box. */
@@ -88,35 +107,14 @@ export function Ribbons({
   width: number;
   height: number;
 }) {
-  const { ribbons, months } = buildStreamgraph(items, width, height);
+  const { ribbons, months, grid, plot } = buildStreamgraph(items, width, height);
 
   return (
     <g>
-      {months.map((m) => (
-        <text key={m.label} x={m.x} y={24} textAnchor="middle" fontSize={AXIS_FONT} fill="#888888">
-          {m.label}
-        </text>
-      ))}
+      <MonthGrid at={grid} top={plot.top} bottom={plot.bottom} />
 
       {ribbons.map((r) => (
-        <g key={r.name}>
-          {r.driftPath && (
-            <path
-              d={r.driftPath}
-              fill={r.driftColor}
-              stroke={CHART_BG}
-              strokeWidth={1}
-              strokeLinejoin="round"
-            />
-          )}
-          <path
-            d={r.path}
-            fill={r.color}
-            stroke={CHART_BG}
-            strokeWidth={1}
-            strokeLinejoin="round"
-          />
-        </g>
+        <Ribbon key={r.name} {...r} />
       ))}
 
       {/* After every ribbon: rows are painted in order, so a label drawn with its own row
@@ -124,24 +122,79 @@ export function Ribbons({
       {ribbons.map((r) => (
         <RibbonLabel key={r.name} {...r.label} />
       ))}
+
+      <MonthAxis months={months} y={plot.top - AXIS_INSET} />
+      {/* Repeated below the last row so a crop late in the year can be read against the
+          calendar without tracking back up the full height of the poster. */}
+      <MonthAxis months={months} y={plot.bottom + AXIS_INSET} />
     </g>
   );
 }
 
-/** The produce name, set in its own colour beside the ridge it belongs to. */
-function RibbonLabel({ x, y, text, color, anchor }: Label) {
+/** One crop: the season an early or late year would run, with the season that always holds over it. */
+function Ribbon({ color, path, driftPath, driftColor }: Ribbon) {
   return (
-    <text
-      x={x}
-      y={y}
-      fontSize={LABEL_FONT}
-      fontWeight={600}
-      fill={color}
-      textAnchor={anchor}
-      dominantBaseline="central"
-    >
-      {text}
-    </text>
+    <g stroke={CHART_BG} strokeWidth={1} strokeLinejoin="round">
+      {driftPath && <path d={driftPath} fill={driftColor} />}
+      <path d={path} fill={color} />
+    </g>
+  );
+}
+
+/** The calendar, labelled at the centre of each month. */
+function MonthAxis({ months, y }: { months: Month[]; y: number }) {
+  return (
+    <g fill={AXIS_COLOR} fontSize={AXIS_FONT} textAnchor="middle" dominantBaseline="central">
+      {months.map((m) => (
+        <text key={m.label} x={m.x} y={y}>
+          {m.label}
+        </text>
+      ))}
+    </g>
+  );
+}
+
+/**
+ * The month divisions, drawn behind the ribbons — over them, a rule crossing a season would
+ * read as a seam in that crop, and would compete with the pale/solid split carrying the drift.
+ */
+function MonthGrid({ at, top, bottom }: { at: number[]; top: number; bottom: number }) {
+  return (
+    <g stroke={GRID_COLOR} strokeWidth={1}>
+      {at.map((x) => (
+        <line key={x} x1={x} x2={x} y1={top} y2={bottom} />
+      ))}
+    </g>
+  );
+}
+
+/** The produce name on an outlined card, set in its own colour beside the ridge it belongs to. */
+function RibbonLabel({ x, y, width, text, color }: Label) {
+  const height = LABEL_FONT + CHIP_PAD_Y * 2;
+  return (
+    <g>
+      <rect
+        x={x - width / 2}
+        y={y - height / 2}
+        width={width}
+        height={height}
+        rx={CHIP_RADIUS}
+        fill={CHART_BG}
+        stroke={color}
+        strokeWidth={1}
+      />
+      <text
+        x={x}
+        y={y}
+        fontSize={LABEL_FONT}
+        fontWeight={LABEL_WEIGHT}
+        fill={color}
+        textAnchor="middle"
+        dominantBaseline="central"
+      >
+        {text}
+      </text>
+    </g>
   );
 }
 
@@ -173,7 +226,12 @@ function buildStreamgraph(
   items: Produce[],
   width: number,
   height: number,
-): { ribbons: Ribbon[]; months: { label: string; x: number }[] } {
+): {
+  ribbons: Ribbon[];
+  months: Month[];
+  grid: number[];
+  plot: { top: number; bottom: number };
+} {
   const gridW = width - PAD_X * 2;
   const weekToX = (week: number) => PAD_X + ((week - 1) / WEEKS_PER_YEAR) * gridW;
 
@@ -214,12 +272,37 @@ function buildStreamgraph(
     };
   });
 
-  const months = MONTHS.map((label, m) => ({
-    label,
-    x: weekToX(1 + ((m + 0.5) * WEEKS_PER_YEAR) / 12),
-  }));
+  const monthStart = (m: number) => weekToX(1 + (m * WEEKS_PER_YEAR) / 12);
+  const months = MONTHS.map((label, m) => ({ label, x: monthStart(m + 0.5) }));
+  // Interior divisions only: the outer two would land on the plot edges and box the chart in.
+  const grid = MONTHS.slice(1).map((_, m) => monthStart(m + 1));
 
-  return { ribbons, months };
+  return {
+    ribbons,
+    months,
+    grid,
+    plot: { top: PAD_TOP, bottom: height - PAD_BOTTOM },
+  };
+}
+
+let measurer: CanvasRenderingContext2D | null | undefined;
+let fontFamily: string | undefined;
+
+/**
+ * How wide `text` will actually be set, in poster units.
+ *
+ * The page asks for `ui-sans-serif, system-ui`, so this is not one font: the same name is a
+ * different width on macOS, Windows and Android. No ratio baked into the source can be right for
+ * all of them, and one calibrated to the current weight would go stale the moment the weight or
+ * the font stack moved. Asking the browser costs one cached canvas and is correct by definition.
+ */
+function textWidth(text: string, size: number, weight: number): number {
+  if (typeof document === 'undefined') return text.length * size * FALLBACK_CHAR_W;
+  measurer ??= document.createElement('canvas').getContext('2d');
+  fontFamily ??= getComputedStyle(document.body).fontFamily;
+  if (!measurer) return text.length * size * FALLBACK_CHAR_W;
+  measurer.font = `${weight} ${size}px ${fontFamily}`;
+  return measurer.measureText(text).width;
 }
 
 /** Blend two #rrggbb colours, `amount` of the way from `from` to `to`. */
@@ -256,18 +339,19 @@ function placeLabel(item: Produce, geo: Geometry, y: number): Label {
     .flatMap((s) => coveredWeeks(s.from, s.to));
   const first = weeks.length > 0 ? Math.min(...weeks) : 1;
   const last = weeks.length > 0 ? Math.max(...weeks) : WEEKS_PER_YEAR;
-  const width = item.name.length * LABEL_FONT * CHAR_W_RATIO;
+  const width = textWidth(item.name, LABEL_FONT, LABEL_WEIGHT) + CHIP_PAD_X * 2;
 
+  // Where the chip's near edge lands on each side, so LABEL_GAP stays true clear space.
   const before = geo.weekToX(Math.max(1, first - CURVE_LEAD)) - LABEL_GAP;
   const after = geo.weekToX(Math.min(WEEKS_PER_YEAR + 1, last + 1 + CURVE_LEAD)) + LABEL_GAP;
-  const [x, anchor]: [number, Label['anchor']] =
+  const x =
     before - width >= PAD_X
-      ? [before, 'end']
+      ? before - width / 2
       : after + width <= PAD_X + geo.gridW
-        ? [after, 'start']
-        : [PAD_X, 'start']; // a season filling the year leaves no margin; keep it on the canvas
+        ? after + width / 2
+        : PAD_X + width / 2; // a season filling the year leaves no margin; keep it on the canvas
 
-  return { x, y, text: item.name, color: readable(item.color), anchor };
+  return { x, y, width, text: item.name, color: readable(item.color) };
 }
 
 /** Darken a colour until it clears MIN_CONTRAST against the card, keeping its hue. */
