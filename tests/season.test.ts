@@ -54,14 +54,32 @@ describe('spansFromSeasons', () => {
     expect(peaks[0]?.to).toBeLessThanOrEqual(34);
   });
 
-  test('widens the peak when no two seasons agree, rather than reporting none', () => {
+  test('averages the peaks when no two seasons agree, rather than reporting none', () => {
     // Blueberries peaked in weeks 20-22, 24 and 23 — overlapping in no single week. A strict
-    // majority would leave the crop with no peak at all, and sort it to the end of the poster.
+    // majority would leave the crop with no peak at all, and sort it to the end of the poster;
+    // spanning 20-24 to cover them all would claim a five-week peak no season actually had.
     const spans = spansFromSeasons([peakingAt(20, 22), peakingAt(24, 24), peakingAt(23, 23)]);
     const peaks = spans.filter((s) => s.level === 'peak');
     expect(peaks).toHaveLength(1);
-    expect(peaks[0]?.from).toBeLessThanOrEqual(20);
-    expect(peaks[0]?.to).toBeGreaterThanOrEqual(24);
+    expect(peaks[0]).toMatchObject({ from: 22, to: 23 }); // mean of 20/24/23 and of 22/24/23
+  });
+
+  test('averages around each season best week, not across a two-harvest gap', () => {
+    // Every season harvests twice and no two agree on when. Measuring each season from its
+    // first peak week to its last would reach over the quiet middle, averaging out to one
+    // 23-week "peak" spanning both harvests and the lull between them.
+    const twoHarvests = (first: number) => {
+      const weeks = new Array<number>(53).fill(0);
+      for (let w = first; w <= first + 2; w++) weeks[w] = 100;
+      for (let w = first + 20; w <= first + 22; w++) weeks[w] = 60; // a lesser second harvest
+      return weeks;
+    };
+
+    const peaks = spansFromSeasons([twoHarvests(20), twoHarvests(24), twoHarvests(28)]).filter(
+      (s) => s.level === 'peak',
+    );
+    expect(peaks).toHaveLength(1);
+    expect(peaks[0]).toMatchObject({ from: 24, to: 26 }); // mean of the 20-22/24-26/28-30 runs
   });
 
   test('bridges a short mid-season gap where the seasons briefly disagree', () => {

@@ -68,19 +68,19 @@ export function spansFromSeasons(seasons: number[][]): Span[] {
   const peakVotes = (week: number) => levels.filter((s) => (s[week] ?? 0) === 2).length;
   const seasonVotes = (week: number) => levels.filter((s) => (s[week] ?? 0) > 0).length;
 
-  // When a crop's peaks never line up — blueberries peaked in weeks 20–22, 24 and 23 across
-  // three seasons, overlapping in none — no week can win a majority, and the crop would come
-  // out with no peak at all. Fall back to any week that peaked in some season: the band widens
-  // to cover the disagreement, which is the truthful answer to "when is it best?".
-  const peakThreshold = Array.from({ length: WEEKS }, (_, i) => peakVotes(i + 1)).some(
-    (votes) => votes >= majority,
-  )
-    ? majority
-    : 1;
-
   const weekly = Array.from({ length: WEEKS + 1 }, (_, week) =>
-    week === 0 ? 0 : peakVotes(week) >= peakThreshold ? 2 : seasonVotes(week) >= majority ? 1 : 0,
+    week === 0 ? 0 : peakVotes(week) >= majority ? 2 : seasonVotes(week) >= majority ? 1 : 0,
   );
+
+  // When a crop's peaks never line up — blueberries peaked in weeks 20–22, 24 and 23 across
+  // three seasons, overlapping in none — no week wins a majority and the crop comes out with no
+  // peak at all. Average the seasons' peaks instead: a best guess sited where they cluster,
+  // rather than a band stretched to cover every week any one season ever called its best.
+  if (!weekly.includes(2)) {
+    const guess = averagePeak(voting, levels);
+    if (guess) for (let week = guess.from; week <= guess.to; week++) weekly[week] = 2;
+  }
+
   bridge(weekly, 1); // a short hole inside a season is noise
   bridge(weekly, 2); // ...as is a short dip out of peak
 
@@ -94,6 +94,44 @@ export function spansFromSeasons(seasons: number[][]): Span[] {
     else spans.push({ level, from: week, to: week });
   }
   return spans;
+}
+
+/**
+ * The mean of each season's peak, as a single span — the best guess when they never overlap.
+ *
+ * Averaging the starts and the ends separately keeps the guess about as long as a typical
+ * season's peak, so a crop whose harvest merely drifts year to year still reads as a peak of
+ * plausible length, placed where those years centre.
+ */
+function averagePeak(voting: number[][], levels: number[][]): { from: number; to: number } | null {
+  const runs = voting
+    .map((weeks, i) => bestPeakRun(weeks, levels[i] ?? []))
+    .filter((run) => run !== null);
+  if (runs.length === 0) return null;
+  const mean = (ns: number[]) => ns.reduce((sum, n) => sum + n, 0) / ns.length;
+  return {
+    from: Math.round(mean(runs.map((run) => run.from))),
+    to: Math.round(mean(runs.map((run) => run.to))),
+  };
+}
+
+/**
+ * The run of peak weeks around a season's single busiest week; null if it never shipped.
+ *
+ * Anchoring on the busiest week rather than taking first-peak to last-peak matters for a crop
+ * with two harvests, where the latter would return one run spanning the quiet middle.
+ */
+function bestPeakRun(weeks: number[], levels: number[]): { from: number; to: number } | null {
+  let best = 0;
+  for (let week = 1; week <= WEEKS; week++) {
+    if ((weeks[week] ?? 0) > (weeks[best] ?? 0)) best = week;
+  }
+  if (best === 0) return null;
+  let from = best;
+  let to = best;
+  while (from > 1 && levels[from - 1] === 2) from -= 1;
+  while (to < WEEKS && levels[to + 1] === 2) to += 1;
+  return { from, to };
 }
 
 /**
