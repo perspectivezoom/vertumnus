@@ -1,4 +1,5 @@
 import { area, curveBasis } from 'd3-shape';
+import { useEffect, useState } from 'react';
 
 import type { Produce } from '@/data/regions/schema';
 import {
@@ -23,8 +24,12 @@ const AXIS_INSET = 16; // from the plot edge out to the centre of the month labe
 const RIDGE_OVERLAP = 1.5;
 
 // Label sizing/placement.
-const LABEL_FONT = 12;
-const LABEL_WEIGHT = 600;
+// Sized against the display face's own metrics rather than a nominal size, since x-height and
+// width vary enough between candidates to change how big the same setting actually looks.
+const LABEL_FONT = 14;
+// A real weight, not a synthesised one: small text on a busy poster needs the extra stroke, and
+// faux-bolding would also desync the measured chip widths from what actually renders.
+const LABEL_WEIGHT = 700;
 const LABEL_GAP = 7; // clear space between a name's chip and the ribbon it sits beside
 // A name sits on a card of its own, so a month rule passing behind it does not run through the
 // text. The outline is the crop's colour, which ties the name to its ribbon a second time.
@@ -37,6 +42,7 @@ const AXIS_FONT = 11; // month labels
 // Advance ÷ font size, used only where there is no DOM to measure against. Deliberately generous:
 // a chip narrower than its name clips it, whereas a wide one just carries roomier padding.
 const FALLBACK_CHAR_W = 0.65;
+const FONT_STACK_VAR = '--font-poster'; // declared in global.css @theme; the poster SVG wears it
 
 /**
  * How far above its own baseline a name sits, in row spacings.
@@ -107,6 +113,7 @@ export function Ribbons({
   width: number;
   height: number;
 }) {
+  useFontsReady();
   const { ribbons, months, grid, plot } = buildStreamgraph(items, width, height);
 
   return (
@@ -141,7 +148,13 @@ function Ribbon({ color, path, driftPath, driftColor }: Ribbon) {
   );
 }
 
-/** The calendar, labelled at the centre of each month. */
+/**
+ * The calendar, labelled at the centre of each month.
+ *
+ * Inherits the poster's face rather than overriding it. The override this replaced existed only
+ * because the poster was briefly set in a script, where Jan/Jun/Jul blurred at this size. A
+ * workhorse face costs nothing in legibility here, and matching reads as one decision, not two.
+ */
 function MonthAxis({ months, y }: { months: Month[]; y: number }) {
   return (
     <g fill={AXIS_COLOR} fontSize={AXIS_FONT} textAnchor="middle" dominantBaseline="central">
@@ -291,18 +304,39 @@ let fontFamily: string | undefined;
 /**
  * How wide `text` will actually be set, in poster units.
  *
- * The page asks for `ui-sans-serif, system-ui`, so this is not one font: the same name is a
- * different width on macOS, Windows and Android. No ratio baked into the source can be right for
- * all of them, and one calibrated to the current weight would go stale the moment the weight or
- * the font stack moved. Asking the browser costs one cached canvas and is correct by definition.
+ * The stack is read from the theme variable the poster itself wears, so the measurement follows
+ * whatever CSS declares rather than a family name duplicated into the source. Measuring beats a
+ * baked ratio here because that ratio would be specific to one font at one weight.
  */
 function textWidth(text: string, size: number, weight: number): number {
   if (typeof document === 'undefined') return text.length * size * FALLBACK_CHAR_W;
   measurer ??= document.createElement('canvas').getContext('2d');
-  fontFamily ??= getComputedStyle(document.body).fontFamily;
+  fontFamily ??=
+    getComputedStyle(document.documentElement).getPropertyValue(FONT_STACK_VAR).trim() ||
+    getComputedStyle(document.body).fontFamily;
   if (!measurer) return text.length * size * FALLBACK_CHAR_W;
   measurer.font = `${weight} ${size}px ${fontFamily}`;
   return measurer.measureText(text).width;
+}
+
+/**
+ * Re-render once webfonts have loaded.
+ *
+ * Chip widths come from measuring text, and during the `font-display: swap` window the browser
+ * measures the fallback — so a first render mid-swap would size every chip to the wrong font and
+ * then keep those numbers. Re-measuring once fixes it. This is exactly the cost a precomputed
+ * metrics table would avoid, and it only exists because the poster now uses a webfont.
+ */
+function useFontsReady(): void {
+  const [, setReady] = useState(false);
+  useEffect(() => {
+    if (typeof document === 'undefined' || !document.fonts) return;
+    let live = true;
+    void document.fonts.ready.then(() => live && setReady(true));
+    return () => {
+      live = false;
+    };
+  }, []);
 }
 
 /** Blend two #rrggbb colours, `amount` of the way from `from` to `to`. */

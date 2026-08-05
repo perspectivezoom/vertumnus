@@ -1,5 +1,23 @@
 @import 'tailwindcss';
 
+/* Noto Serif, by the Noto Project Authors — SIL Open Font License 1.1, see
+   ../fonts/OFL-notoserif.txt. Latin subset only: the poster is English-only, and the full family
+   carries Greek and Cyrillic it would never set. The licence travels with the file we serve.
+   Declared alone — an unreferenced @font-face is still bundled, so a spare costs real bytes. */
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: normal;
+  font-weight: 400 800; /* variable weight axis, so one file covers the whole range */
+  font-display: swap;
+  src: url('../fonts/noto-serif-latin.woff2') format('woff2');
+}
+
+/* Named for its role, not its style — the poster has been set in a script, a stencil and a
+   serif inside a day, and nothing outside this file should need editing when it changes again. */
+@theme {
+  --font-poster: 'Noto Serif', ui-serif, serif;
+}
+
 @layer base {
   /* Tailwind v4's Preflight dropped the implicit button cursor; restore it app-wide.
      https://tailwindcss.com/docs/upgrade-guide#buttons-use-the-default-cursor */

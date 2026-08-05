@@ -36,7 +36,7 @@ export function Poster({ region }: { region: Region }) {
   const maxWidth = `min(64rem, calc((100vh - 3rem) * ${w} / ${h}))`;
   return (
     <svg
-      className="mx-auto block h-auto w-full font-sans shadow-lg"
+      className="font-poster mx-auto block h-auto w-full shadow-lg"
       style={{ maxWidth }}
       viewBox={`0 0 ${POSTER_W} ${posterH}`}
       role="img"
@@ -50,7 +50,7 @@ export function Poster({ region }: { region: Region }) {
         textAnchor="middle"
         dominantBaseline="central"
         fontSize={TITLE_SIZE}
-        fontWeight={600}
+        fontWeight={700}
         fill={TITLE_COLOR}
       >
         {region.name}
