@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { Produce } from '@/data/regions/schema';
 import {
   coveredWeeks,
+  LEVEL_BAND,
   Level,
   MONTHS,
   PEAK_HEIGHT,
@@ -19,9 +20,23 @@ const PAD_TOP = 40;
 const PAD_BOTTOM = 40;
 const AXIS_INSET = 16; // from the plot edge out to the centre of the month labels
 
-// How many row-spacings tall a full peak ridge is. Above 1 the ridges overlap, which is what
-// reclaims the empty space one-row-per-crop would otherwise waste.
-const RIDGE_OVERLAP = 1.5;
+/** The share of a full ridge that a merely-available week stands at. */
+const AVAILABLE_SHARE = LEVEL_BAND[Level.Available].lower / PEAK_HEIGHT;
+
+/**
+ * How many row-spacings tall a full peak ridge is. Above 1 the ridges overlap, which is what
+ * reclaims the empty space one-row-per-crop would otherwise waste.
+ *
+ * How far above 1 has a ceiling, though, and it is worth deriving rather than guessing. A row's
+ * available weeks stand AVAILABLE_SHARE of a ridge above its baseline, while the row below rises
+ * to `RIDGE_OVERLAP - 1` spacings above that same baseline. Equate them and the limit is
+ * `1 / (1 - AVAILABLE_SHARE)`: at or beyond it, a neighbour's peak swallows a crop's shoulder
+ * season whole. We sit just under, so the band still reads as a band rather than a hairline.
+ *
+ * Raising the available level would lift the ceiling too, and buy more overlap — but that height
+ * is a claim about how strongly the crop is in season, not a dial for winning back space.
+ */
+const RIDGE_OVERLAP = (1 / (1 - AVAILABLE_SHARE)) * 0.9;
 
 // Label sizing/placement.
 // Sized against the display face's own metrics rather than a nominal size, since x-height and
