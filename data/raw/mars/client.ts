@@ -9,6 +9,15 @@ export interface MarsSource {
   report: MarsReportId; // which movement report carries this commodity (see MARS_REPORTS)
   commodity: string; // MARS commodity name
   years: number[]; // seasons to span in a single request
+  /**
+   * Growing districts whose shipments count, matched by prefix against a row's `district`.
+   *
+   * A movement report covers a whole state, and the districts within one are staggered by
+   * hundreds of miles, so pooling them answers "when is the state shipping this" rather than
+   * "when is it good at my market". Which districts are near enough is regional knowledge, so
+   * a region's crop list supplies this — see the factories in data/regions/crops/.
+   */
+  districts: string[];
 }
 
 /** Path of the raw cache for a source (origin comes from its report). */

@@ -173,9 +173,28 @@ function bridge(weekly: number[], level: number): void {
   }
 }
 
-/** Derive peak/available week spans from a commodity's cached raw data. */
+/**
+ * Derive peak/available week spans from a commodity's cached raw data, counting only shipments
+ * from the source's own districts.
+ *
+ * Strawberries make the stakes concrete: statewide the peak lands seven weeks before
+ * Salinas-Watsonville's own crop, because the southern districts out-ship it and harvest first.
+ *
+ * The cache is keyed by origin rather than by region, so it is shared by every region drawing
+ * on the same state. Narrowing here rather than at fetch time keeps it that way, and makes a
+ * region's reach a rebuild instead of a refetch.
+ */
 export async function deriveSeason(src: MarsSource): Promise<Span[]> {
-  const rows = rehydrate(parseCache(await Bun.file(cachePath(src)).text()));
+  const all = rehydrate(parseCache(await Bun.file(cachePath(src)).text()));
+  const rows = all.filter((row) =>
+    src.districts.some((d) => String(row.district ?? '').startsWith(d)),
+  );
+  if (rows.length === 0) {
+    throw new Error(
+      `${src.commodity}: nothing ships from ${src.districts.join(', ')} — it grows too far ` +
+        `away to reach this region's markets. Drop it from the crop list.`,
+    );
+  }
   const report: MarsReport = MARS_REPORTS[src.report];
   const { volumeField } = report;
   if (!volumeField) throw new Error(`${src.report} reports no shipped volume`);
@@ -214,8 +233,8 @@ export async function buildMarsProduce(crop: MarsCrop): Promise<GeneratedProduce
       {
         title:
           `USDA AMS Market News — ${report.name} (${crop.report}); ` +
-          `${report.originPrefix}-grown, ${years} seasons; season from weekly shipped weight ` +
-          `(raw cache: ${cachePath(crop)})`,
+          `${report.originPrefix}-grown, ${years} seasons, ${crop.districts.join(' / ')} ` +
+          `districts only; season from weekly shipped weight (raw cache: ${cachePath(crop)})`,
         url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
       },
     ],

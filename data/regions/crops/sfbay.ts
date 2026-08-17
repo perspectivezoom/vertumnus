@@ -3,8 +3,21 @@ import type { Crop, RegionSources } from '@/data/regions/crops';
 
 const YEARS = [2019, 2020, 2021, 2022, 2023, 2024];
 
-// Fresno carries berries, stone fruit and grapes; El Centro carries vegetables and melons.
-// The two reports share no commodities, so each crop has exactly one source.
+/**
+ * The growing districts a Bay Area market vendor can realistically drive in from. Watsonville
+ * and the northern San Joaquin are an hour or two out; Bakersfield, Santa Maria and Oxnard are
+ * half a day, and Imperial and Coachella most of one — that produce reaches supermarkets, not a
+ * stall. MARS labels every one of them `California`, so without this the poster would answer
+ * "when is the state shipping this" instead of "when is it good at my market". The two differ
+ * by weeks: statewide strawberries peak seven weeks before Watsonville's own crop, because the
+ * southern districts out-ship it and harvest first.
+ */
+const DISTRICTS = ['SALINAS-WATSONVILLE', 'SAN JOAQUIN VALLEY', 'CENTRAL DISTRICT'];
+
+// Which AMS office publishes the commodity, not where it grows: Fresno carries berries, stone
+// fruit and grapes; El Centro carries vegetables and melons. They share no commodities, so each
+// crop has exactly one source — but they do share growing districts (both report San Joaquin
+// Valley and Central District), which is why DISTRICTS is filtered separately and identically.
 const fresno = (name: string, color: string, commodity = name): MarsCrop => ({
   type: 'mars',
   name,
@@ -12,6 +25,7 @@ const fresno = (name: string, color: string, commodity = name): MarsCrop => ({
   report: 'FR_FV170',
   commodity,
   years: YEARS,
+  districts: DISTRICTS,
 });
 const elCentro = (name: string, color: string, commodity = name): MarsCrop => ({
   type: 'mars',
@@ -20,6 +34,7 @@ const elCentro = (name: string, color: string, commodity = name): MarsCrop => ({
   report: 'EL_FV170',
   commodity,
   years: YEARS,
+  districts: DISTRICTS,
 });
 
 /**
