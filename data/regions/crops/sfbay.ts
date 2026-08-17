@@ -57,9 +57,12 @@ const elCentro = (name: string, color: string, commodity = name): MarsCrop => ({
  * them (smoothing, recurrence filters, contrast-relative thresholds) distorted the crops that
  * already worked. Deferred to a yet-to-be-chosen source:
  *
- * - **Citrus** (oranges, tangerines, satsuma, grapefruit) — too sparse here to derive at all;
- *   El Centro carries only ~13 satsuma rows a year, and its peak landed in August. This is the
- *   painful gap, since citrus is what a Bay Area winter poster is made of.
+ * - **Citrus** (oranges, tangerines, lemons, grapefruit, clementines) — ample volume, but no
+ *   weekly resolution: oranges alone out-ship everything else here. Every citrus commodity is
+ *   reported on the same ~4 dates a year and only those — they share 100% of their reporting
+ *   dates with each other, against 1% between oranges and peaches, which reports 23-26 weeks a
+ *   year. Aggregates, not shipments, so no season can be derived however much is fetched. Needs
+ *   a different source, and it is the painful gap: citrus is what a Bay Area winter is made of.
  * - **Artichokes** — shipped every week of the year, so no season emerges.
  * - **Sweet corn, sugar snap peas, bell peppers** — fragmented into slivers.
  *
