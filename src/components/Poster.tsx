@@ -10,35 +10,21 @@ import { useQueryParams } from '@/src/lib/params';
 const POSTER_W = 1000;
 
 const FRAME = 32; // sage border, same thickness on all four sides
+const HEADER_GAP = 24; // between the header and the chart card
 
-// On a wall the poster announces what it is before where it applies, so the region sits above
-// as a tracked overline rather than heading the masthead. No year: these are typical seasons
-// across six of them, not a forecast. The colloquial phrasing only holds up in the display
-// face — the workhorse sets these same words as prose.
-const HEADLINE = 'What’s in season at the farmers’ market'; // typographic apostrophes
-const HEADLINE_SIZE = 33;
-const HEADLINE_H = 38; // the headline's line box
-const REGION_SIZE = 12;
-const REGION_TRACKING = 3; // a short line takes tracking well, and reads as a stamp
-const REGION_GAP = 12; // between the overline and the headline's box
-const MASTHEAD_H = REGION_SIZE + REGION_GAP + HEADLINE_H;
-
-const TITLE_GAP = 24; // space between the masthead and the chart card
-const CARD_PAD = 12;
-const CARD_RADIUS = 12;
-
-// Fine print. One URL only: on paper every address is dead weight unless someone would type it,
-// so that page carries the method, the repo and the per-crop citations rather than the poster.
-const SOURCES_URL = 'vertumnus.fyi/about/sources';
-const FOOTER_SIZE = 8;
-const FOOTER_LEAD = 11; // between credit lines
-const FOOTER_GAP = 14; // between the card and the first credit
-
+// Shared because the frame, the header and the fine print have to read as one voice. Anything
+// used in only one place lives with the piece that uses it.
 const FRAME_COLOR = '#cbd7be';
-const HEADLINE_COLOR = '#14532d';
-const REGION_COLOR = '#2f6b47'; // lighter than the headline, still print-safe on the frame
+const INK = '#14532d';
+const INK_MUTED = '#2f6b47';
 
-/** The printable poster: a faded sage frame at the paper's aspect ratio, titled, wrapping the chart. */
+/**
+ * The printable poster: a header, the chart on its card, and fine print, inside a sage frame
+ * at the paper's aspect ratio.
+ *
+ * Only placement lives here. What the header says and how the fine print is set belong to
+ * those pieces; this decides how much room each gets and hands the rest to the chart.
+ */
 export function Poster({ region }: { region: Region }) {
   const { w, h } = useQueryParams();
   const posterH = (POSTER_W * h) / w;
@@ -46,12 +32,10 @@ export function Poster({ region }: { region: Region }) {
   // One line per distinct source, so a region drawing on several says so and the usual case of
   // one shared derivation says it once.
   const credits = [...new Set(region.items.flatMap((item) => item.sources.map((s) => s.credit)))];
-  const footerH = FOOTER_GAP + credits.length * FOOTER_LEAD;
 
-  const cardY = FRAME + MASTHEAD_H + TITLE_GAP;
+  const cardY = FRAME + HEADER_H + HEADER_GAP;
   const cardW = POSTER_W - FRAME * 2;
-  const cardH = posterH - cardY - footerH - FRAME;
-  const footerY = cardY + cardH + FOOTER_GAP + FOOTER_SIZE / 2;
+  const cardH = posterH - cardY - footerHeight(credits.length) - FRAME;
 
   // Fit both axes by capping *width* from the paper ratio: max-height would clamp the height
   // while leaving width maximal, letterboxing the poster and casting the shadow round the box.
@@ -66,50 +50,122 @@ export function Poster({ region }: { region: Region }) {
     >
       <rect width={POSTER_W} height={posterH} fill={FRAME_COLOR} />
 
+      <Header region={region.name} y={FRAME} />
+      <Card items={region.items} x={FRAME} y={cardY} width={cardW} height={cardH} />
+      <Footer credits={credits} y={cardY + cardH} />
+    </svg>
+  );
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────────────────
+
+// On a wall the poster announces what it is before where it applies, so the region sits above
+// as a tracked overline rather than heading the block. No year: these are typical seasons
+// across six of them, not a forecast. The colloquial phrasing only holds up in the display
+// face — the workhorse sets these same words as prose.
+const HEADLINE = 'What’s in season at the farmers’ market'; // typographic apostrophes
+const HEADLINE_SIZE = 33;
+const HEADLINE_H = 38; // the headline's line box
+const REGION_SIZE = 12;
+const REGION_TRACKING = 3; // a short line takes tracking well, and reads as a stamp
+const REGION_GAP = 12; // between the overline and the headline's box
+
+/** What the header occupies, so the layout can place the card below it. */
+const HEADER_H = REGION_SIZE + REGION_GAP + HEADLINE_H;
+
+function Header({ region, y }: { region: string; y: number }) {
+  return (
+    <g textAnchor="middle" dominantBaseline="central">
       <text
         x={POSTER_W / 2}
-        y={FRAME + REGION_SIZE / 2}
-        textAnchor="middle"
-        dominantBaseline="central"
+        y={y + REGION_SIZE / 2}
         fontSize={REGION_SIZE}
         fontWeight={600}
         letterSpacing={REGION_TRACKING}
-        fill={REGION_COLOR}
+        fill={INK_MUTED}
       >
-        {region.name.toUpperCase()}
+        {region.toUpperCase()}
       </text>
       <text
         x={POSTER_W / 2}
-        y={FRAME + REGION_SIZE + REGION_GAP + HEADLINE_H / 2}
-        textAnchor="middle"
-        dominantBaseline="central"
+        y={y + REGION_SIZE + REGION_GAP + HEADLINE_H / 2}
         className="font-headline"
         fontSize={HEADLINE_SIZE}
         fontWeight={700}
-        fill={HEADLINE_COLOR}
+        fill={INK}
       >
         {HEADLINE}
       </text>
+    </g>
+  );
+}
 
-      <rect x={FRAME} y={cardY} width={cardW} height={cardH} rx={CARD_RADIUS} fill="#ffffff" />
-      <g transform={`translate(${FRAME + CARD_PAD} ${cardY + CARD_PAD})`}>
-        <Ribbons items={region.items} width={cardW - CARD_PAD * 2} height={cardH - CARD_PAD * 2} />
+// ── Card ────────────────────────────────────────────────────────────────────────────────────
+
+const CARD_PAD = 12; // inset between the card's edge and the chart it holds
+const CARD_RADIUS = 12;
+// Ribbons paints its separator hairlines and its drift tint against this same colour, where it
+// is CHART_BG. The two have to agree, or overlapping ridges stop reading as separate shapes.
+const CARD_COLOR = '#ffffff';
+
+/** The white card the chart sits on, inset from its own edges. */
+function Card({
+  items,
+  x,
+  y,
+  width,
+  height,
+}: {
+  items: Region['items'];
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}) {
+  return (
+    <>
+      <rect x={x} y={y} width={width} height={height} rx={CARD_RADIUS} fill={CARD_COLOR} />
+      <g transform={`translate(${x + CARD_PAD} ${y + CARD_PAD})`}>
+        <Ribbons items={items} width={width - CARD_PAD * 2} height={height - CARD_PAD * 2} />
       </g>
+    </>
+  );
+}
 
-      {/* Provenance on the left, where to go on the right. The headline claims a farmers'
-          market; the data is wholesale shipment volume from named districts, and this is where
-          that gets said plainly. Shares the overline's colour so the frame reads as one voice —
-          4.2:1 on the sage, just under AA, which the print size is doing the rest of. */}
-      <g fontSize={FOOTER_SIZE} fill={REGION_COLOR}>
-        {credits.map((credit, i) => (
-          <text key={credit} x={FRAME} y={footerY + i * FOOTER_LEAD}>
-            {credit}
-          </text>
-        ))}
-        <text x={POSTER_W - FRAME} y={footerY} textAnchor="end">
-          {SOURCES_URL}
+// ── Footer ──────────────────────────────────────────────────────────────────────────────────
+
+// One URL only: on paper every address is dead weight unless someone would type it, so that
+// page carries the method, the repo and the per-crop citations rather than the poster.
+const SOURCES_URL = 'vertumnus.fyi/about/sources';
+const FOOTER_SIZE = 8;
+const FOOTER_LEAD = 11; // between credit lines
+const FOOTER_GAP = 14; // between the card and the first credit
+
+/** What `lines` of fine print occupy, so the card can yield exactly that much. */
+function footerHeight(lines: number): number {
+  return FOOTER_GAP + lines * FOOTER_LEAD;
+}
+
+/**
+ * Provenance on the left, where to go on the right.
+ *
+ * The headline claims a farmers' market; the data is wholesale shipment volume from named
+ * growing districts, and this is where that gets said plainly. Shares the overline's colour so
+ * the frame reads as one voice — 4.2:1 on the sage, just under AA, which the print size is
+ * doing the rest of.
+ */
+function Footer({ credits, y }: { credits: string[]; y: number }) {
+  const first = y + FOOTER_GAP + FOOTER_SIZE / 2;
+  return (
+    <g fontSize={FOOTER_SIZE} fill={INK_MUTED}>
+      {credits.map((credit, i) => (
+        <text key={credit} x={FRAME} y={first + i * FOOTER_LEAD}>
+          {credit}
         </text>
-      </g>
-    </svg>
+      ))}
+      <text x={POSTER_W - FRAME} y={first} textAnchor="end">
+        {SOURCES_URL}
+      </text>
+    </g>
   );
 }
