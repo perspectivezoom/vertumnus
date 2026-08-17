@@ -1,9 +1,10 @@
 @import 'tailwindcss';
 
-/* Noto Serif, by the Noto Project Authors — SIL Open Font License 1.1, see
-   ../fonts/OFL-notoserif.txt. Latin subset only: the poster is English-only, and the full family
-   carries Greek and Cyrillic it would never set. The licence travels with the file we serve.
-   Declared alone — an unreferenced @font-face is still bundled, so a spare costs real bytes. */
+/* Both faces are Latin-subset only — the poster is English-only, and the full families carry
+   Greek and Cyrillic they would never set. Each licence travels with the file we serve. Declare
+   nothing spare: an unreferenced @font-face is still bundled, so it costs real bytes. */
+
+/* Noto Serif, by the Noto Project Authors — SIL OFL 1.1, see ../fonts/OFL-notoserif.txt. */
 @font-face {
   font-family: 'Noto Serif';
   font-style: normal;
@@ -12,10 +13,22 @@
   src: url('../fonts/noto-serif-latin.woff2') format('woff2');
 }
 
-/* Named for its role, not its style — the poster has been set in a script, a stencil and a
-   serif inside a day, and nothing outside this file should need editing when it changes again. */
+/* Playfair Display, by the Playfair Project Authors — SIL OFL 1.1, see ../fonts/OFL-playfair.txt.
+   One static weight rather than the variable family: it sets a single line at a single size. */
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/playfair-display-latin.woff2') format('woff2');
+}
+
+/* Named for their roles, not their styles, so swapping a face touches only this file:
+   `headline` is the display face and sets one line; `poster` is the workhorse behind everything
+   else. Both fall back to the other, then to the platform serif. */
 @theme {
   --font-poster: 'Noto Serif', ui-serif, serif;
+  --font-headline: 'Playfair Display', 'Noto Serif', ui-serif, serif;
 }
 
 @layer base {
