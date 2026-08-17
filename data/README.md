@@ -19,13 +19,15 @@ Two commands, one per stage:
 
 Each owns its artifacts, the schema describing them, and the code that writes them.
 
-**`raw/`** — source data exactly as published, committed so an auth-walled API stays
-reproducible and nobody has to refetch to look.
+**`raw/`** — source data as published, committed so an auth-walled API stays reproducible and
+nobody has to refetch to look. Not the whole publication, though: a source narrows what it asks
+for, so these hold only what some region wants (see **Reach** below).
 
 - `format.ts` — the columnar `.jsonc` codec, i.e. what these files _are_
-- `fetch.ts` — the CLI that writes them
+- `source.ts` — the one thing `fetch.ts` asks of a source: what it would fetch, and why
+- `fetch.ts` — the CLI that sequences that work
 - `mars/{client,reports}.ts` — USDA Market News: how to ask, and which report carries what
-- `mars/ca/*.jsonc` — **the artifacts**
+- `mars/ca/*.jsonc` — **the artifacts**, each recording the districts it was narrowed to
 
 **`regions/`** — the modules the app imports, and everything that produces them.
 
@@ -40,6 +42,13 @@ reproducible and nobody has to refetch to look.
 
 `crops/` says _what_ each poster shows; `sources/` says _where the data comes from_. A crop
 list names a region, but the region module itself is the build output in `__generated__/`.
+
+## Reach
+
+Each region's crop list names the growing districts near enough to supply it. `fetch` asks for
+the union across every region — caches are keyed by where produce grows, not by who reads them,
+so regions share them — and `regions` narrows that to the one being built. **Widening a
+region's reach therefore needs a refetch**; narrowing it is only a rebuild.
 
 ## Rules
 

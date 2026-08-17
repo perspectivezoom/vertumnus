@@ -78,23 +78,6 @@ export default {
       ],
     },
     {
-      name: 'Strawberries',
-      color: '#d1495b',
-      generated: false,
-      spans: [
-        { level: 'available', from: 18, to: 22 }, // Apr 30 – Jun 3
-        { level: 'peak', from: 23, to: 33 }, // Jun 4 – Aug 19
-        { level: 'available', from: 34, to: 40 }, // Aug 20 – Oct 7
-      ],
-      sources: [
-        {
-          title:
-            'The California Strawberry Industry: Current Trends and Future Prospects (2024), Fig. 5 — Salinas-Watsonville district weekly production volume, three-year average',
-          url: 'https://www.tandfonline.com/doi/full/10.1080/15538362.2024.2342900',
-        },
-      ],
-    },
-    {
       name: 'Tomatoes',
       color: '#d1402f',
       generated: true,
@@ -113,6 +96,24 @@ export default {
         {
           title:
             'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/tomatoes.jsonc)',
+          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
+        },
+      ],
+    },
+    {
+      name: 'Strawberries',
+      color: '#d1495b',
+      generated: true,
+      spans: [
+        { level: 'available', from: 17, to: 20 }, // Apr 23 – May 20
+        { level: 'uncertain', from: 21, to: 21 }, // May 21 – May 27
+        { level: 'peak', from: 22, to: 36 }, // May 28 – Sep 9
+        { level: 'available', from: 37, to: 42 }, // Sep 10 – Oct 21
+      ],
+      sources: [
+        {
+          title:
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/strawberries.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],

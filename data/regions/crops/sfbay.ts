@@ -67,25 +67,8 @@ const elCentro = (name: string, color: string, commodity = name): MarsCrop => ({
  * region file that appears nowhere below has been retired and the writer removes it.
  */
 const crops: Crop[] = [
-  {
-    type: 'manual',
-    name: 'Strawberries',
-    color: '#d1495b',
-    why: 'derived from Salinas-Watsonville production volume, a better source than the movement reports: California grows strawberries in districts with staggered seasons (Oxnard, Santa Maria, Salinas-Watsonville), which those reports union into a ~9-month band',
-    spans: [
-      { level: 'available', from: 18, to: 22 }, // ramp-up, >=25% of peak volume
-      { level: 'peak', from: 23, to: 33 }, // 4-Jun to 13-Aug on Fig. 5
-      { level: 'available', from: 34, to: 40 }, // tail-off, >=25% of peak volume
-    ],
-    sources: [
-      {
-        title:
-          'The California Strawberry Industry: Current Trends and Future Prospects (2024), Fig. 5 — Salinas-Watsonville district weekly production volume, three-year average',
-        url: 'https://www.tandfonline.com/doi/full/10.1080/15538362.2024.2342900',
-      },
-    ],
-  },
   // spring
+  fresno('Strawberries', '#d1495b'),
   fresno('Cherries', '#7a1f2b'),
   fresno('Blueberries', '#4a6fa5'),
   fresno('Apricots', '#f0a83c'),
