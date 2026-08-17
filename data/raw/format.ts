@@ -4,11 +4,14 @@ export interface Columnar {
   rows: unknown[][];
 }
 
+/**
+ * What every cache records, whatever wrote it. A source adds its own provenance on top — what
+ * it asked for, and how it narrowed the answer — and this module neither knows nor cares what
+ * those fields are; it only round-trips them.
+ */
 export interface CacheMeta {
   url: string;
   fetchedAt: string;
-  years: number[];
-  commodity: string;
 }
 
 /**
@@ -44,17 +47,21 @@ export function rehydrate(c: Columnar): Record<string, unknown>[] {
  * is left to oxfmt (see `pull`, which formats the file it writes), so this only has to emit
  * something valid and readable — no hand-rolled line breaking.
  */
-export function serializeCache(header: string[], meta: CacheMeta, c: Columnar): string {
+export function serializeCache<M extends CacheMeta>(
+  header: string[],
+  meta: M,
+  c: Columnar
+): string {
   const comments = header.map((line) => (line ? `// ${line}` : '//')).join('\n');
   const body = { ...meta, constants: c.constants, fields: c.fields, rows: c.rows };
   return `${comments}\n${JSON.stringify(body, null, 2)}\n`;
 }
 
 /** Parse a `.jsonc` cache written by serializeCache (drops the leading `//` comment lines). */
-export function parseCache(text: string): CacheMeta & Columnar {
+export function parseCache<M extends CacheMeta = CacheMeta>(text: string): M & Columnar {
   const json = text
     .split('\n')
     .filter((line) => !line.trimStart().startsWith('//'))
     .join('\n');
-  return JSON.parse(json) as CacheMeta & Columnar;
+  return JSON.parse(json) as M & Columnar;
 }

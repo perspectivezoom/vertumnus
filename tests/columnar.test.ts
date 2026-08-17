@@ -8,11 +8,17 @@ import {
   toColumnar,
 } from '@/data/raw/format';
 
-const meta: CacheMeta = {
+/** Stands in for whatever provenance a source adds; the codec should not care which fields. */
+interface FakeSourceMeta extends CacheMeta {
+  askedFor: string;
+  narrowedTo: string[];
+}
+
+const meta: FakeSourceMeta = {
   url: 'https://example.test/reports/1',
   fetchedAt: '2026-01-01T00:00:00Z',
-  years: [2024, 2025],
-  commodity: 'Cherries',
+  askedFor: 'Cherries',
+  narrowedTo: ['SOMEWHERE', 'ELSEWHERE'],
 };
 
 /** Shaped like real MARS rows: constant columns, nulls, and prose with quotes/newlines. */
@@ -73,12 +79,13 @@ describe('toColumnar / rehydrate', () => {
 describe('serializeCache / parseCache', () => {
   test('round-trips through the on-disk .jsonc form', () => {
     const text = serializeCache(['a header', '', 'line two'], meta, toColumnar(rows));
-    const parsed = parseCache(text);
+    const parsed = parseCache<FakeSourceMeta>(text);
     expect(rehydrate(parsed)).toEqual(rows);
     expect(parsed.url).toBe(meta.url);
     expect(parsed.fetchedAt).toBe(meta.fetchedAt);
-    expect(parsed.years).toEqual(meta.years);
-    expect(parsed.commodity).toBe(meta.commodity);
+    // Whatever the source recorded comes back untouched, without the codec naming those fields.
+    expect(parsed.askedFor).toBe(meta.askedFor);
+    expect(parsed.narrowedTo).toEqual(meta.narrowedTo);
   });
 
   test('emits a comment header and stays valid JSON once comments are stripped', () => {

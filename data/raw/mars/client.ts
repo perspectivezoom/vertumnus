@@ -1,7 +1,8 @@
 import { mkdir } from 'node:fs/promises';
 
-import { type CacheMeta, serializeCache, toColumnar } from '@/data/raw/format';
+import { type CacheMeta, parseCache, serializeCache, toColumnar } from '@/data/raw/format';
 import { MARS_REPORTS, type MarsReport, type MarsReportId } from '@/data/raw/mars/reports';
+import type { FetchJob } from '@/data/raw/source';
 
 const API_BASE = 'https://marsapi.ams.usda.gov/services/v1.2';
 
@@ -10,7 +11,7 @@ export interface MarsSource {
   commodity: string; // MARS commodity name
   years: number[]; // seasons to span in a single request
   /**
-   * Growing districts whose shipments count, matched by prefix against a row's `district`.
+   * Growing districts whose shipments count, as exact MARS district names.
    *
    * A movement report covers a whole state, and the districts within one are staggered by
    * hundreds of miles, so pooling them answers "when is the state shipping this" rather than
@@ -18,6 +19,57 @@ export interface MarsSource {
    * a region's crop list supplies this — see the factories in data/regions/crops/.
    */
   districts: string[];
+}
+
+/** What a MARS cache records beyond the universal fields: what was asked for, and how narrowed. */
+export interface MarsCacheMeta extends CacheMeta {
+  years: number[];
+  commodity: string;
+  /** Growing districts this cache was narrowed to — everything else was never fetched. */
+  districts: string[];
+}
+
+/**
+ * Combine two sources that share a cache into one that satisfies both.
+ *
+ * Caches are keyed by where produce grows rather than by who reads them, so two regions can
+ * want the same file with different reach. Fetching the union means neither is short a district.
+ */
+function merge(a: MarsSource, b: MarsSource): MarsSource {
+  return { ...a, districts: [...new Set([...a.districts, ...b.districts])].sort() };
+}
+
+/** True if the committed cache was already narrowed widely enough to answer `src`. */
+async function covers(src: MarsSource): Promise<boolean> {
+  const file = Bun.file(cachePath(src));
+  if (!(await file.exists())) return false;
+  const cached = new Set(parseCache<MarsCacheMeta>(await file.text()).districts ?? []);
+  return src.districts.every((d) => cached.has(d));
+}
+
+/**
+ * The fetches needed to answer `wanted`, one per cache.
+ *
+ * `all` is every MARS source anywhere; `wanted` is the subset this run cares about. Both are
+ * required because a cache is keyed by where produce grows rather than by who reads it, so a
+ * run scoped to one region must still fetch the union every region wants from a shared file —
+ * otherwise it writes something complete for itself and short for its neighbour. Callers say
+ * which caches to touch, never what to ask for them.
+ */
+export async function marsJobs(all: MarsSource[], wanted: MarsSource[]): Promise<FetchJob[]> {
+  const byPath = new Map<string, MarsSource>();
+  for (const src of all) {
+    const path = cachePath(src);
+    const seen = byPath.get(path);
+    byPath.set(path, seen ? merge(seen, src) : src);
+  }
+  const touched = new Set(wanted.map(cachePath));
+  const jobs: FetchJob[] = [];
+  for (const [path, src] of byPath) {
+    if (!touched.has(path)) continue;
+    jobs.push({ label: src.commodity, needed: !(await covers(src)), pull: () => pull(src) });
+  }
+  return jobs;
 }
 
 /** Path of the raw cache for a source (origin comes from its report). */
@@ -37,7 +89,7 @@ function header(report: string): string[] {
     'Raw USDA AMS Market News data — cached so this auth-walled source is reproducible',
     'and never needs refetching. Regenerate with `bun run fetch`.',
     '',
-    `Source: ${report}, narrowed to California-grown rows. Each row is one shipment, and`,
+    `Source: ${report}, narrowed to the districts in \`districts\` below. Each row is a shipment,`,
     '`1 lb units` is its weight — summing that per week gives the season, and where it peaks.',
     '',
     'Columnar layout to dedupe JSON keys: `constants` = columns identical across all rows;',
@@ -51,7 +103,7 @@ function header(report: string): string[] {
 }
 
 /** Fetch a commodity's movement data and (re)write its columnar raw cache; returns the path. */
-export async function pull(src: MarsSource): Promise<string> {
+async function pull(src: MarsSource): Promise<string> {
   const key = Bun.env.MARS_API_KEY;
   if (!key) {
     throw new Error(
@@ -65,7 +117,10 @@ export async function pull(src: MarsSource): Promise<string> {
   // 'Peppers, Bell Type' would filter for "Peppers" OR " Bell Type" and match nothing.
   // Quotes make it a literal; the `;` and `=` separators stay unencoded.
   const commodity = encodeURIComponent(`"${src.commodity}"`);
-  const query = `commodity=${commodity};report_begin_date=${from}:${to}`;
+  // Districts are OR'd by a bare comma, so quote and encode each one but leave the commas raw.
+  // Filtering here rather than after the fact halves what we fetch and commit.
+  const district = src.districts.map((d) => encodeURIComponent(`"${d}"`)).join(',');
+  const query = `commodity=${commodity};district=${district};report_begin_date=${from}:${to}`;
   const url = `${API_BASE}/reports/${report.slug}/Report%20Details?q=${query}`;
 
   const res = await fetch(url, { headers: { authorization: `Basic ${btoa(`${key}:`)}` } });
@@ -78,11 +133,12 @@ export async function pull(src: MarsSource): Promise<string> {
   );
   if (rows.length === 0) throw new Error(`${src.commodity}: no rows from ${src.report}`);
 
-  const meta: CacheMeta = {
+  const meta: MarsCacheMeta = {
     url,
     fetchedAt: new Date().toISOString(),
     years: src.years,
-    commodity: src.commodity
+    commodity: src.commodity,
+    districts: src.districts
   };
   const path = cachePath(src);
   await mkdir(path.slice(0, path.lastIndexOf('/')), { recursive: true });

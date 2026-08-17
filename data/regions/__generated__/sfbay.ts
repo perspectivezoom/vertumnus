@@ -18,7 +18,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/cherries.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/cherries.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -35,7 +35,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/blueberries.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/blueberries.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -53,7 +53,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/apricots.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/apricots.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -72,7 +72,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/raspberries.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/raspberries.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -112,7 +112,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/tomatoes.jsonc)',
+            'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/tomatoes.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -129,7 +129,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/nectarines.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/nectarines.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -147,7 +147,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/plums.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/plums.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -165,7 +165,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/watermelons.jsonc)',
+            'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/watermelons.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -183,7 +183,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/peaches.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/peaches.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -201,7 +201,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/cantaloupes.jsonc)',
+            'USDA AMS Market News — El Centro, CA Truck, Air and Boat Movement Report (EL_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/cantaloupes.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -220,7 +220,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/blackberries.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/blackberries.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -238,7 +238,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/grapes.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/grapes.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -256,7 +256,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/pomegranates.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/pomegranates.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],
@@ -273,7 +273,7 @@ export default {
       sources: [
         {
           title:
-            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE / SAN JOAQUIN VALLEY / CENTRAL DISTRICT districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/persimmons.jsonc)',
+            'USDA AMS Market News — Fresno, CA Truck, Air and Boat Movement Report (FR_FV170); California-grown, 2019–2024 seasons, SALINAS-WATSONVILLE CALIFORNIA / SAN JOAQUIN VALLEY CALIFORNIA / CENTRAL DISTRICT CALIFORNIA districts only; season from weekly shipped weight (raw cache: data/raw/mars/ca/persimmons.jsonc)',
           url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
         },
       ],

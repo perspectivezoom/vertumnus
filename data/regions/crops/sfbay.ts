@@ -12,7 +12,12 @@ const YEARS = [2019, 2020, 2021, 2022, 2023, 2024];
  * by weeks: statewide strawberries peak seven weeks before Watsonville's own crop, because the
  * southern districts out-ship it and harvest first.
  */
-const DISTRICTS = ['SALINAS-WATSONVILLE', 'SAN JOAQUIN VALLEY', 'CENTRAL DISTRICT'];
+// Exact MARS district names: the API matches them literally, with no prefix form.
+const DISTRICTS = [
+  'SALINAS-WATSONVILLE CALIFORNIA',
+  'SAN JOAQUIN VALLEY CALIFORNIA',
+  'CENTRAL DISTRICT CALIFORNIA',
+];
 
 // Which AMS office publishes the commodity, not where it grows: Fresno carries berries, stone
 // fruit and grapes; El Centro carries vegetables and melons. They share no commodities, so each
