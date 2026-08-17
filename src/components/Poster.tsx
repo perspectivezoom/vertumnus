@@ -27,6 +27,13 @@ const TITLE_GAP = 24; // space between the masthead and the chart card
 const CARD_PAD = 12;
 const CARD_RADIUS = 12;
 
+// Fine print. One URL only: on paper every address is dead weight unless someone would type it,
+// so that page carries the method, the repo and the per-crop citations rather than the poster.
+const SOURCES_URL = 'vertumnus.fyi/about/sources';
+const FOOTER_SIZE = 8;
+const FOOTER_LEAD = 11; // between credit lines
+const FOOTER_GAP = 14; // between the card and the first credit
+
 const FRAME_COLOR = '#cbd7be';
 const HEADLINE_COLOR = '#14532d';
 const REGION_COLOR = '#2f6b47'; // lighter than the headline, still print-safe on the frame
@@ -36,9 +43,15 @@ export function Poster({ region }: { region: Region }) {
   const { w, h } = useQueryParams();
   const posterH = (POSTER_W * h) / w;
 
+  // One line per distinct source, so a region drawing on several says so and the usual case of
+  // one shared derivation says it once.
+  const credits = [...new Set(region.items.flatMap((item) => item.sources.map((s) => s.credit)))];
+  const footerH = FOOTER_GAP + credits.length * FOOTER_LEAD;
+
   const cardY = FRAME + MASTHEAD_H + TITLE_GAP;
   const cardW = POSTER_W - FRAME * 2;
-  const cardH = posterH - cardY - FRAME;
+  const cardH = posterH - cardY - footerH - FRAME;
+  const footerY = cardY + cardH + FOOTER_GAP + FOOTER_SIZE / 2;
 
   // Fit both axes by capping *width* from the paper ratio: max-height would clamp the height
   // while leaving width maximal, letterboxing the poster and casting the shadow round the box.
@@ -83,7 +96,20 @@ export function Poster({ region }: { region: Region }) {
         <Ribbons items={region.items} width={cardW - CARD_PAD * 2} height={cardH - CARD_PAD * 2} />
       </g>
 
-      {/* TODO: footer — source citations as fine print + a link back to vertumnus */}
+      {/* Provenance on the left, where to go on the right. The headline claims a farmers'
+          market; the data is wholesale shipment volume from named districts, and this is where
+          that gets said plainly. Shares the overline's colour so the frame reads as one voice —
+          4.2:1 on the sage, just under AA, which the print size is doing the rest of. */}
+      <g fontSize={FOOTER_SIZE} fill={REGION_COLOR}>
+        {credits.map((credit, i) => (
+          <text key={credit} x={FRAME} y={footerY + i * FOOTER_LEAD}>
+            {credit}
+          </text>
+        ))}
+        <text x={POSTER_W - FRAME} y={footerY} textAnchor="end">
+          {SOURCES_URL}
+        </text>
+      </g>
     </svg>
   );
 }

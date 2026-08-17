@@ -8,7 +8,8 @@ export type Produce = z.infer<typeof ProduceSchema>;
 const WeekSchema = z.number().int().min(MIN_WEEK).max(MAX_WEEK);
 
 const SourceSchema = z.object({
-  title: z.string().min(1),
+  /** Short human attribution, set as fine print on the poster. Detail lives in the crop list. */
+  credit: z.string().min(1),
   url: z.url().nullable(), // null = uncited local knowledge, never a placeholder
 });
 

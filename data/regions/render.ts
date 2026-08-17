@@ -7,7 +7,7 @@ export interface Span {
 }
 
 export interface Source {
-  title: string;
+  credit: string;
   url: string | null;
 }
 
@@ -43,7 +43,7 @@ function serializeProduce(produce: Produce): string {
     .map((s) => `{ level: ${quote(s.level)}, from: ${s.from}, to: ${s.to} }, // ${spanLabel(s)}`)
     .join('\n');
   const sources = produce.sources
-    .map((s) => `{ title: ${quote(s.title)}, url: ${s.url === null ? 'null' : quote(s.url)} },`)
+    .map((s) => `{ credit: ${quote(s.credit)}, url: ${s.url === null ? 'null' : quote(s.url)} },`)
     .join('\n');
   return [
     '{',

@@ -11,7 +11,7 @@ const produceWith = (spans: Span[]) => ({
   color: '#2a78d6',
   generated: false,
   spans,
-  sources: [{ title: 'src', url: null }],
+  sources: [{ credit: 'src', url: null }],
 });
 
 describe('RegionSchema', () => {
@@ -86,7 +86,7 @@ describe('RegionSchema', () => {
       color: '#2a78d6',
       generated: false,
       spans: [{ level: 'peak', from, to }],
-      sources: [{ title: 'src', url: null }],
+      sources: [{ credit: 'src', url: null }],
     });
 
     const region = (items: ProduceInput[]): z.input<typeof RegionSchema> => ({
@@ -126,7 +126,7 @@ describe('RegionSchema', () => {
         color: '#2a78d6',
         generated: false,
         spans: [{ level: 'available', from: 1, to: 10 }],
-        sources: [{ title: 'src', url: null }],
+        sources: [{ credit: 'src', url: null }],
       };
       expect(() => RegionSchema.parse(region([noPeak, peakProduce('HasPeak', 20, 24)]))).toThrow(
         ORDER_ERROR,

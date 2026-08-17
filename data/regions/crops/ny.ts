@@ -17,8 +17,7 @@ const crops: Crop[] = [
     ],
     sources: [
       {
-        title:
-          'Cornell Cooperative Extension Tompkins County — "U-Pick Blueberry Farms", Finger Lakes region farm picking windows (openings 9–15 Jul, running mid-Aug into September)',
+        credit: 'Cornell Cooperative Extension, Tompkins County',
         url: 'https://ccetompkins.org/agriculture/buy-local/u-pick-blueberry-farms',
       },
     ],

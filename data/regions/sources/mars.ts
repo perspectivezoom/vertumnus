@@ -223,7 +223,6 @@ export async function buildMarsProduce(crop: MarsCrop): Promise<GeneratedProduce
     throw new Error(`No raw cache at ${path} — re-run with --pull (needs MARS_API_KEY).`);
   }
   const spans = await deriveSeason(crop);
-  const report: MarsReport = MARS_REPORTS[crop.report];
   const years = `${Math.min(...crop.years)}–${Math.max(...crop.years)}`;
   return {
     name: crop.name,
@@ -231,12 +230,19 @@ export async function buildMarsProduce(crop: MarsCrop): Promise<GeneratedProduce
     spans,
     sources: [
       {
-        title:
-          `USDA AMS Market News — ${report.name} (${crop.report}); ` +
-          `${report.originPrefix}-grown, ${years} seasons, ${crop.districts.join(' / ')} ` +
-          `districts only; season from weekly shipped weight (raw cache: ${cachePath(crop)})`,
+        // Short enough to set as fine print, and deliberately naming neither the report nor the
+        // cache: those differ per crop, so including them would give the poster a separate
+        // credit line for every commodity. The crop list and the raw cache hold that detail.
+        credit: `USDA AMS Market News shipment volumes, ${years} · ${crop.districts.map(districtLabel).join(', ')}`,
         url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
       },
     ],
   };
+}
+
+/** 'SALINAS-WATSONVILLE CALIFORNIA' → 'Salinas-Watsonville', for setting rather than matching. */
+function districtLabel(district: string): string {
+  return district
+    .replace(/\s+CALIFORNIA$/, '')
+    .replace(/\b\w+/g, (word) => word[0] + word.slice(1).toLowerCase());
 }
