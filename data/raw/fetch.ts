@@ -39,14 +39,40 @@ const marsCrops = (regions: RegionSources[]): MarsSource[] =>
 const jobs = await marsJobs(marsCrops(regionSources), marsCrops(selected));
 const pending = jobs.filter((job) => force || job.needed);
 
+/**
+ * What the run was asked for, against what it did.
+ *
+ * Three separate things pull those apart, and reporting one number for all of them has misled
+ * before: caches already good enough to skip, caches deferred by `--limit`, and whether running
+ * again gets any further. It does only while coverage is deciding — `--force` ignores exactly
+ * the state that records progress, so a forced, limited run repeats its first few every time
+ * rather than working through the rest.
+ */
+function summarize(count: { scope: number; pending: number; fetched: number }): string {
+  const { scope, pending, fetched } = count;
+  if (scope === 0) return 'No caches in scope — nothing to fetch.';
+
+  const parts = [`${scope} cache(s) in scope`];
+  if (force) parts.push('cache state ignored (--force)');
+  else if (scope > pending) parts.push(`${scope - pending} already sufficient`);
+  parts.push(`${fetched} fetched`);
+
+  const deferred = pending - fetched;
+  if (deferred > 0) {
+    parts.push(
+      force
+        ? `${deferred} beyond --limit (a forced run restarts from the top, so raise it to reach them)`
+        : `${deferred} beyond --limit — run again to continue`
+    );
+  }
+  return `${parts.join(', ')}.`;
+}
+
 const batch = pending.slice(0, Math.max(0, limit));
-console.log(`${pending.length} cache(s) need data, fetching ${batch.length}`);
 for (const [i, job] of batch.entries()) {
   console.log(`  [${i + 1}/${batch.length}] ${job.label} → ${await job.pull()}`);
   if (i < batch.length - 1) await Bun.sleep(DELAY_MS);
 }
-if (pending.length > batch.length) {
-  console.log(`  ${pending.length - batch.length} still missing — run again to continue`);
-}
+console.log(summarize({ scope: jobs.length, pending: pending.length, fetched: batch.length }));
 
-console.log('\nNow run `bun run regions` to rebuild the region modules.');
+if (batch.length > 0) console.log('\nNow run `bun run regions` to rebuild the region modules.');
