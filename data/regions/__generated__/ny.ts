@@ -7,7 +7,7 @@ export default {
   items: [
     {
       name: 'Blueberries',
-      color: '#4a6fa5',
+      color: '#5b7294',
       generated: false,
       spans: [
         { level: 'available', from: 28, to: 29 }, // Jul 9 – Jul 22

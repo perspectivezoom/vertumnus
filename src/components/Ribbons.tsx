@@ -153,10 +153,12 @@ export function Ribbons({
   );
 }
 
-/** One crop: the season an early or late year would run, with the season that always holds over it. */
+/**
+ * One crop: the season an early or late year would run, with the season that always holds over it.
+ */
 function Ribbon({ color, path, driftPath, driftColor }: Ribbon) {
   return (
-    <g stroke={CHART_BG} strokeWidth={1} strokeLinejoin="round">
+    <g>
       {driftPath && <path d={driftPath} fill={driftColor} />}
       <path d={path} fill={color} />
     </g>

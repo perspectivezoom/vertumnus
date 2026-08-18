@@ -7,7 +7,7 @@ export default {
   items: [
     {
       name: 'Cherries',
-      color: '#7a1f2b',
+      color: '#693038',
       generated: true,
       spans: [
         { level: 'available', from: 19, to: 19 }, // May 7 – May 13
@@ -25,7 +25,7 @@ export default {
     },
     {
       name: 'Blueberries',
-      color: '#4a6fa5',
+      color: '#5b7294',
       generated: true,
       spans: [
         { level: 'available', from: 19, to: 20 }, // May 7 – May 20
@@ -42,7 +42,7 @@ export default {
     },
     {
       name: 'Apricots',
-      color: '#f0a83c',
+      color: '#cea15e',
       generated: true,
       spans: [
         { level: 'available', from: 21, to: 21 }, // May 21 – May 27
@@ -60,7 +60,7 @@ export default {
     },
     {
       name: 'Raspberries',
-      color: '#c73e5a',
+      color: '#ad5869',
       generated: true,
       spans: [
         { level: 'available', from: 21, to: 23 }, // May 21 – Jun 10
@@ -79,7 +79,7 @@ export default {
     },
     {
       name: 'Tomatoes',
-      color: '#d1402f',
+      color: '#b2584e',
       generated: true,
       spans: [
         { level: 'available', from: 25, to: 25 }, // Jun 18 – Jun 24
@@ -102,7 +102,7 @@ export default {
     },
     {
       name: 'Strawberries',
-      color: '#d1495b',
+      color: '#b7636e',
       generated: true,
       spans: [
         { level: 'available', from: 17, to: 20 }, // Apr 23 – May 20
@@ -120,7 +120,7 @@ export default {
     },
     {
       name: 'Nectarines',
-      color: '#e8703a',
+      color: '#c77d5b',
       generated: true,
       spans: [
         { level: 'available', from: 21, to: 23 }, // May 21 – Jun 10
@@ -137,7 +137,7 @@ export default {
     },
     {
       name: 'Plums',
-      color: '#8e3b5a',
+      color: '#7e4b5e',
       generated: true,
       spans: [
         { level: 'available', from: 23, to: 26 }, // Jun 4 – Jul 1
@@ -155,7 +155,7 @@ export default {
     },
     {
       name: 'Watermelons',
-      color: '#e05c6e',
+      color: '#c77580',
       generated: true,
       spans: [
         { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
@@ -173,7 +173,7 @@ export default {
     },
     {
       name: 'Peaches',
-      color: '#f2a25c',
+      color: '#d5a479',
       generated: true,
       spans: [
         { level: 'available', from: 21, to: 24 }, // May 21 – Jun 17
@@ -191,7 +191,7 @@ export default {
     },
     {
       name: 'Cantaloupes',
-      color: '#eda15e',
+      color: '#d2a379',
       generated: true,
       spans: [
         { level: 'available', from: 28, to: 28 }, // Jul 9 – Jul 15
@@ -209,7 +209,7 @@ export default {
     },
     {
       name: 'Blackberries',
-      color: '#3d2b45',
+      color: '#3b3040',
       generated: true,
       spans: [
         { level: 'available', from: 23, to: 28 }, // Jun 4 – Jul 15
@@ -228,7 +228,7 @@ export default {
     },
     {
       name: 'Grapes',
-      color: '#7b4397',
+      color: '#765387',
       generated: true,
       spans: [
         { level: 'available', from: 29, to: 30 }, // Jul 16 – Jul 29
@@ -246,7 +246,7 @@ export default {
     },
     {
       name: 'Pomegranates',
-      color: '#9e2b3a',
+      color: '#88414a',
       generated: true,
       spans: [
         { level: 'available', from: 38, to: 38 }, // Sep 17 – Sep 23
@@ -264,7 +264,7 @@ export default {
     },
     {
       name: 'Persimmons',
-      color: '#d95f18',
+      color: '#b4693d',
       generated: true,
       spans: [
         { level: 'available', from: 44, to: 44 }, // Oct 29 – Nov 4

@@ -71,23 +71,23 @@ const elCentro = (name: string, color: string, commodity = name): MarsCrop => ({
  */
 const crops: Crop[] = [
   // spring
-  fresno('Strawberries', '#d1495b'),
-  fresno('Cherries', '#7a1f2b'),
-  fresno('Blueberries', '#4a6fa5'),
-  fresno('Apricots', '#f0a83c'),
+  fresno('Strawberries', '#b7636e'),
+  fresno('Cherries', '#693038'),
+  fresno('Blueberries', '#5b7294'),
+  fresno('Apricots', '#cea15e'),
   // summer
-  fresno('Raspberries', '#c73e5a'),
-  fresno('Peaches', '#f2a25c'),
-  fresno('Nectarines', '#e8703a'),
-  fresno('Plums', '#8e3b5a'),
-  fresno('Blackberries', '#3d2b45'),
-  elCentro('Watermelons', '#e05c6e'),
-  elCentro('Cantaloupes', '#eda15e'),
+  fresno('Raspberries', '#ad5869'),
+  fresno('Peaches', '#d5a479'),
+  fresno('Nectarines', '#c77d5b'),
+  fresno('Plums', '#7e4b5e'),
+  fresno('Blackberries', '#3b3040'),
+  elCentro('Watermelons', '#c77580'),
+  elCentro('Cantaloupes', '#d2a379'),
   // autumn
-  elCentro('Tomatoes', '#d1402f'),
-  fresno('Grapes', '#7b4397'),
-  fresno('Pomegranates', '#9e2b3a'),
-  fresno('Persimmons', '#d95f18'),
+  elCentro('Tomatoes', '#b2584e'),
+  fresno('Grapes', '#765387'),
+  fresno('Pomegranates', '#88414a'),
+  fresno('Persimmons', '#b4693d'),
 ];
 
 /**
