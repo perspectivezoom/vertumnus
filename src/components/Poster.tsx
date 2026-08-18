@@ -9,18 +9,18 @@ import { useQueryParams } from '@/src/lib/params';
  */
 const POSTER_W = 1000;
 
-const FRAME = 32; // sage border, same thickness on all four sides
+const MARGIN = 32; // paper margin, same on all four sides
 const HEADER_GAP = 24; // between the header and the chart card
 
-// Shared because the frame, the header and the fine print have to read as one voice. Anything
+// Shared because the paper, the header and the fine print have to read as one voice. Anything
 // used in only one place lives with the piece that uses it.
-const FRAME_COLOR = '#cbd7be';
+const PAPER = '#ffffff';
 const INK = '#14532d';
 const INK_MUTED = '#2f6b47';
 
 /**
- * The printable poster: a header, the chart on its card, and fine print, inside a sage frame
- * at the paper's aspect ratio.
+ * The printable poster: a header, the chart on its card, and fine print, on white paper at
+ * the chosen aspect ratio.
  *
  * Only placement lives here. What the header says and how the fine print is set belong to
  * those pieces; this decides how much room each gets and hands the rest to the chart.
@@ -33,9 +33,9 @@ export function Poster({ region }: { region: Region }) {
   // one shared derivation says it once.
   const credits = [...new Set(region.items.flatMap((item) => item.sources.map((s) => s.credit)))];
 
-  const cardY = FRAME + HEADER_H + HEADER_GAP;
-  const cardW = POSTER_W - FRAME * 2;
-  const cardH = posterH - cardY - footerHeight(credits.length) - FRAME;
+  const cardY = MARGIN + HEADER_H + HEADER_GAP;
+  const cardW = POSTER_W - MARGIN * 2;
+  const cardH = posterH - cardY - footerHeight(credits.length) - MARGIN;
 
   // Fit both axes by capping *width* from the paper ratio: max-height would clamp the height
   // while leaving width maximal, letterboxing the poster and casting the shadow round the box.
@@ -48,10 +48,10 @@ export function Poster({ region }: { region: Region }) {
       role="img"
       aria-label={`In-season produce for ${region.name}`}
     >
-      <rect width={POSTER_W} height={posterH} fill={FRAME_COLOR} />
+      <rect width={POSTER_W} height={posterH} fill={PAPER} />
 
-      <Header region={region.name} y={FRAME} />
-      <Card items={region.items} x={FRAME} y={cardY} width={cardW} height={cardH} />
+      <Header region={region.name} y={MARGIN} />
+      <Card items={region.items} x={MARGIN} y={cardY} width={cardW} height={cardH} />
       <Footer credits={credits} y={cardY + cardH} />
     </svg>
   );
@@ -108,7 +108,13 @@ const CARD_RADIUS = 12;
 // is CHART_BG. The two have to agree, or overlapping ridges stop reading as separate shapes.
 const CARD_COLOR = '#ffffff';
 
-/** The white card the chart sits on, inset from its own edges. */
+/**
+ * The card the chart sits on, inset from its own edges.
+ *
+ * Invisible while the paper is also white, but it is the chart's ground rather than decoration:
+ * the moment the paper carries a tint or an illustration, this is what keeps the ridges legible
+ * and what CARD_COLOR above has to agree with.
+ */
 function Card({
   items,
   x,
@@ -151,19 +157,19 @@ function footerHeight(lines: number): number {
  *
  * The headline claims a farmers' market; the data is wholesale shipment volume from named
  * growing districts, and this is where that gets said plainly. Shares the overline's colour so
- * the frame reads as one voice — 4.2:1 on the sage, just under AA, which the print size is
- * doing the rest of.
+ * the words read as one voice — 6.3:1 on white, which the sage frame it replaced could not
+ * manage at this size.
  */
 function Footer({ credits, y }: { credits: string[]; y: number }) {
   const first = y + FOOTER_GAP + FOOTER_SIZE / 2;
   return (
     <g fontSize={FOOTER_SIZE} fill={INK_MUTED}>
       {credits.map((credit, i) => (
-        <text key={credit} x={FRAME} y={first + i * FOOTER_LEAD}>
+        <text key={credit} x={MARGIN} y={first + i * FOOTER_LEAD}>
           {credit}
         </text>
       ))}
-      <text x={POSTER_W - FRAME} y={first} textAnchor="end">
+      <text x={POSTER_W - MARGIN} y={first} textAnchor="end">
         {SOURCES_URL}
       </text>
     </g>
