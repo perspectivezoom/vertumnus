@@ -27,8 +27,16 @@ function numberParam(whenAbsent: number) {
   return z.coerce.number().positive().catch(whenAbsent).default(whenAbsent);
 }
 
+/** A comma-separated list param; absent or empty yields []. */
+const listParam = z
+  .string()
+  .default('')
+  .catch('')
+  .transform((v) => v.split(',').filter(Boolean));
+
 const QueryParamsSchema = z.object({
   hideBanner: flagParam(false),
+  crops: listParam,
   w: numberParam(DEFAULT_PAPER.w),
   h: numberParam(DEFAULT_PAPER.h),
   unit: z.enum(UNITS).catch(DEFAULT_PAPER.unit).default(DEFAULT_PAPER.unit),

@@ -1,5 +1,6 @@
 import { Ribbons } from '@/src/components/Ribbons';
 import type { Region } from '@/data/regions/schema';
+import { selectCrops } from '@/src/lib/crops';
 import { useQueryParams } from '@/src/lib/params';
 import { type Plate, PLATES } from '@/src/lib/plates';
 
@@ -27,12 +28,17 @@ const INK_MUTED = '#2f6b47';
  * those pieces; this decides how much room each gets and hands the rest to the chart.
  */
 export function Poster({ region }: { region: Region }) {
-  const { w, h } = useQueryParams();
+  const { w, h, crops } = useQueryParams();
   const posterH = (POSTER_W * h) / w;
 
+  // Paper and produce are both options the URL carries, and both belong here rather than
+  // further in: this is where a region becomes a particular printable artifact.
+  const items = selectCrops(region.items, crops);
+
   // One line per distinct source, so a region drawing on several says so and the usual case of
-  // one shared derivation says it once.
-  const credits = [...new Set(region.items.flatMap((item) => item.sources.map((s) => s.credit)))];
+  // one shared derivation says it once. Taken from what is shown, not from the whole region —
+  // fine print should credit the data on the page.
+  const credits = [...new Set(items.flatMap((item) => item.sources.map((s) => s.credit)))];
 
   const cardY = MARGIN + HEADER_H + HEADER_GAP;
   const cardW = POSTER_W - MARGIN * 2;
@@ -53,7 +59,7 @@ export function Poster({ region }: { region: Region }) {
 
       <Header region={region.name} y={MARGIN} />
       <Card
-        items={region.items}
+        items={items}
         plates={PLATES[region.id] ?? []}
         x={MARGIN}
         y={cardY}

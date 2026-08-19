@@ -1,6 +1,7 @@
 import { Info, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
+import { CropPicker } from '@/src/components/CropPicker';
 import { PaperSizeSelector } from '@/src/components/PaperSizeSelector';
 import { RegionPicker } from '@/src/components/RegionPicker';
 import { useQueryParams, useSetQueryParams } from '@/src/lib/params';
@@ -78,6 +79,7 @@ function BannerContent() {
     <div className="min-w-[32rem] max-w-[36rem]">
       <Intro />
       <RegionPicker />
+      <CropPicker />
       <PaperSizeSelector />
     </div>
   );

@@ -38,7 +38,11 @@ export function Expander({
         </span>
       </button>
 
-      {expanded && <ul className="mt-1 space-y-0.5">{children}</ul>}
+      {/* Capped and scrollable: the point of a control is to watch the poster change as you
+          use it, and a list long enough to cover the chart defeats that. */}
+      {expanded && (
+        <ul className="mt-1 max-h-64 space-y-0.5 overflow-y-auto overscroll-contain">{children}</ul>
+      )}
     </div>
   );
 }
