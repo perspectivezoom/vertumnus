@@ -76,7 +76,7 @@ export function Banner() {
 /** Lays out the banner's (growing) content: the intro, then the controls. */
 function BannerContent() {
   return (
-    <div className="min-w-[32rem] max-w-[36rem]">
+    <div className="flex min-w-[32rem] max-w-[36rem] flex-col gap-4">
       <Intro />
       <RegionPicker />
       <CropPicker />
@@ -88,13 +88,13 @@ function BannerContent() {
 /** The banner's title and description. */
 function Intro() {
   return (
-    <>
+    <div className="flex flex-col gap-3">
       <h2 className="text-center text-lg font-semibold text-neutral-900">Vertumnus</h2>
-      <p className="mt-3 text-sm leading-relaxed text-neutral-600">
+      <p className="text-sm leading-relaxed text-neutral-600">
         Printable posters of what&rsquo;s in season at farmers&rsquo; markets. Data is specific to
         your region, with week-level granularity.
       </p>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+      <p className="text-sm leading-relaxed text-neutral-600">
         Etymology: Vertumnus is the{' '}
         <a
           className="text-green-700 underline underline-offset-2 hover:text-green-900"
@@ -106,6 +106,6 @@ function Intro() {
         </a>
         .
       </p>
-    </>
+    </div>
   );
 }

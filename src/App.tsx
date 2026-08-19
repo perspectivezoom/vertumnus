@@ -1,6 +1,11 @@
-import { BrowserRouter, Outlet, Route, Routes } from 'react-router';
+import { BrowserRouter, Route, Routes } from 'react-router';
 
-import { Banner } from '@/src/components/Banner';
+import { AboutIndex } from '@/src/components/about/AboutIndex';
+import { AboutShell } from '@/src/components/about/AboutShell';
+import { Ai } from '@/src/components/about/Ai';
+import { Licenses } from '@/src/components/about/Licenses';
+import { Sources } from '@/src/components/about/Sources';
+import { AppShell } from '@/src/components/AppShell';
 import { Poster } from '@/src/components/Poster';
 import { useRegion } from '@/src/lib/params';
 
@@ -10,17 +15,7 @@ declare const __APP_BASE__: string | undefined;
 const basename =
   (typeof __APP_BASE__ === 'undefined' ? '/' : __APP_BASE__).replace(/\/$/, '') || '/';
 
-/** Shell shared by every route: the page surface plus the floating controls banner. */
-function AppShell() {
-  return (
-    <main className="min-h-screen bg-neutral-100 p-6">
-      <Outlet />
-      <Banner />
-    </main>
-  );
-}
-
-/** The poster for the region named in the path (the default region at "/"). */
+/** Binds the `:region` path segment to a poster; the only glue this file needs to own. */
 function RegionView() {
   return <Poster region={useRegion()} />;
 }
@@ -29,6 +24,13 @@ export function App() {
   return (
     <BrowserRouter basename={basename}>
       <Routes>
+        {/* Before the region route: ":region" would otherwise swallow "/about". */}
+        <Route path="about" element={<AboutShell />}>
+          <Route index element={<AboutIndex />} />
+          <Route path="sources" element={<Sources />} />
+          <Route path="ai" element={<Ai />} />
+          <Route path="licenses" element={<Licenses />} />
+        </Route>
         <Route element={<AppShell />}>
           <Route index element={<RegionView />} />
           <Route path=":region" element={<RegionView />} />

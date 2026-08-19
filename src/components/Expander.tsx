@@ -24,7 +24,7 @@ export function Expander({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="mt-4">
+    <div className="flex flex-col gap-1">
       <button
         type="button"
         onClick={() => setExpanded((open) => !open)}
@@ -41,7 +41,9 @@ export function Expander({
       {/* Capped and scrollable: the point of a control is to watch the poster change as you
           use it, and a list long enough to cover the chart defeats that. */}
       {expanded && (
-        <ul className="mt-1 max-h-64 space-y-0.5 overflow-y-auto overscroll-contain">{children}</ul>
+        <ul className="flex max-h-64 flex-col gap-0.5 overflow-y-auto overscroll-contain">
+          {children}
+        </ul>
       )}
     </div>
   );
