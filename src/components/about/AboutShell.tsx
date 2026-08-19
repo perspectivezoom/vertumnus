@@ -63,7 +63,7 @@ export function AboutShell() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-10">
+      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-10">
         <Outlet />
       </main>
     </div>
