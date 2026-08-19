@@ -1,4 +1,4 @@
-import { Section } from '@/src/components/about/AboutShell';
+import { Section } from '@/src/components/about/Prose';
 
 /**
  * How the project was built alongside a model, and the record of it.

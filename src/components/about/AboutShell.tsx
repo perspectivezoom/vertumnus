@@ -69,15 +69,3 @@ export function AboutShell() {
     </div>
   );
 }
-
-/** A section's heading and body, at a measure that stays readable. */
-export function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <article className="flex max-w-[65ch] flex-col gap-6">
-      <h1 className="font-poster text-3xl font-bold text-neutral-900">{title}</h1>
-      <div className="flex flex-col gap-4 text-[15px] leading-relaxed text-neutral-700">
-        {children}
-      </div>
-    </article>
-  );
-}

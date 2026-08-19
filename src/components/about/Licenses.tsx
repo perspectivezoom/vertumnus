@@ -1,22 +1,27 @@
-import { Section } from '@/src/components/about/AboutShell';
+import { Link } from 'react-router';
+
+import { ExternalLink, Heading, LINK_CLASS, REPO, Section } from '@/src/components/about/Prose';
 import { DEPENDENCIES, TYPEFACES } from '@/src/lib/licenses';
 
 export function Licenses() {
   return (
     <Section title="Licenses">
       <p>
-        Vertumnus is open source, on{' '}
-        <Ext href="https://github.com/perspectivezoom/vertumnus">GitHub</Ext>.
+        Vertumnus is open source, on <ExternalLink href={REPO}>GitHub</ExternalLink>.
       </p>
       <p>
         Vertumnus code is under the{' '}
-        <Ext href="https://opensource.org/license/isc-license-txt">ISC licence</Ext>.
+        <ExternalLink href="https://opensource.org/license/isc-license-txt">
+          ISC licence
+        </ExternalLink>
+        .
       </p>
       <p>
         Vertumnus derived data (which crops each poster shows, which growing districts count as near
         enough to supply it, and the derived seasons themselves) is dedicated to the public domain
-        under <Ext href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</Ext>, allowing for
-        arbitrary reuse without asking and without attribution.
+        under{' '}
+        <ExternalLink href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</ExternalLink>,
+        allowing for arbitrary reuse without asking and without attribution.
       </p>
 
       <hr className="border-neutral-300" />
@@ -29,27 +34,27 @@ export function Licenses() {
       <Heading>Data and artwork</Heading>
       <p>
         Crop seasonality data is derived from{' '}
-        <Ext href="https://www.ams.usda.gov/market-news/fruits-vegetables">
+        <ExternalLink href="https://www.ams.usda.gov/market-news/fruits-vegetables">
           USDA Agricultural Marketing Service
-        </Ext>{' '}
+        </ExternalLink>{' '}
         Market News shipment reports.
       </p>
       <p>
         The watercolours are from the{' '}
-        <Ext href="https://usdawatercolors.nal.usda.gov/">
+        <ExternalLink href="https://search.nal.usda.gov/discovery/collectionDiscovery?vid=01NAL_INST:MAIN&collectionId=81279629860007426">
           USDA Pomological Watercolor Collection
-        </Ext>
-        , painted between 1886 and 1942 and held by the National Agricultural Library.
+        </ExternalLink>
+        , held by the National Agricultural Library. They are cropped, scaled and re-encoded here,
+        but not retouched. More detail on their usage can be found in the{' '}
+        <Link to="/about/sources" className={LINK_CLASS}>
+          sources page
+        </Link>
+        .
       </p>
       <p>
-        Both are works of the United States government and in the public domain — no permission is
-        needed to use them, and none is claimed here. They are credited because the project cites
-        what it is built from, not because any licence demands it.
-      </p>
-      <p>
-        The plates on each poster were painted from fruit grown in the region, which was only
-        findable because <Ext href="https://pomological.art/">pomological.art</Ext> made its
-        collection browsable by map.
+        Both are works of the United States government and in the public domain &mdash; no
+        permission is needed to use them, and none is claimed here. They are credited because the
+        project cites what it is built from, not because any licence demands it.
       </p>
 
       <Heading>Typefaces</Heading>
@@ -60,9 +65,9 @@ export function Licenses() {
       {TYPEFACES.map((face) => (
         <div key={face.name} className="flex flex-col gap-1">
           <p>
-            <Ext href={face.url}>
+            <ExternalLink href={face.url}>
               <strong className="font-medium">{face.name}</strong>
-            </Ext>{' '}
+            </ExternalLink>{' '}
             — {face.role}.
             <br />
             {face.designer}. {face.license}.
@@ -86,9 +91,9 @@ export function Licenses() {
       <ul className="flex flex-col gap-2">
         {DEPENDENCIES.map((dep) => (
           <li key={dep.name} className="flex flex-wrap items-baseline gap-x-2">
-            <Ext href={`https://www.npmjs.com/package/${dep.name}`}>
+            <ExternalLink href={`https://www.npmjs.com/package/${dep.name}`}>
               <span className="font-medium">{dep.name}</span>
-            </Ext>
+            </ExternalLink>
             <span className="text-xs text-neutral-400 tabular-nums">{dep.version}</span>
             <span className="text-xs text-neutral-400">{dep.license}</span>
             {dep.what && <span className="text-neutral-600">— {dep.what}</span>}
@@ -96,22 +101,5 @@ export function Licenses() {
         ))}
       </ul>
     </Section>
-  );
-}
-
-function Heading({ children }: { children: React.ReactNode }) {
-  return <h2 className="pt-4 text-lg font-semibold text-neutral-900">{children}</h2>;
-}
-
-function Ext({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="text-green-700 underline underline-offset-2 hover:text-green-900"
-    >
-      {children}
-    </a>
   );
 }

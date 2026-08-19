@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 
-import { SECTIONS, Section } from '@/src/components/about/AboutShell';
+import { SECTIONS } from '@/src/components/about/AboutShell';
+import { ExternalLink, Section } from '@/src/components/about/Prose';
 
 /** The landing section: what the poster is, then a way into each of the others. */
 export function AboutIndex() {
@@ -12,14 +13,9 @@ export function AboutIndex() {
       </p>
       <p>
         Named for the{' '}
-        <a
-          className="text-green-700 underline underline-offset-2 hover:text-green-900"
-          href="https://en.wikipedia.org/wiki/Vertumnus"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <ExternalLink href="https://en.wikipedia.org/wiki/Vertumnus">
           Roman god of seasons, change and plant growth
-        </a>
+        </ExternalLink>
         .
       </p>
 
