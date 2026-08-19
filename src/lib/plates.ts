@@ -21,6 +21,14 @@ export interface Plate {
   /** What it shows and where the specimen was grown. */
   subject: string;
   origin: string;
+  /**
+   * The crop this plate depicts, exactly as the poster names it, when the poster has one.
+   *
+   * Stated rather than inferred from `subject`: the collection's names are singular specimens
+   * ("Cherry") and a crop is a plural row ("Cherries"), and pairing them by string surgery would
+   * be a rule that silently mismatches the first time a name does not follow the pattern.
+   */
+  crop?: string;
 }
 
 /**
@@ -35,15 +43,62 @@ export interface Plate {
  */
 export const PLATES: Record<string, readonly Plate[]> = {
   sfbay: [
-    { accession: 'POM00006232', src: grape, subject: 'Grape', origin: 'Napa, CA' },
-    { accession: 'POM00004736', src: plum, subject: 'Plum', origin: 'Vacaville, CA' },
-    { accession: 'POM00005136', src: peach, subject: 'Peach', origin: 'Morgan Hill, CA' },
-    { accession: 'POM00004450', src: cherry, subject: 'Cherry', origin: 'Santa Clara, CA' },
-    { accession: 'POM00005704', src: nectarine, subject: 'Nectarine', origin: 'Marysville, CA' },
+    { accession: 'POM00006232', src: grape, subject: 'Grape', origin: 'Napa, CA', crop: 'Grapes' },
+    {
+      accession: 'POM00004736',
+      src: plum,
+      subject: 'Plum',
+      origin: 'Vacaville, CA',
+      crop: 'Plums',
+    },
+    {
+      accession: 'POM00005136',
+      src: peach,
+      subject: 'Peach',
+      origin: 'Morgan Hill, CA',
+      crop: 'Peaches',
+    },
+    {
+      accession: 'POM00004450',
+      src: cherry,
+      subject: 'Cherry',
+      origin: 'Santa Clara, CA',
+      crop: 'Cherries',
+    },
+    {
+      accession: 'POM00005704',
+      src: nectarine,
+      subject: 'Nectarine',
+      origin: 'Marysville, CA',
+      crop: 'Nectarines',
+    },
+    {
+      accession: 'POM00001088',
+      src: persimmon,
+      subject: 'Persimmon',
+      origin: 'Chico, CA',
+      crop: 'Persimmons',
+    },
+    // No pear on any poster yet; it fills a gap when the depicted plates run out.
     { accession: 'POM00007001', src: pear, subject: 'Pear', origin: 'Santa Clara, CA' },
-    { accession: 'POM00001088', src: persimmon, subject: 'Persimmon', origin: 'Chico, CA' },
   ],
 };
+
+/**
+ * A region's plates, those depicting a crop on the poster first.
+ *
+ * A loose tie rather than a strict one: the collection has no plate for most crops, and the
+ * gaps the solver finds have nothing to do with which crops are showing. So this is a
+ * preference — pick a cherry when cherries are on the poster — and the remaining plates still
+ * fill whatever space is left rather than leaving it bare.
+ */
+export function platesFor(regionId: string, shown: readonly { name: string }[]): readonly Plate[] {
+  const names = new Set(shown.map((item) => item.name));
+  const all = PLATES[regionId] ?? [];
+  const depicted = all.filter((plate) => plate.crop !== undefined && names.has(plate.crop));
+  const others = all.filter((plate) => !depicted.includes(plate));
+  return [...depicted, ...others];
+}
 
 /** Every plate is a portrait scan of roughly this shape, which is what the solver fits gaps to. */
 export const PLATE_ASPECT = 0.65;

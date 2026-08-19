@@ -2,7 +2,7 @@ import { Ribbons } from '@/src/components/Ribbons';
 import type { Region } from '@/data/regions/schema';
 import { selectCrops } from '@/src/lib/crops';
 import { useQueryParams } from '@/src/lib/params';
-import { type Plate, PLATES } from '@/src/lib/plates';
+import { type Plate, platesFor } from '@/src/lib/plates';
 
 /**
  * Laid out in "poster units": always POSTER_W wide, height from the paper's aspect ratio. The
@@ -60,7 +60,7 @@ export function Poster({ region }: { region: Region }) {
       <Header region={region.name} y={MARGIN} />
       <Card
         items={items}
-        plates={PLATES[region.id] ?? []}
+        plates={platesFor(region.id, items)}
         x={MARGIN}
         y={cardY}
         width={cardW}
