@@ -2,6 +2,8 @@ import { area, curveBasis } from 'd3-shape';
 import { useEffect, useState } from 'react';
 
 import type { Produce } from '@/data/regions/schema';
+import { type Plate, PLATE_ASPECT } from '@/src/lib/plates';
+import { type Box, findVoids, occupancyOf, toUnits } from '@/src/lib/whitespace';
 import {
   coveredWeeks,
   LEVEL_BAND,
@@ -69,6 +71,13 @@ const FONT_STACK_VAR = '--font-poster'; // declared in global.css @theme; the po
  */
 const LABEL_RISE = (RIDGE_OVERLAP - 1 + 1) / 2;
 
+// Whitespace search. The grid is coarse on purpose: it only has to find where art fits, and a
+// finer one would chase pixels the eye does not read as a gap anyway.
+const VOID_COLS = 120;
+const VOID_MAX_H = 0.34; // tallest a plate may be, as a share of the chart
+const VOID_MIN_H = 0.14; // below this the gap is left empty rather than filled badly
+const PLATE_FADE = 0.16; // how far in from a plate's edge the paper dissolves, as a share of it
+
 const CHART_BG = '#ffffff'; // the card the ribbons sit on, and the colour uncertainty fades toward
 const AXIS_COLOR = '#888888';
 const GRID_COLOR = '#d9d9d9'; // recessive against the ribbons, but a hairline that survives print
@@ -93,6 +102,9 @@ interface Label {
 interface Ribbon {
   name: string;
   color: string;
+  /** Per-week silhouette, kept so the whitespace search can see what the chart covers. */
+  slices: Slice[];
+  cellW: number;
   /** The season as it holds whichever way the year goes — drawn solid. */
   path: string;
   /** The season an early or late year would run; null when the two curves coincide. */
@@ -123,17 +135,25 @@ export function Ribbons({
   items,
   width,
   height,
+  plates = [],
 }: {
   items: Produce[];
   width: number;
   height: number;
+  plates?: readonly Plate[];
 }) {
   useFontsReady();
-  const { ribbons, months, grid, plot } = buildStreamgraph(items, width, height);
+  const { ribbons, months, grid, plot, art } = buildStreamgraph(items, width, height, plates);
 
   return (
     <g>
       <MonthGrid at={grid} top={plot.top} bottom={plot.bottom} />
+
+      {/* Over the month rules but under the ribbons: the rules are recessive furniture, and the
+          chart is the subject. */}
+      {art.map((a) => (
+        <PlateArt key={a.plate.accession} {...a} />
+      ))}
 
       {ribbons.map((r) => (
         <Ribbon key={r.name} {...r} />
@@ -150,6 +170,49 @@ export function Ribbons({
           calendar without tracking back up the full height of the poster. */}
       <MonthAxis months={months} y={plot.bottom + AXIS_INSET} />
     </g>
+  );
+}
+
+/**
+ * A watercolour plate, faded to nothing at its edges.
+ *
+ * The scans are cream paper, not white, so a hard edge would read as a pasted rectangle. The
+ * fade follows the plate's own rectangle — a blurred inset rect rather than an ellipse, which
+ * would eat the corners and leave the subject sitting in an oval. It is a mask rather than
+ * something baked into the file, so one asset works whatever the paper becomes.
+ */
+function PlateArt({ plate, box }: { plate: Plate; box: Box }) {
+  const id = `plate-fade-${plate.accession}`;
+  const inset = Math.min(box.w, box.h) * PLATE_FADE;
+  return (
+    <>
+      <defs>
+        <filter id={`${id}-blur`} x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation={inset / 2} />
+        </filter>
+        <mask id={`${id}-mask`} maskUnits="userSpaceOnUse">
+          <rect
+            x={box.x + inset}
+            y={box.y + inset}
+            width={Math.max(0, box.w - inset * 2)}
+            height={Math.max(0, box.h - inset * 2)}
+            fill="#ffffff"
+            filter={`url(#${id}-blur)`}
+          />
+        </mask>
+      </defs>
+      <image
+        href={plate.src}
+        x={box.x}
+        y={box.y}
+        width={box.w}
+        height={box.h}
+        preserveAspectRatio="xMidYMid slice"
+        mask={`url(#${id}-mask)`}
+      >
+        <title>{`${plate.subject}, ${plate.origin} — USDA Pomological Watercolor Collection`}</title>
+      </image>
+    </>
   );
 }
 
@@ -256,11 +319,13 @@ function buildStreamgraph(
   items: Produce[],
   width: number,
   height: number,
+  plates: readonly Plate[],
 ): {
   ribbons: Ribbon[];
   months: Month[];
   grid: number[];
   plot: { top: number; bottom: number };
+  art: { plate: Plate; box: Box }[];
 } {
   const gridW = width - PAD_X * 2;
   const weekToX = (week: number) => PAD_X + ((week - 1) / WEEKS_PER_YEAR) * gridW;
@@ -292,11 +357,14 @@ function buildStreamgraph(
     const { lower, upper } = weeklyBand(item.spans);
     const drifts = item.spans.some((s) => s.level === Level.Uncertain);
 
+    const upperSlices = slice(upper);
     return {
       name: item.name,
       color: item.color,
+      slices: upperSlices,
+      cellW: gridW / WEEKS_PER_YEAR,
       path: areaGen(slice(lower)) ?? '',
-      driftPath: drifts ? (areaGen(slice(upper)) ?? '') : null,
+      driftPath: drifts ? (areaGen(upperSlices) ?? '') : null,
       driftColor: mix(item.color, CHART_BG, UNCERTAIN_TINT),
       label: placeLabel(item, geometry, baseline - spacing * LABEL_RISE),
     };
@@ -312,7 +380,45 @@ function buildStreamgraph(
     months,
     grid,
     plot: { top: PAD_TOP, bottom: height - PAD_BOTTOM },
+    art: placeArt(ribbons, plates, { width, height }),
   };
+}
+
+/**
+ * Fit plates into whatever the chart leaves empty.
+ *
+ * Obstacles come from the geometry already computed above rather than from the rendered DOM, so
+ * the search is exact, runs before paint, and needs no second pass. Ridges are reported a week
+ * at a time — a column of boxes under the drift curve, which is the taller of the two.
+ */
+function placeArt(
+  ribbons: Ribbon[],
+  plates: readonly Plate[],
+  size: { width: number; height: number },
+): { plate: Plate; box: Box }[] {
+  if (plates.length === 0) return [];
+
+  const obstacles: Box[] = [];
+  for (const r of ribbons) {
+    for (const s of r.slices) {
+      if (s.bottom > s.top) obstacles.push({ x: s.x, y: s.top, w: r.cellW, h: s.bottom - s.top });
+    }
+    const l = r.label;
+    obstacles.push({ x: l.x - l.width / 2, y: l.y - LABEL_FONT, w: l.width, h: LABEL_FONT * 2 });
+  }
+  // The axes are text the search cannot see, so reserve their bands explicitly.
+  obstacles.push({ x: 0, y: 0, w: size.width, h: PAD_TOP });
+  obstacles.push({ x: 0, y: size.height - PAD_BOTTOM, w: size.width, h: PAD_BOTTOM });
+
+  const occ = occupancyOf(obstacles, size, VOID_COLS);
+  const boxes = findVoids(occ, {
+    aspect: PLATE_ASPECT,
+    maxHeight: Math.round(occ.rows * VOID_MAX_H),
+    minHeight: Math.round(occ.rows * VOID_MIN_H),
+  });
+  return boxes
+    .slice(0, plates.length)
+    .map((box, i) => ({ plate: plates[i]!, box: toUnits(box, occ, size) }));
 }
 
 let measurer: CanvasRenderingContext2D | null | undefined;

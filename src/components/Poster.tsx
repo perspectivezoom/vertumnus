@@ -1,6 +1,7 @@
 import { Ribbons } from '@/src/components/Ribbons';
 import type { Region } from '@/data/regions/schema';
 import { useQueryParams } from '@/src/lib/params';
+import { type Plate, PLATES } from '@/src/lib/plates';
 
 /**
  * Laid out in "poster units": always POSTER_W wide, height from the paper's aspect ratio. The
@@ -51,7 +52,14 @@ export function Poster({ region }: { region: Region }) {
       <rect width={POSTER_W} height={posterH} fill={PAPER} />
 
       <Header region={region.name} y={MARGIN} />
-      <Card items={region.items} x={MARGIN} y={cardY} width={cardW} height={cardH} />
+      <Card
+        items={region.items}
+        plates={PLATES[region.id] ?? []}
+        x={MARGIN}
+        y={cardY}
+        width={cardW}
+        height={cardH}
+      />
       <Footer credits={credits} y={cardY + cardH} />
     </svg>
   );
@@ -117,12 +125,14 @@ const CARD_COLOR = '#ffffff';
  */
 function Card({
   items,
+  plates,
   x,
   y,
   width,
   height,
 }: {
   items: Region['items'];
+  plates: readonly Plate[];
   x: number;
   y: number;
   width: number;
@@ -132,7 +142,12 @@ function Card({
     <>
       <rect x={x} y={y} width={width} height={height} rx={CARD_RADIUS} fill={CARD_COLOR} />
       <g transform={`translate(${x + CARD_PAD} ${y + CARD_PAD})`}>
-        <Ribbons items={items} width={width - CARD_PAD * 2} height={height - CARD_PAD * 2} />
+        <Ribbons
+          items={items}
+          plates={plates}
+          width={width - CARD_PAD * 2}
+          height={height - CARD_PAD * 2}
+        />
       </g>
     </>
   );
