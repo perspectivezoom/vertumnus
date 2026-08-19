@@ -5,20 +5,14 @@ import { AboutShell } from '@/src/components/about/AboutShell';
 import { Ai } from '@/src/components/about/Ai';
 import { Licenses } from '@/src/components/about/Licenses';
 import { Sources } from '@/src/components/about/Sources';
-import { AppShell } from '@/src/components/AppShell';
-import { Poster } from '@/src/components/Poster';
-import { useRegion } from '@/src/lib/params';
+import { PosterShell } from '@/src/components/poster/PosterShell';
+import { Poster } from '@/src/components/poster/Poster';
 
 // `__APP_BASE__` is injected at build time (the `define` in scripts/build.ts); in dev
 // the guard yields '/'. React Router wants a basename without a trailing slash.
 declare const __APP_BASE__: string | undefined;
 const basename =
   (typeof __APP_BASE__ === 'undefined' ? '/' : __APP_BASE__).replace(/\/$/, '') || '/';
-
-/** Binds the `:region` path segment to a poster; the only glue this file needs to own. */
-function RegionView() {
-  return <Poster region={useRegion()} />;
-}
 
 export function App() {
   return (
@@ -31,9 +25,9 @@ export function App() {
           <Route path="ai" element={<Ai />} />
           <Route path="licenses" element={<Licenses />} />
         </Route>
-        <Route element={<AppShell />}>
-          <Route index element={<RegionView />} />
-          <Route path=":region" element={<RegionView />} />
+        <Route element={<PosterShell />}>
+          <Route index element={<Poster />} />
+          <Route path=":region" element={<Poster />} />
         </Route>
       </Routes>
     </BrowserRouter>

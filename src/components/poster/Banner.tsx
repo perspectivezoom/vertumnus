@@ -1,9 +1,9 @@
 import { Info, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
-import { CropPicker } from '@/src/components/CropPicker';
-import { PaperSizeSelector } from '@/src/components/PaperSizeSelector';
-import { RegionPicker } from '@/src/components/RegionPicker';
+import { CropPicker } from '@/src/components/poster/CropPicker';
+import { PaperSizeSelector } from '@/src/components/poster/PaperSizeSelector';
+import { RegionPicker } from '@/src/components/poster/RegionPicker';
 import { useQueryParams, useSetQueryParams } from '@/src/lib/params';
 
 // All banner timing derives from one morph duration.

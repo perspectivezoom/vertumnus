@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react';
 
 import type { Produce } from '@/data/regions/schema';
-import { Expander, optionClass } from '@/src/components/Expander';
+import { Expander, optionClass } from '@/src/components/poster/Expander';
 import { cropSlug, cropsParam } from '@/src/lib/crops';
 import { useQueryParams, useRegion, useSetQueryParams } from '@/src/lib/params';
 

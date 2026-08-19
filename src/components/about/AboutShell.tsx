@@ -9,12 +9,14 @@ export const SECTIONS = [
   {
     path: 'sources',
     label: 'Sources',
-    blurb: 'Where the raw data comes from, and the methodology and heuristics used to interpret the data.',
+    blurb:
+      'Where the raw data comes from, and the methodology and heuristics used to interpret the data.',
   },
   {
     path: 'ai',
     label: 'AI',
-    blurb: 'Write up on how AI was used in this project, including the raw AI conversation transcript.',
+    blurb:
+      'Write up on how AI was used in this project, including the raw AI conversation transcript.',
   },
   {
     path: 'licenses',

@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router';
 
-import { Banner } from '@/src/components/Banner';
+import { Banner } from '@/src/components/poster/Banner';
 
 /**
  * Chrome for the poster routes: the page surface with the floating controls over it.
@@ -9,7 +9,7 @@ import { Banner } from '@/src/components/Banner';
  * surface for a single artifact and puts controls on top of it; that one is a reading layout
  * with navigation above it.
  */
-export function AppShell() {
+export function PosterShell() {
   return (
     <main className="min-h-screen bg-neutral-100 p-6">
       <Outlet />

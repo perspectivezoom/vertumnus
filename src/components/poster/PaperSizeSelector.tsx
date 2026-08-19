@@ -1,6 +1,6 @@
 import { type ComponentProps, useEffect, useState } from 'react';
 
-import { Expander, optionClass, ROW } from '@/src/components/Expander';
+import { Expander, optionClass, ROW } from '@/src/components/poster/Expander';
 import { convertLength, matchPaperSize, PAPER_SIZES, type Unit, UNITS } from '@/src/lib/paper';
 import { useQueryParams, useSetQueryParams } from '@/src/lib/params';
 

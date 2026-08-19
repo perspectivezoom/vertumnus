@@ -7,7 +7,8 @@ export function AboutIndex() {
   return (
     <Section title="About">
       <p>
-        Vertumnus is a tool to create customized printable posters of what is in season at local farmers&rsquo; markets.
+        Vertumnus is a tool to create customized printable posters of what is in season at local
+        farmers&rsquo; markets.
       </p>
       <p>
         Named for the{' '}

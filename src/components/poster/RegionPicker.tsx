@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router';
 
-import { Expander, optionClass } from '@/src/components/Expander';
+import { Expander, optionClass } from '@/src/components/poster/Expander';
 import { defaultRegion, regions } from '@/data/regions';
 
 /** Collapsible region control: the current region, expanding to a clickable list. */

@@ -1,7 +1,7 @@
-import { Ribbons } from '@/src/components/Ribbons';
+import { Ribbons } from '@/src/components/poster/Ribbons';
 import type { Region } from '@/data/regions/schema';
 import { selectCrops } from '@/src/lib/crops';
-import { useQueryParams } from '@/src/lib/params';
+import { useQueryParams, useRegion } from '@/src/lib/params';
 import { type Plate, platesFor } from '@/src/lib/plates';
 
 /**
@@ -27,7 +27,8 @@ const INK_MUTED = '#2f6b47';
  * Only placement lives here. What the header says and how the fine print is set belong to
  * those pieces; this decides how much room each gets and hands the rest to the chart.
  */
-export function Poster({ region }: { region: Region }) {
+export function Poster() {
+  const region = useRegion();
   const { w, h, crops } = useQueryParams();
   const posterH = (POSTER_W * h) / w;
 
