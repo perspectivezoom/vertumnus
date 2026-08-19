@@ -1,0 +1,23 @@
+CC0 1.0 Universal — Public Domain Dedication
+https://creativecommons.org/publicdomain/zero/1.0/
+
+To the extent possible under law, the Vertumnus contributors have waived all
+copyright and related or neighbouring rights to the produce data in this
+repository. You may copy, modify and distribute it, including for commercial
+purposes, without asking permission and without attribution.
+
+What this covers:
+
+  data/regions/__generated__/   the derived seasons each poster is drawn from
+  data/regions/crops/           the crop lists, districts and hand-authored spans
+
+The underlying shipment records in data/raw/ are United States government
+works, already in the public domain, and were never ours to license. What this
+dedication adds is the editorial layer on top of them: which crops a region
+shows, which growing districts count as near enough to supply it, and the
+thresholds that turn weekly shipment volume into a season. Those are judgments
+rather than facts, so they could otherwise carry a copyright — this waives it.
+
+Attribution is not required. It is appreciated, and the method is written up at
+https://vertumnus.fyi/about/sources so that anyone reusing the numbers can see
+what they mean and where they are weak.

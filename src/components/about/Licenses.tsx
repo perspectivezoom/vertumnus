@@ -1,63 +1,68 @@
-import { Section } from "@/src/components/about/AboutShell";
-import { DEPENDENCIES, TYPEFACES } from "@/src/lib/licenses";
+import { Section } from '@/src/components/about/AboutShell';
+import { DEPENDENCIES, TYPEFACES } from '@/src/lib/licenses';
 
-/** What the site is built on, and the notices that have to travel with it. */
 export function Licenses() {
   return (
     <Section title="Licenses">
       <p>
-        Vertumnus is open source; the source is on{" "}
+        Vertumnus is open source, on{' '}
         <Ext href="https://github.com/perspectivezoom/vertumnus">GitHub</Ext>.
+      </p>
+      <p>
+        Vertumnus code is under the{' '}
+        <Ext href="https://opensource.org/license/isc-license-txt">ISC licence</Ext>.
+      </p>
+      <p>
+        Vertumnus derived data (which crops each poster shows, which growing districts count as near
+        enough to supply it, and the derived seasons themselves) is dedicated to the public domain
+        under <Ext href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</Ext>, allowing for
+        arbitrary reuse without asking and without attribution.
       </p>
 
       <hr className="border-neutral-300" />
 
       <p>
-        Vertumnus builds off of other people&rsquo;s work, all of it either
-        public domain or openly licensed. What follows are the notices that
-        travel with that work.
+        Vertumnus builds off of other people&rsquo;s work, all of it either public domain or openly
+        licensed. Acknowledgements of that work and their license disclosures are as follows:
       </p>
 
       <Heading>Data and artwork</Heading>
       <p>
-        Crop seasonality data is derived from{" "}
+        Crop seasonality data is derived from{' '}
         <Ext href="https://www.ams.usda.gov/market-news/fruits-vegetables">
           USDA Agricultural Marketing Service
-        </Ext>{" "}
+        </Ext>{' '}
         Market News shipment reports.
       </p>
       <p>
-        The watercolours are from the{" "}
+        The watercolours are from the{' '}
         <Ext href="https://usdawatercolors.nal.usda.gov/">
           USDA Pomological Watercolor Collection
         </Ext>
-        , painted between 1886 and 1942 and held by the National Agricultural
-        Library.
+        , painted between 1886 and 1942 and held by the National Agricultural Library.
       </p>
       <p>
-        Both are works of the United States government and in the public domain
-        — no permission is needed to use them, and none is claimed here. They
-        are credited because the project cites what it is built from, not
-        because any licence demands it.
+        Both are works of the United States government and in the public domain — no permission is
+        needed to use them, and none is claimed here. They are credited because the project cites
+        what it is built from, not because any licence demands it.
       </p>
       <p>
-        The plates on each poster were painted from fruit grown in the region,
-        which was only findable because{" "}
-        <Ext href="https://pomological.art/">pomological.art</Ext> made its
+        The plates on each poster were painted from fruit grown in the region, which was only
+        findable because <Ext href="https://pomological.art/">pomological.art</Ext> made its
         collection browsable by map.
       </p>
 
       <Heading>Typefaces</Heading>
       <p>
-        Fonts are served from this site as WOFF2 files, so a copy of their
-        licensing is included here.
+        Fonts are served from this site as WOFF2 files, so a copy of their licensing is included
+        here.
       </p>
       {TYPEFACES.map((face) => (
         <div key={face.name} className="flex flex-col gap-1">
           <p>
             <Ext href={face.url}>
               <strong className="font-medium">{face.name}</strong>
-            </Ext>{" "}
+            </Ext>{' '}
             — {face.role}.
             <br />
             {face.designer}. {face.license}.
@@ -75,8 +80,8 @@ export function Licenses() {
 
       <Heading>Software</Heading>
       <p>
-        Although not necessary to disclose, the following libraries were used in
-        the creation of this site.
+        Although not necessary to disclose, the following libraries were used in the creation of
+        this site.
       </p>
       <ul className="flex flex-col gap-2">
         {DEPENDENCIES.map((dep) => (
@@ -84,9 +89,7 @@ export function Licenses() {
             <Ext href={`https://www.npmjs.com/package/${dep.name}`}>
               <span className="font-medium">{dep.name}</span>
             </Ext>
-            <span className="text-xs text-neutral-400 tabular-nums">
-              {dep.version}
-            </span>
+            <span className="text-xs text-neutral-400 tabular-nums">{dep.version}</span>
             <span className="text-xs text-neutral-400">{dep.license}</span>
             {dep.what && <span className="text-neutral-600">— {dep.what}</span>}
           </li>
@@ -97,9 +100,7 @@ export function Licenses() {
 }
 
 function Heading({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="pt-4 text-lg font-semibold text-neutral-900">{children}</h2>
-  );
+  return <h2 className="pt-4 text-lg font-semibold text-neutral-900">{children}</h2>;
 }
 
 function Ext({ href, children }: { href: string; children: React.ReactNode }) {

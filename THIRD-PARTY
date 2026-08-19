@@ -1,0 +1,43 @@
+Third-party material in this repository, and the terms it keeps.
+
+Nothing here is covered by LICENSE or LICENSE-DATA; each item stays under its
+own terms, which travel with it.
+
+
+FONTS — SIL Open Font License 1.1
+
+  src/fonts/noto-serif-latin.woff2        Noto Serif, by the Noto Project Authors
+  src/fonts/playfair-display-latin.woff2  Playfair Display, by the Playfair Display Project Authors
+
+  Full licence text sits beside each file (OFL-notoserif.txt, OFL-playfair.txt)
+  and is served on https://vertumnus.fyi/about/licenses, because the OFL asks
+  that a copy accompany the font software wherever it is distributed.
+
+  Note the Reserved Font Name clause: "Playfair Display" is a reserved name, so
+  a modified version may not be distributed under it.
+
+
+ARTWORK — United States public domain
+
+  src/images/plates/    USDA Pomological Watercolor Collection, painted
+                        1886-1942, held by the National Agricultural Library.
+
+  Cropped and re-encoded here; the paintings themselves are government works
+  and free of copyright. No rights are claimed over them.
+
+
+DATA — United States public domain
+
+  data/raw/    USDA Agricultural Marketing Service, Market News movement
+               reports. Government works, free of copyright.
+
+
+LIBRARIES
+
+  Runtime dependencies ship in the built page and carry MIT or ISC licences.
+  The current list, with versions, is generated into
+  src/lib/__generated__/dependencies.ts and shown at
+  https://vertumnus.fyi/about/licenses.
+
+  Build-only tools (TypeScript, oxlint, oxfmt, Tailwind) are not redistributed
+  by this project.

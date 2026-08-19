@@ -1,6 +1,7 @@
 {
   "name": "vertumnus",
   "version": "0.0.1",
+  "license": "ISC",
   "type": "module",
   "scripts": {
     "dev": "bun ./index.html",
