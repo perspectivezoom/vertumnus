@@ -39,3 +39,45 @@
     cursor: pointer;
   }
 }
+
+/**
+ * Printing.
+ *
+ * Deliberately all in one place. Each rule here could be a `print:` variant on the element it
+ * affects, and several would then not need !important — but that scatters one concern across
+ * five files, and there would be no single place to read to know what a printed poster does.
+ * The !important calls are the price of that, and they are honest: this block exists precisely
+ * to override how the poster is framed for a screen.
+ *
+ * The sheet size is the one part not here, because it follows whichever paper the reader picked
+ * — Poster emits its own @page rule alongside the artwork.
+ */
+@media print {
+  /* Chrome for reading on a screen; on paper there is nothing for it to control. */
+  [data-screen-only] {
+    display: none !important;
+  }
+
+  /* The page is the frame on paper, so the screen's surface and padding go. */
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  /* On screen the poster is capped to fit the viewport; on paper it fills the sheet. */
+  svg[role='img'] {
+    max-width: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Browsers drop backgrounds and fills by default to save ink. On a poster whose whole content
+     is coloured areas, that prints a near-blank page. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

@@ -76,7 +76,6 @@ const LABEL_RISE = (RIDGE_OVERLAP - 1 + 1) / 2;
 const VOID_COLS = 120;
 const VOID_MAX_H = 0.34; // tallest a plate may be, as a share of the chart
 const VOID_MIN_H = 0.14; // below this the gap is left empty rather than filled badly
-const PLATE_FADE = 0.16; // how far in from a plate's edge the paper dissolves, as a share of it
 
 const CHART_BG = '#ffffff'; // the card the ribbons sit on, and the colour uncertainty fades toward
 const AXIS_COLOR = '#888888';
@@ -174,45 +173,26 @@ export function Ribbons({
 }
 
 /**
- * A watercolour plate, faded to nothing at its edges.
+ * A watercolour plate.
  *
- * The scans are cream paper, not white, so a hard edge would read as a pasted rectangle. The
- * fade follows the plate's own rectangle — a blurred inset rect rather than an ellipse, which
- * would eat the corners and leave the subject sitting in an oval. It is a mask rather than
- * something baked into the file, so one asset works whatever the paper becomes.
+ * The fade at its edges is baked into the file's own alpha rather than applied here as a mask
+ * over a blurred rectangle. Two reasons: SVG filters have no equivalent in PDF, so exporting one
+ * depends on the renderer rasterising it and some viewers end up with nothing at all; and an
+ * alpha fade dissolves into whatever is behind it, where a mask had to be told what colour the
+ * paper was.
  */
 function PlateArt({ plate, box }: { plate: Plate; box: Box }) {
-  const id = `plate-fade-${plate.accession}`;
-  const inset = Math.min(box.w, box.h) * PLATE_FADE;
   return (
-    <>
-      <defs>
-        <filter id={`${id}-blur`} x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation={inset / 2} />
-        </filter>
-        <mask id={`${id}-mask`} maskUnits="userSpaceOnUse">
-          <rect
-            x={box.x + inset}
-            y={box.y + inset}
-            width={Math.max(0, box.w - inset * 2)}
-            height={Math.max(0, box.h - inset * 2)}
-            fill="#ffffff"
-            filter={`url(#${id}-blur)`}
-          />
-        </mask>
-      </defs>
-      <image
-        href={plate.src}
-        x={box.x}
-        y={box.y}
-        width={box.w}
-        height={box.h}
-        preserveAspectRatio="xMidYMid slice"
-        mask={`url(#${id}-mask)`}
-      >
-        <title>{`${plate.subject}, ${plate.origin} — USDA Pomological Watercolor Collection`}</title>
-      </image>
-    </>
+    <image
+      href={plate.src}
+      x={box.x}
+      y={box.y}
+      width={box.w}
+      height={box.h}
+      preserveAspectRatio="xMidYMid slice"
+    >
+      <title>{`${plate.subject}, ${plate.origin} — USDA Pomological Watercolor Collection`}</title>
+    </image>
   );
 }
 

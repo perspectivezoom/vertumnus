@@ -21,6 +21,26 @@ const INK = '#14532d';
 const INK_MUTED = '#2f6b47';
 
 /**
+ * Declares the sheet this poster was laid out for, so the print dialog opens on the right paper.
+ *
+ * Without it a poster set to Letter prints letterboxed on a printer defaulting to A4 — the
+ * aspect ratio comes from the paper picker, and nothing else tells the dialog about it. It has
+ * to be emitted rather than written into the stylesheet because it changes with that picker.
+ *
+ * `href` and `precedence` are what make React hoist this into the head and keep one copy of it,
+ * rather than leaving a <style> in the body — which browsers do honour, but is not valid there
+ * and would be re-created on every re-render. The precedence value claims no priority; there is
+ * only ever one of these.
+ */
+function PageSize({ width, height, unit }: { width: number; height: number; unit: string }) {
+  return (
+    <style href="poster-page" precedence="default">
+      {`@page { size: ${width}${unit} ${height}${unit}; margin: 0; }`}
+    </style>
+  );
+}
+
+/**
  * The printable poster: a header, the chart on its card, and fine print, on white paper at
  * the chosen aspect ratio.
  *
@@ -29,7 +49,7 @@ const INK_MUTED = '#2f6b47';
  */
 export function Poster() {
   const region = useRegion();
-  const { w, h, crops } = useQueryParams();
+  const { w, h, unit, crops } = useQueryParams();
   const posterH = (POSTER_W * h) / w;
 
   // Paper and produce are both options the URL carries, and both belong here rather than
@@ -49,26 +69,29 @@ export function Poster() {
   // while leaving width maximal, letterboxing the poster and casting the shadow round the box.
   const maxWidth = `min(64rem, calc((100vh - 3rem) * ${w} / ${h}))`;
   return (
-    <svg
-      className="font-poster mx-auto block h-auto w-full shadow-lg"
-      style={{ maxWidth }}
-      viewBox={`0 0 ${POSTER_W} ${posterH}`}
-      role="img"
-      aria-label={`In-season produce for ${region.name}`}
-    >
-      <rect width={POSTER_W} height={posterH} fill={PAPER} />
+    <>
+      <PageSize width={w} height={h} unit={unit} />
+      <svg
+        className="font-poster mx-auto block h-auto w-full shadow-lg"
+        style={{ maxWidth }}
+        viewBox={`0 0 ${POSTER_W} ${posterH}`}
+        role="img"
+        aria-label={`In-season produce for ${region.name}`}
+      >
+        <rect width={POSTER_W} height={posterH} fill={PAPER} />
 
-      <Header region={region.name} y={MARGIN} />
-      <Card
-        items={items}
-        plates={platesFor(region.id, items)}
-        x={MARGIN}
-        y={cardY}
-        width={cardW}
-        height={cardH}
-      />
-      <Footer credits={credits} y={cardY + cardH} />
-    </svg>
+        <Header region={region.name} y={MARGIN} />
+        <Card
+          items={items}
+          plates={platesFor(region.id, items)}
+          x={MARGIN}
+          y={cardY}
+          width={cardW}
+          height={cardH}
+        />
+        <Footer credits={credits} y={cardY + cardH} />
+      </svg>
+    </>
   );
 }
 

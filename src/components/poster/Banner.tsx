@@ -1,7 +1,8 @@
-import { Info, X } from 'lucide-react';
+import { Info, Printer, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
 import { CropPicker } from '@/src/components/poster/CropPicker';
+import { RoundButton } from '@/src/components/poster/RoundButton';
 import { PaperSizeSelector } from '@/src/components/poster/PaperSizeSelector';
 import { RegionPicker } from '@/src/components/poster/RegionPicker';
 import { useQueryParams, useSetQueryParams } from '@/src/lib/params';
@@ -27,29 +28,35 @@ export function Banner() {
   const setQueryParams = useSetQueryParams();
 
   return (
-    <div className="pointer-events-none fixed inset-0 flex items-center justify-center p-6">
+    <div
+      data-screen-only
+      className="pointer-events-none fixed inset-0 flex items-center justify-center p-6"
+    >
       <AnimatePresence initial={false}>
         {hideBanner ? (
-          <motion.button
-            key="icon"
-            layoutId="banner"
-            type="button"
-            onClick={() => setQueryParams({ hideBanner: null })}
-            aria-label="Open controls"
-            initial={{ backgroundColor: '#ffffff' }}
-            animate={{ backgroundColor: '#15803d' }}
-            transition={{ layout: boxMorph, backgroundColor: revealLate }}
-            className="pointer-events-auto absolute right-4 bottom-4 flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-[filter] duration-150 hover:brightness-90"
-          >
-            <motion.span
-              className="flex"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={revealLate}
+          <div key="icon" className="absolute right-4 bottom-4 flex items-center gap-2">
+            <PrintButton />
+            <motion.button
+              layoutId="banner"
+              type="button"
+              onClick={() => setQueryParams({ hideBanner: null })}
+              aria-label="Open controls"
+              title="Open controls"
+              initial={{ backgroundColor: '#ffffff' }}
+              animate={{ backgroundColor: '#15803d' }}
+              transition={{ layout: boxMorph, backgroundColor: revealLate }}
+              className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-[filter] duration-150 hover:brightness-90"
             >
-              <Info className="h-5 w-5" />
-            </motion.span>
-          </motion.button>
+              <motion.span
+                className="flex"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={revealLate}
+              >
+                <Info className="h-5 w-5" />
+              </motion.span>
+            </motion.button>
+          </div>
         ) : (
           <motion.aside
             key="card"
@@ -57,19 +64,32 @@ export function Banner() {
             transition={{ layout: boxMorph }}
             className="pointer-events-auto relative max-w-[90vw] rounded-lg border border-neutral-200 bg-white p-6 shadow-xl"
           >
-            <button
-              type="button"
-              onClick={() => setQueryParams({ hideBanner: 'true' })}
-              aria-label="Dismiss"
-              className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="absolute top-3 right-3 flex items-center gap-2">
+              <PrintButton />
+              <RoundButton onClick={() => setQueryParams({ hideBanner: 'true' })} label="Close">
+                <X className="h-5 w-5" />
+              </RoundButton>
+            </div>
             <BannerContent />
           </motion.aside>
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+/**
+ * Hands the poster to the browser's own print dialog.
+ *
+ * No custom dialog of its own: the reader already has one that knows their printers and paper,
+ * and the poster is laid out in proportional units, so whatever they choose there is what it
+ * scales to. The controls hide themselves for the print (see global.css).
+ */
+function PrintButton() {
+  return (
+    <RoundButton onClick={() => window.print()} label="Print poster">
+      <Printer className="h-5 w-5" />
+    </RoundButton>
   );
 }
 
