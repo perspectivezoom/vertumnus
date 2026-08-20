@@ -1,10 +1,10 @@
 import cherry from '@/src/images/plates/sfbay/POM00004450.webp';
-import grape from '@/src/images/plates/sfbay/POM00006232.webp';
+import grape from '@/src/images/plates/sfbay/POM00006021.webp';
 import nectarine from '@/src/images/plates/sfbay/POM00005704.webp';
 import peach from '@/src/images/plates/sfbay/POM00005136.webp';
 import pear from '@/src/images/plates/sfbay/POM00007001.webp';
 import persimmon from '@/src/images/plates/sfbay/POM00001088.webp';
-import plum from '@/src/images/plates/sfbay/POM00004736.webp';
+import plum from '@/src/images/plates/sfbay/POM00004856.webp';
 
 /**
  * A watercolour plate from the USDA Pomological Watercolor Collection.
@@ -43,9 +43,9 @@ export interface Plate {
  */
 export const PLATES: Record<string, readonly Plate[]> = {
   sfbay: [
-    { accession: 'POM00006232', src: grape, subject: 'Grape', origin: 'Napa, CA', crop: 'Grapes' },
+    { accession: 'POM00006021', src: grape, subject: 'Grape', origin: 'Napa, CA', crop: 'Grapes' },
     {
-      accession: 'POM00004736',
+      accession: 'POM00004856',
       src: plum,
       subject: 'Plum',
       origin: 'Vacaville, CA',
