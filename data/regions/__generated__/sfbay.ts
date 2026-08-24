@@ -30,7 +30,8 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 19, to: 20 }, // May 7 – May 20
+        { level: 'available', from: 18, to: 19 }, // Apr 30 – May 13
+        { level: 'uncertain', from: 20, to: 20 }, // May 14 – May 20
         { level: 'peak', from: 21, to: 24 }, // May 21 – Jun 17
         { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
       ],
@@ -50,8 +51,7 @@ export default {
       spans: [
         { level: 'available', from: 21, to: 21 }, // May 21 – May 27
         { level: 'peak', from: 22, to: 24 }, // May 28 – Jun 17
-        { level: 'uncertain', from: 25, to: 25 }, // Jun 18 – Jun 24
-        { level: 'available', from: 26, to: 26 }, // Jun 25 – Jul 1
+        { level: 'uncertain', from: 25, to: 26 }, // Jun 18 – Jul 1
       ],
       sources: [
         {
@@ -67,53 +67,9 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 24, to: 25 }, // Jun 11 – Jun 24
-        { level: 'peak', from: 26, to: 26 }, // Jun 25 – Jul 1
-        { level: 'available', from: 27, to: 32 }, // Jul 2 – Aug 12
-      ],
-      sources: [
-        {
-          credit:
-            'USDA AMS Market News shipment volumes, 2019–2024 · Salinas-Watsonville, San Joaquin Valley, Central District',
-          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
-        },
-      ],
-    },
-    {
-      name: 'Raspberries',
-      color: '#ad5869',
-      generated: true,
-      default: true,
-      spans: [
-        { level: 'available', from: 21, to: 23 }, // May 21 – Jun 10
-        { level: 'peak', from: 24, to: 29 }, // Jun 11 – Jul 22
-        { level: 'uncertain', from: 30, to: 33 }, // Jul 23 – Aug 19
-        { level: 'peak', from: 34, to: 35 }, // Aug 20 – Sep 2
-        { level: 'available', from: 36, to: 42 }, // Sep 3 – Oct 21
-      ],
-      sources: [
-        {
-          credit:
-            'USDA AMS Market News shipment volumes, 2019–2024 · Salinas-Watsonville, San Joaquin Valley, Central District',
-          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
-        },
-      ],
-    },
-    {
-      name: 'Tomatoes',
-      color: '#b2584e',
-      generated: true,
-      default: true,
-      spans: [
-        { level: 'available', from: 25, to: 25 }, // Jun 18 – Jun 24
-        { level: 'peak', from: 26, to: 30 }, // Jun 25 – Jul 29
-        { level: 'uncertain', from: 31, to: 31 }, // Jul 30 – Aug 5
-        { level: 'available', from: 32, to: 33 }, // Aug 6 – Aug 19
-        { level: 'uncertain', from: 34, to: 34 }, // Aug 20 – Aug 26
-        { level: 'peak', from: 35, to: 37 }, // Aug 27 – Sep 16
-        { level: 'available', from: 38, to: 40 }, // Sep 17 – Oct 7
-        { level: 'uncertain', from: 41, to: 42 }, // Oct 8 – Oct 21
-        { level: 'available', from: 43, to: 43 }, // Oct 22 – Oct 28
+        { level: 'peak', from: 24, to: 27 }, // Jun 11 – Jul 8
+        { level: 'uncertain', from: 28, to: 30 }, // Jul 9 – Jul 29
+        { level: 'available', from: 31, to: 42 }, // Jul 30 – Oct 21
       ],
       sources: [
         {
@@ -129,10 +85,31 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 17, to: 20 }, // Apr 23 – May 20
+        { level: 'available', from: 18, to: 20 }, // Apr 30 – May 20
         { level: 'uncertain', from: 21, to: 21 }, // May 21 – May 27
-        { level: 'peak', from: 22, to: 36 }, // May 28 – Sep 9
-        { level: 'available', from: 37, to: 42 }, // Sep 10 – Oct 21
+        { level: 'peak', from: 22, to: 33 }, // May 28 – Aug 19
+        { level: 'uncertain', from: 34, to: 34 }, // Aug 20 – Aug 26
+        { level: 'available', from: 35, to: 41 }, // Aug 27 – Oct 14
+      ],
+      sources: [
+        {
+          credit:
+            'USDA AMS Market News shipment volumes, 2019–2024 · Salinas-Watsonville, San Joaquin Valley, Central District',
+          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
+        },
+      ],
+    },
+    {
+      name: 'Raspberries',
+      color: '#ad5869',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'available', from: 22, to: 22 }, // May 28 – Jun 3
+        { level: 'uncertain', from: 23, to: 23 }, // Jun 4 – Jun 10
+        { level: 'peak', from: 24, to: 34 }, // Jun 11 – Aug 26
+        { level: 'uncertain', from: 35, to: 35 }, // Aug 27 – Sep 2
+        { level: 'available', from: 36, to: 41 }, // Sep 3 – Oct 14
       ],
       sources: [
         {
@@ -150,7 +127,26 @@ export default {
       spans: [
         { level: 'available', from: 21, to: 23 }, // May 21 – Jun 10
         { level: 'peak', from: 24, to: 34 }, // Jun 11 – Aug 26
-        { level: 'available', from: 35, to: 37 }, // Aug 27 – Sep 16
+        { level: 'available', from: 35, to: 36 }, // Aug 27 – Sep 9
+      ],
+      sources: [
+        {
+          credit:
+            'USDA AMS Market News shipment volumes, 2019–2024 · Salinas-Watsonville, San Joaquin Valley, Central District',
+          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
+        },
+      ],
+    },
+    {
+      name: 'Peaches',
+      color: '#d5a479',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'available', from: 21, to: 22 }, // May 21 – Jun 3
+        { level: 'uncertain', from: 23, to: 25 }, // Jun 4 – Jun 24
+        { level: 'peak', from: 26, to: 34 }, // Jun 25 – Aug 26
+        { level: 'available', from: 35, to: 41 }, // Aug 27 – Oct 14
       ],
       sources: [
         {
@@ -166,32 +162,9 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 23, to: 26 }, // Jun 4 – Jul 1
-        { level: 'peak', from: 27, to: 31 }, // Jul 2 – Aug 5
-        { level: 'uncertain', from: 32, to: 33 }, // Aug 6 – Aug 19
-        { level: 'available', from: 34, to: 41 }, // Aug 20 – Oct 14
-      ],
-      sources: [
-        {
-          credit:
-            'USDA AMS Market News shipment volumes, 2019–2024 · Salinas-Watsonville, San Joaquin Valley, Central District',
-          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
-        },
-      ],
-    },
-    {
-      name: 'Peppers, Bell',
-      color: '#7a8f4a',
-      generated: true,
-      default: false,
-      spans: [
-        { level: 'available', from: 24, to: 25 }, // Jun 11 – Jun 24
-        { level: 'uncertain', from: 26, to: 27 }, // Jun 25 – Jul 8
-        { level: 'peak', from: 28, to: 32 }, // Jul 9 – Aug 12
-        { level: 'uncertain', from: 33, to: 34 }, // Aug 13 – Aug 26
-        { level: 'available', from: 35, to: 35 }, // Aug 27 – Sep 2
-        { level: 'uncertain', from: 36, to: 40 }, // Sep 3 – Oct 7
-        { level: 'available', from: 41, to: 44 }, // Oct 8 – Nov 4
+        { level: 'available', from: 24, to: 26 }, // Jun 11 – Jul 1
+        { level: 'peak', from: 27, to: 35 }, // Jul 2 – Sep 2
+        { level: 'available', from: 36, to: 40 }, // Sep 3 – Oct 7
       ],
       sources: [
         {
@@ -208,9 +181,8 @@ export default {
       default: false,
       spans: [
         { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
-        { level: 'peak', from: 27, to: 34 }, // Jul 2 – Aug 26
-        { level: 'uncertain', from: 35, to: 36 }, // Aug 27 – Sep 9
-        { level: 'available', from: 37, to: 39 }, // Sep 10 – Sep 30
+        { level: 'peak', from: 27, to: 35 }, // Jul 2 – Sep 2
+        { level: 'available', from: 36, to: 38 }, // Sep 3 – Sep 23
       ],
       sources: [
         {
@@ -221,15 +193,15 @@ export default {
       ],
     },
     {
-      name: 'Peaches',
-      color: '#d5a479',
+      name: 'Peppers, Bell',
+      color: '#7a8f4a',
       generated: true,
-      default: true,
+      default: false,
       spans: [
-        { level: 'available', from: 21, to: 24 }, // May 21 – Jun 17
-        { level: 'uncertain', from: 25, to: 27 }, // Jun 18 – Jul 8
-        { level: 'peak', from: 28, to: 34 }, // Jul 9 – Aug 26
-        { level: 'available', from: 35, to: 42 }, // Aug 27 – Oct 21
+        { level: 'available', from: 24, to: 25 }, // Jun 11 – Jun 24
+        { level: 'peak', from: 26, to: 37 }, // Jun 25 – Sep 16
+        { level: 'uncertain', from: 38, to: 38 }, // Sep 17 – Sep 23
+        { level: 'available', from: 39, to: 43 }, // Sep 24 – Oct 28
       ],
       sources: [
         {
@@ -247,8 +219,7 @@ export default {
       spans: [
         { level: 'available', from: 28, to: 28 }, // Jul 9 – Jul 15
         { level: 'peak', from: 29, to: 36 }, // Jul 16 – Sep 9
-        { level: 'uncertain', from: 37, to: 38 }, // Sep 10 – Sep 23
-        { level: 'available', from: 39, to: 41 }, // Sep 24 – Oct 14
+        { level: 'available', from: 37, to: 40 }, // Sep 10 – Oct 7
       ],
       sources: [
         {
@@ -266,9 +237,26 @@ export default {
       spans: [
         { level: 'available', from: 23, to: 28 }, // Jun 4 – Jul 15
         { level: 'uncertain', from: 29, to: 29 }, // Jul 16 – Jul 22
-        { level: 'available', from: 30, to: 30 }, // Jul 23 – Jul 29
-        { level: 'peak', from: 31, to: 37 }, // Jul 30 – Sep 16
-        { level: 'available', from: 38, to: 41 }, // Sep 17 – Oct 14
+        { level: 'peak', from: 30, to: 37 }, // Jul 23 – Sep 16
+        { level: 'uncertain', from: 38, to: 38 }, // Sep 17 – Sep 23
+        { level: 'available', from: 39, to: 42 }, // Sep 24 – Oct 21
+      ],
+      sources: [
+        {
+          credit:
+            'USDA AMS Market News shipment volumes, 2019–2024 · Salinas-Watsonville, San Joaquin Valley, Central District',
+          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
+        },
+      ],
+    },
+    {
+      name: 'Tomatoes',
+      color: '#b2584e',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 26, to: 41 }, // Jun 25 – Oct 14
+        { level: 'available', from: 42, to: 43 }, // Oct 15 – Oct 28
       ],
       sources: [
         {
@@ -284,10 +272,10 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 29, to: 30 }, // Jul 16 – Jul 29
-        { level: 'peak', from: 31, to: 44 }, // Jul 30 – Nov 4
-        { level: 'uncertain', from: 45, to: 45 }, // Nov 5 – Nov 11
-        { level: 'available', from: 46, to: 49 }, // Nov 12 – Dec 9
+        { level: 'available', from: 30, to: 31 }, // Jul 23 – Aug 5
+        { level: 'peak', from: 32, to: 42 }, // Aug 6 – Oct 21
+        { level: 'uncertain', from: 43, to: 43 }, // Oct 22 – Oct 28
+        { level: 'available', from: 44, to: 47 }, // Oct 29 – Nov 25
       ],
       sources: [
         {
@@ -304,9 +292,9 @@ export default {
       default: true,
       spans: [
         { level: 'available', from: 38, to: 38 }, // Sep 17 – Sep 23
-        { level: 'uncertain', from: 39, to: 39 }, // Sep 24 – Sep 30
-        { level: 'peak', from: 40, to: 44 }, // Oct 1 – Nov 4
-        { level: 'available', from: 45, to: 50 }, // Nov 5 – Dec 16
+        { level: 'peak', from: 39, to: 44 }, // Sep 24 – Nov 4
+        { level: 'uncertain', from: 45, to: 45 }, // Nov 5 – Nov 11
+        { level: 'available', from: 46, to: 49 }, // Nov 12 – Dec 9
       ],
       sources: [
         {
@@ -322,9 +310,10 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 44, to: 44 }, // Oct 29 – Nov 4
+        { level: 'uncertain', from: 44, to: 44 }, // Oct 29 – Nov 4
         { level: 'peak', from: 45, to: 49 }, // Nov 5 – Dec 9
-        { level: 'available', from: 50, to: 51 }, // Dec 10 – Dec 23
+        { level: 'uncertain', from: 50, to: 50 }, // Dec 10 – Dec 16
+        { level: 'available', from: 51, to: 52 }, // Dec 17 – Dec 30
       ],
       sources: [
         {

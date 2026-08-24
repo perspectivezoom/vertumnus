@@ -10,11 +10,26 @@ export interface Sample {
 }
 
 const WEEKS = 52;
-const SEASON_FLOOR = 0.25; // below this share of a season's best week the crop is not in season
-const PEAK_FRACTION = 0.75; // at or above this share of a season's best week it is peak
+const PEAK_SHARE = 0.5; // the busiest weeks carrying this much of a season are its peak
+const SEASON_SHARE = 0.9; // ...and carrying this much, its season; the rest is trickle
 const MIN_SEASON_SHARE = 0.1; // a season carrying less than this of the median gets no vote
-const MAX_GAP = 3; // an interior gap this short is reporting noise, not a break in the season
+const MAX_GAP = 4; // an interior gap this short is reporting noise, not a break in the season
+const PEAK_GAP = 2; // a dip this short inside a peak is the seasons disagreeing, not a second crop
 const UNCERTAIN_SHARE = 1 / 3; // seasons that must call a week best for it to read as maybe-peak
+
+/** A week's standing, ranked so that `bridge` can raise everything below a level. */
+const OUT = 0;
+const AVAILABLE = 1;
+const UNCERTAIN = 2;
+const PEAK = 3;
+const LEVELS = [null, 'available', 'uncertain', 'peak'] as const;
+
+/** One season's answer for every week: which it calls its best, and which it ships at all. */
+interface Ballot {
+  weeks: number[]; // that season's shipped weight per week, which the sets index into
+  peak: Set<number>;
+  season: Set<number>; // contains `peak` — 90% of a harvest includes the busiest 50%
+}
 
 /** Our poster week for a MM/DD/YYYY date: ceil(dayOfYear / 7), clamped to 1..52. */
 export function weekOf(date: string): number {
@@ -39,11 +54,14 @@ export function weeklyVolumeBySeason(samples: Sample[]): number[][] {
 /**
  * Decide each week's level by asking every season separately and taking the majority.
  *
- * Seasons shift. Peaches peaked in weeks 21–31, 24–34 and 29–35 across three years — each a
- * clean single peak, but eight weeks apart. Pooling the volume first and thresholding after
- * turns that into a smear with holes where one year is fading and the next has not started;
- * the same arithmetic collapsed tomatoes to a single week. So classify within a season, where
- * "its best week" is meaningful, and only then combine.
+ * Seasons shift — a crop can peak weeks apart from one year to the next. Pooling every year's
+ * volume together and classifying afterwards turns that drift into a smear, with holes where
+ * one year is fading and the next has not started. So each season answers for itself, over its
+ * own harvest, and only then do the answers combine.
+ *
+ * A season's two bands are volume shares (see {@link topWeeksCarrying}): its peak is the busiest
+ * weeks shipping half that year's crop, its season the weeks shipping 90%, and the remaining
+ * tenth is the trickle California ships year-round.
  *
  * Counting the votes rather than just checking for a majority gives three bands a shopper can
  * act on: **peak** is "most years this is at its best", **uncertain** is "a fair few years, but
@@ -58,62 +76,77 @@ export function spansFromSeasons(seasons: number[][]): Span[] {
   const voting = seasons.filter((_, i) => (totals[i] ?? 0) >= MIN_SEASON_SHARE * median);
   if (voting.length === 0) return [];
 
-  // Each season's own verdict, per week: 0 out of season, 1 in season, 2 at its best. Note this
-  // is a season's ballot, not the poster's three levels — the tally below produces those.
+  const ballots: Ballot[] = voting.map((weeks) => ({
+    weeks,
+    peak: topWeeksCarrying(weeks, PEAK_SHARE),
+    season: topWeeksCarrying(weeks, SEASON_SHARE),
+  }));
+
   const majority = Math.ceil(voting.length / 2);
-  const levels = voting.map((weeks) => {
-    const high = Math.max(0, ...weeks.slice(1, WEEKS + 1));
-    return weeks.map((v) =>
-      high === 0 || v < SEASON_FLOOR * high ? 0 : v >= PEAK_FRACTION * high ? 2 : 1,
-    );
+  const maybe = Math.max(1, Math.ceil(UNCERTAIN_SHARE * voting.length));
+  const peakVotes = (week: number) => ballots.filter((b) => b.peak.has(week)).length;
+  const seasonVotes = (week: number) => ballots.filter((b) => b.season.has(week)).length;
+
+  const weekly = Array.from({ length: WEEKS + 1 }, (_, week) => {
+    if (week === 0) return OUT;
+    if (peakVotes(week) >= majority) return PEAK;
+    if (peakVotes(week) >= maybe) return UNCERTAIN;
+    return seasonVotes(week) >= majority ? AVAILABLE : OUT;
   });
 
-  const peakVotes = (week: number) => levels.filter((s) => (s[week] ?? 0) === 2).length;
-  const seasonVotes = (week: number) => levels.filter((s) => (s[week] ?? 0) > 0).length;
-
-  const uncertain = Math.max(1, Math.ceil(UNCERTAIN_SHARE * voting.length));
-  const weekly = Array.from({ length: WEEKS + 1 }, (_, week) =>
-    week === 0
-      ? 0
-      : peakVotes(week) >= majority
-        ? 3
-        : peakVotes(week) >= uncertain
-          ? 2
-          : seasonVotes(week) >= majority
-            ? 1
-            : 0,
-  );
-
-  // When a crop's peaks never line up — blueberries peaked in weeks 20–22, 24 and 23 across
-  // three seasons, overlapping in none — no week wins a majority and the crop comes out with no
-  // peak at all. Average the seasons' peaks instead: a best guess sited where they cluster,
-  // rather than a band stretched to cover every week any one season ever called its best.
-  if (!weekly.includes(3)) {
-    const guess = averagePeak(voting, levels);
-    if (guess) for (let week = guess.from; week <= guess.to; week++) weekly[week] = 3;
+  // A crop whose harvest lands somewhere different every year can have no week win a majority,
+  // leaving it with no peak at all and sorting it to the end of the poster. Average the seasons'
+  // peaks instead: a guess sited where they cluster, rather than a band stretched to cover every
+  // week any one season ever called its best.
+  if (!weekly.includes(PEAK)) {
+    const guess = averagePeak(ballots);
+    if (guess) for (let week = guess.from; week <= guess.to; week++) weekly[week] = PEAK;
   }
 
-  bridge(weekly, 1); // a short hole inside a season is noise
-  bridge(weekly, 3); // ...as is a short dip out of peak
-  // The uncertain band is deliberately *not* bridged: it marks where the seasons disagree, so
-  // smoothing it erases the signal. Bridging it welded tomatoes' two harvests into one mass.
+  // Peak is bridged more tightly than availability, and uncertainty not at all: a wide bridge
+  // across a peak would weld a twice-harvested crop into one mass, while uncertainty is the
+  // record of where seasons disagree, so smoothing it would erase the signal itself.
+  bridge(weekly, AVAILABLE, MAX_GAP);
+  bridge(weekly, PEAK, PEAK_GAP);
 
   const spans: Span[] = [];
   for (let week = 1; week <= WEEKS; week++) {
-    const level: Span['level'] | null =
-      weekly[week] === 3
-        ? 'peak'
-        : weekly[week] === 2
-          ? 'uncertain'
-          : weekly[week] === 1
-            ? 'available'
-            : null;
+    const level = LEVELS[weekly[week] ?? OUT];
     if (!level) continue;
     const last = spans.at(-1);
     if (last && last.level === level && last.to === week - 1) last.to = week;
     else spans.push({ level, from: week, to: week });
   }
-  return spans;
+  return anchorUncertain(spans);
+}
+
+/**
+ * Demote uncertainty that touches no peak.
+ *
+ * The pale band on the poster is drawn as the gap between an early curve and a late one — it
+ * says "in some years the peak reached this far", which only means something as the edge of a
+ * peak. Voting can also raise a week in the middle of a tail, where a couple of seasons happened
+ * to ship well; that renders as a spike floating clear of the ridge, promising abundance that
+ * the weeks around it do not have. Those weeks still ship, so they read as available.
+ */
+function anchorUncertain(spans: Span[]): Span[] {
+  const anchored = spans.map((span, i) => {
+    if (span.level !== 'uncertain') return span;
+    const before = spans[i - 1];
+    const after = spans[i + 1];
+    const touchesPeak =
+      (before?.level === 'peak' && before.to === span.from - 1) ||
+      (after?.level === 'peak' && after.from === span.to + 1);
+    return touchesPeak ? span : { ...span, level: 'available' as const };
+  });
+
+  const merged: Span[] = [];
+  for (const span of anchored) {
+    const last = merged.at(-1);
+    if (last && last.level === span.level && last.to === span.from - 1) last.to = span.to;
+    else merged.push({ ...span });
+  }
+  return merged;
 }
 
 /**
@@ -123,10 +156,8 @@ export function spansFromSeasons(seasons: number[][]): Span[] {
  * season's peak, so a crop whose harvest merely drifts year to year still reads as a peak of
  * plausible length, placed where those years centre.
  */
-function averagePeak(voting: number[][], levels: number[][]): { from: number; to: number } | null {
-  const runs = voting
-    .map((weeks, i) => bestPeakRun(weeks, levels[i] ?? []))
-    .filter((run) => run !== null);
+function averagePeak(ballots: Ballot[]): { from: number; to: number } | null {
+  const runs = ballots.map(bestPeakRun).filter((run) => run !== null);
   if (runs.length === 0) return null;
   const mean = (ns: number[]) => ns.reduce((sum, n) => sum + n, 0) / ns.length;
   return {
@@ -141,7 +172,7 @@ function averagePeak(voting: number[][], levels: number[][]): { from: number; to
  * Anchoring on the busiest week rather than taking first-peak to last-peak matters for a crop
  * with two harvests, where the latter would return one run spanning the quiet middle.
  */
-function bestPeakRun(weeks: number[], levels: number[]): { from: number; to: number } | null {
+function bestPeakRun({ weeks, peak }: Ballot): { from: number; to: number } | null {
   let best = 0;
   for (let week = 1; week <= WEEKS; week++) {
     if ((weeks[week] ?? 0) > (weeks[best] ?? 0)) best = week;
@@ -149,28 +180,63 @@ function bestPeakRun(weeks: number[], levels: number[]): { from: number; to: num
   if (best === 0) return null;
   let from = best;
   let to = best;
-  while (from > 1 && levels[from - 1] === 2) from -= 1;
-  while (to < WEEKS && levels[to + 1] === 2) to += 1;
+  while (from > 1 && peak.has(from - 1)) from -= 1;
+  while (to < WEEKS && peak.has(to + 1)) to += 1;
   return { from, to };
 }
 
 /**
- * Raise runs shorter than MAX_GAP that sit between two weeks already at `level`.
+ * Raise runs no longer than `maxGap` that sit between two weeks already at `level`.
  *
  * Seasons rarely align exactly, so a consensus can dip for a week or two mid-season purely
  * because the years disagree there. Bridging those keeps a season whole while leaving a
  * genuine second harvest — separated by many weeks — as two distinct spans.
  */
-function bridge(weekly: number[], level: number): void {
+function bridge(weekly: number[], level: number, maxGap: number): void {
   let run = 0;
   for (let week = 1; week <= WEEKS + 1; week++) {
     if ((weekly[week] ?? 0) >= level) {
-      if (run > 0 && run <= MAX_GAP && week - run - 1 >= 1) {
+      if (run > 0 && run <= maxGap && week - run - 1 >= 1) {
         for (let w = week - run; w < week; w++) weekly[w] = level;
       }
       run = 0;
     } else run += 1;
   }
+}
+
+/**
+ * The busiest weeks that together carry `share` of a season's shipped weight.
+ *
+ * A share of the harvest, rather than a fraction of the season's tallest week: that denominator
+ * would be shape-dependent, since sweet corn's best week is four times a typical shipping week
+ * and tomatoes' is under twice, so one threshold asks far more of a spiky crop than a flat one.
+ * A share asks both the same question, and says what a shopper means — the peak is the stretch
+ * that ships half the crop.
+ *
+ * Taking a set of weeks rather than a window is what lets a twice-harvested crop come back as
+ * two runs, with no special case for it.
+ */
+function topWeeksCarrying(weeks: number[], share: number): Set<number> {
+  const shipped = weeks
+    .map((weight, week) => ({ weight, week }))
+    .slice(1, WEEKS + 1)
+    .filter((entry) => entry.weight > 0)
+    .sort((a, b) => b.weight - a.weight);
+  const total = shipped.reduce((sum, entry) => sum + entry.weight, 0);
+  const picked = new Set<number>();
+  let carried = 0;
+  let least = Number.POSITIVE_INFINITY;
+  for (const { weight, week } of shipped) {
+    // Keep going past the share while weeks are still tied with the last one taken. Without
+    // this a crop harvested twice in equal measure would have its peak decided by sort order:
+    // half the volume is reached partway through the first harvest, and the second — just as
+    // busy — would be cut off mid-tie and never appear.
+    if (carried >= share * total && weight < least) break;
+    picked.add(week);
+    carried += weight;
+    least = weight;
+  }
+  return picked;
 }
 
 /**

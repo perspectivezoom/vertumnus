@@ -70,13 +70,23 @@ describe('spansFromSeasons', () => {
   });
 
   test('averages the peaks when no two seasons agree, rather than reporting none', () => {
-    // Blueberries peaked in weeks 20-22, 24 and 23 — overlapping in no single week. A strict
-    // majority would leave the crop with no peak at all, and sort it to the end of the poster;
-    // spanning 20-24 to cover them all would claim a five-week peak no season actually had.
-    const spans = spansFromSeasons([peakingAt(20, 22), peakingAt(24, 24), peakingAt(23, 23)]);
-    const peaks = spans.filter((s) => s.level === 'peak');
+    // A crop that lands somewhere different every year: three seasons spiking in weeks 10, 26
+    // and 42, sharing not one week between them. A strict majority would leave it with no peak
+    // at all and sort it to the end of the poster; a span covering all three would claim a
+    // 33-week peak no season actually had. Volume-share bands make this rarer than it was —
+    // half a season's harvest is wide enough that merely drifting peaks still overlap — but a
+    // crop scattered this far still has to be given an answer.
+    const spike = (at: number): number[] => {
+      const weeks = new Array<number>(53).fill(0);
+      for (let w = at - 1; w <= at + 1; w++) if (w >= 1 && w <= 52) weeks[w] = 20;
+      weeks[at] = 100;
+      return weeks;
+    };
+    const peaks = spansFromSeasons([spike(10), spike(26), spike(42)]).filter(
+      (s) => s.level === 'peak',
+    );
     expect(peaks).toHaveLength(1);
-    expect(peaks[0]).toMatchObject({ from: 22, to: 23 }); // mean of 20/24/23 and of 22/24/23
+    expect(peaks[0]).toMatchObject({ from: 26, to: 26 }); // mean of 10/26/42
   });
 
   test('averages around each season best week, not across a two-harvest gap', () => {
@@ -120,12 +130,66 @@ describe('spansFromSeasons', () => {
     expect(spans.every((s) => s.from > 5)).toBe(true);
   });
 
-  test('a week below the season floor is out of season', () => {
-    // California ships a trickle of many crops year-round; a trickle is not a season.
+  test('a week carrying almost none of the harvest is out of season', () => {
+    // California ships a trickle of many crops year-round; a trickle is not a season. It falls
+    // outside the band by carrying negligible *volume*, not by sitting under a per-week
+    // threshold — which is why it holds for a crop whose peak dwarfs its tail as well as one
+    // whose season is flat.
     const trickle = peakingAt(20, 24);
-    trickle[45] = 10; // 10% of the season's best week
+    trickle[45] = 10; // a rounding error next to the ~700 the season ships
     const spans = spansFromSeasons([trickle, trickle, trickle]);
     expect(spans.every((s) => s.to < 45)).toBe(true);
+  });
+
+  test('peak is the weeks carrying half the harvest, not the weeks near the tallest', () => {
+    // The failure this replaced: sweet corn's best week is four times a typical shipping week,
+    // so asking for 75% of it yielded a one-week peak; tomatoes' is under twice, so the same
+    // question called most of the season peak. Volume share asks both the same thing. Here the
+    // best week ships 40% of the year and the next 20%, so half the harvest is reached two
+    // weeks in — the peak is those two, not the spike alone and not the whole shoulder.
+    const spiky = season({ 24: 140, 25: 200, 26: 400, 27: 150, 28: 110 });
+    const peaks = spansFromSeasons([spiky, spiky, spiky]).filter((s) => s.level === 'peak');
+    expect(peaks).toHaveLength(1);
+    expect(peaks[0]!.to - peaks[0]!.from + 1).toBe(2);
+    expect(peaks[0]!.from).toBeLessThanOrEqual(26);
+    expect(peaks[0]!.to).toBeGreaterThanOrEqual(26);
+  });
+
+  test('a short dip inside a peak is bridged; a longer one separates two harvests', () => {
+    // A crop that ships steadily has many weeks of near-equal volume, so which of them falls
+    // inside the busiest half is decided by trivial differences, and the vote turns that into
+    // holes. Bridging a dip of a couple of weeks closes them. Real harvests are separated by
+    // months, so nothing this narrow is a genuine break.
+    const withHole = (gap: number): number[] => {
+      const weeks = new Array<number>(53).fill(0);
+      for (let w = 20; w <= 32; w++) weeks[w] = 100;
+      for (let w = 26; w < 26 + gap; w++) weeks[w] = 1; // ships, but nowhere near its best
+      return weeks;
+    };
+    const runs = (gap: number) =>
+      spansFromSeasons([withHole(gap), withHole(gap), withHole(gap)]).filter(
+        (s) => s.level === 'peak',
+      ).length;
+    expect(runs(2)).toBe(1);
+    expect(runs(3)).toBe(2);
+  });
+
+  test('uncertainty stranded in the tail is demoted, not left floating', () => {
+    // A couple of seasons shipping well in the same late week can raise it above the uncertain
+    // threshold while the weeks around it stay flat. The pale band means "the peak may reach
+    // here", so detached from any peak it promises abundance its neighbours do not have.
+    const late = (bump: number): number[] => {
+      const weeks = new Array<number>(53).fill(0);
+      for (let w = 20; w <= 24; w++) weeks[w] = 100; // the peak
+      for (let w = 25; w <= 40; w++) weeks[w] = 8; // a long, flat tail
+      weeks[35] = bump;
+      return weeks;
+    };
+    // Two of six seasons surge in week 35 — enough to clear the uncertain threshold. A shoulder
+    // that does touch its peak stays uncertain; that case is covered by the drift test above.
+    const spans = spansFromSeasons([late(60), late(60), late(8), late(8), late(8), late(8)]);
+    expect(spans.some((s) => s.level === 'uncertain')).toBe(false);
+    expect(spans).toContainEqual({ level: 'available', from: 25, to: 40 });
   });
 
   test('no shipments yields no spans', () => {
