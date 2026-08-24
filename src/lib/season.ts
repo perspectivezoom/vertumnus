@@ -1,9 +1,27 @@
 /** Canonical 52-week year (ignoring the ISO 53rd week and leap-day drift). */
 export const WEEKS_PER_YEAR = 52;
 
-/** Inclusive 1-based week bounds. */
-export const MIN_WEEK = 1;
-export const MAX_WEEK = WEEKS_PER_YEAR;
+/**
+ * Inclusive week bounds. Weeks are 0-based: week 0 is the first week of January.
+ *
+ * Counting from 0 rather than 1 because a week number is an index and never leaves the program
+ * — the poster is a drawing, and the region files under __generated__ are build output, not a
+ * published format. So it is indexed the way arrays are: `weeks[w]` is week `w`, rotations are
+ * plain modular arithmetic, and no read carries an offset. The date comment beside every
+ * generated span is what a human checks, and that is written in calendar terms regardless.
+ */
+export const MIN_WEEK = 0;
+export const MAX_WEEK = WEEKS_PER_YEAR - 1;
+
+/** An array holding one value per week of the year. */
+export function byWeek(value = 0): number[] {
+  return new Array<number>(WEEKS_PER_YEAR).fill(value);
+}
+
+/** Bring a week number back into range, however far outside it has strayed. */
+export function wrapWeek(week: number): number {
+  return ((week % WEEKS_PER_YEAR) + WEEKS_PER_YEAR) % WEEKS_PER_YEAR;
+}
 
 export const MONTHS = [
   'Jan',
@@ -62,36 +80,36 @@ export const PEAK_HEIGHT = LEVEL_BAND[Level.Peak].upper;
 
 /** Length of a span in weeks, wrap-aware (to < from wraps the year end). */
 export function spanWidth(from: number, to: number): number {
-  return from <= to ? to - from + 1 : WEEKS_PER_YEAR - from + 1 + to;
+  return from <= to ? to - from + 1 : WEEKS_PER_YEAR - from + to + 1;
 }
 
-/** Week numbers (1..52) a span covers, wrap-aware. */
+/** Week numbers a span covers, wrap-aware. */
 export function coveredWeeks(from: number, to: number): number[] {
   const weeks: number[] = [];
   if (from <= to) {
     for (let w = from; w <= to; w++) weeks.push(w);
   } else {
-    for (let w = from; w <= WEEKS_PER_YEAR; w++) weeks.push(w);
-    for (let w = 1; w <= to; w++) weeks.push(w);
+    for (let w = from; w <= MAX_WEEK; w++) weeks.push(w);
+    for (let w = MIN_WEEK; w <= to; w++) weeks.push(w);
   }
   return weeks;
 }
 
 /**
- * The two curves bounding a produce's season, per week (index 0 = week 1).
+ * The two curves bounding a produce's season, as {@link byWeek} arrays.
  *
  * `upper` is the season as an early or late year would run it — rising sooner and falling later;
  * `lower` is the part that holds whichever way the year goes. They coincide except across
  * uncertain weeks, so a crop that arrives on schedule every year yields one curve, twice.
  */
 export function weeklyBand(spans: Span[]): { lower: number[]; upper: number[] } {
-  const lower = new Array<number>(WEEKS_PER_YEAR).fill(0);
-  const upper = new Array<number>(WEEKS_PER_YEAR).fill(0);
+  const lower = byWeek();
+  const upper = byWeek();
   for (const s of spans) {
     const band = LEVEL_BAND[s.level];
     for (const w of coveredWeeks(s.from, s.to)) {
-      lower[w - 1] = band.lower;
-      upper[w - 1] = band.upper;
+      lower[w] = band.lower;
+      upper[w] = band.upper;
     }
   }
   return { lower, upper };
@@ -108,5 +126,5 @@ export function peakMidpoint(spans: Span[]): number {
   const first = spans.find((s) => s.level === Level.Peak);
   if (!first) return Number.POSITIVE_INFINITY;
   const mid = first.from + (spanWidth(first.from, first.to) - 1) / 2;
-  return mid > WEEKS_PER_YEAR ? mid - WEEKS_PER_YEAR : mid;
+  return mid > MAX_WEEK ? mid - WEEKS_PER_YEAR : mid;
 }

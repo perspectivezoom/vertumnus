@@ -8,6 +8,8 @@ import {
   coveredWeeks,
   LEVEL_BAND,
   Level,
+  MAX_WEEK,
+  MIN_WEEK,
   MONTHS,
   PEAK_HEIGHT,
   WEEKS_PER_YEAR,
@@ -317,7 +319,7 @@ function buildStreamgraph(
   art: { plate: Plate; box: Box }[];
 } {
   const gridW = width - PAD_X * 2;
-  const weekToX = (week: number) => PAD_X + ((week - 1) / WEEKS_PER_YEAR) * gridW;
+  const weekToX = (week: number) => PAD_X + (week / WEEKS_PER_YEAR) * gridW;
 
   const n = items.length;
   const content = height - PAD_TOP - PAD_BOTTOM;
@@ -331,15 +333,15 @@ function buildStreamgraph(
   const ribbons = items.map((item, i) => {
     const baseline = baselineOf(i);
     const slice = (weekly: number[]): Slice[] => {
-      const slices = Array.from({ length: WEEKS_PER_YEAR }, (_, wk) => ({
-        x: weekToX(wk + 1),
-        top: baseline - ((weekly[wk] ?? 0) / PEAK_HEIGHT) * ridgeHeight,
+      const slices = weekly.map((height, week) => ({
+        x: weekToX(week),
+        top: baseline - (height / PEAK_HEIGHT) * ridgeHeight,
         bottom: baseline,
       }));
       // Extend a flat step to the year-end edge so the fill spans the full width.
       const last = slices.at(-1);
       const full = last
-        ? [...slices, { x: weekToX(WEEKS_PER_YEAR + 1), top: last.top, bottom: last.bottom }]
+        ? [...slices, { x: weekToX(WEEKS_PER_YEAR), top: last.top, bottom: last.bottom }]
         : slices;
       const ground = { top: baseline, bottom: baseline };
       // Runway either side, so a crop still in season on the last week of December falls away
@@ -348,9 +350,9 @@ function buildStreamgraph(
       // EDGE_RUNOFF. This is presentation only: it adds no week the data does not have, and
       // both points are flat on the baseline, so the whitespace search ignores them.
       return [
-        { x: weekToX(1) - EDGE_RUNOFF, ...ground },
+        { x: weekToX(MIN_WEEK) - EDGE_RUNOFF, ...ground },
         ...full,
-        { x: weekToX(WEEKS_PER_YEAR + 1) + EDGE_RUNOFF, ...ground },
+        { x: weekToX(WEEKS_PER_YEAR) + EDGE_RUNOFF, ...ground },
       ];
     };
 
@@ -370,7 +372,7 @@ function buildStreamgraph(
     };
   });
 
-  const monthStart = (m: number) => weekToX(1 + (m * WEEKS_PER_YEAR) / 12);
+  const monthStart = (m: number) => weekToX((m * WEEKS_PER_YEAR) / 12);
   const months = MONTHS.map((label, m) => ({ label, x: monthStart(m + 0.5) }));
   // Interior divisions only: the outer two would land on the plot edges and box the chart in.
   const grid = MONTHS.slice(1).map((_, m) => monthStart(m + 1));
@@ -495,12 +497,12 @@ function placeLabel(item: Produce, geo: Geometry, y: number): Label {
     .filter((s) => s.level !== Level.Available)
     .flatMap((s) => coveredWeeks(s.from, s.to));
   const first = weeks.length > 0 ? Math.min(...weeks) : 1;
-  const last = weeks.length > 0 ? Math.max(...weeks) : WEEKS_PER_YEAR;
+  const last = weeks.length > 0 ? Math.max(...weeks) : MAX_WEEK;
   const width = textWidth(item.name, LABEL_FONT, LABEL_WEIGHT) + CHIP_PAD_X * 2;
 
   // Where the chip's near edge lands on each side, so LABEL_GAP stays true clear space.
-  const before = geo.weekToX(Math.max(1, first - CURVE_LEAD)) - LABEL_GAP;
-  const after = geo.weekToX(Math.min(WEEKS_PER_YEAR + 1, last + 1 + CURVE_LEAD)) + LABEL_GAP;
+  const before = geo.weekToX(Math.max(MIN_WEEK, first - CURVE_LEAD)) - LABEL_GAP;
+  const after = geo.weekToX(Math.min(WEEKS_PER_YEAR, last + 1 + CURVE_LEAD)) + LABEL_GAP;
   const x =
     before - width >= PAD_X
       ? before - width / 2

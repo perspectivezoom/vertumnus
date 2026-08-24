@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
+import { byWeek, MAX_WEEK, MIN_WEEK } from '@/src/lib/season';
 import {
   type Sample,
   spansFromSeasons,
@@ -8,27 +9,27 @@ import {
   weekOf,
 } from '@/data/regions/sources/mars';
 
-/** A season's weekly volumes (index 0 unused) from {week: pounds} entries. */
-function season(byWeek: Record<number, number>): number[] {
-  const out = new Array<number>(53).fill(0);
-  for (const [week, pounds] of Object.entries(byWeek)) out[Number(week)] = pounds;
+/** A season's weekly volumes from {week: pounds} entries. */
+function season(pounds: Record<number, number>): number[] {
+  const out = byWeek();
+  for (const [week, weight] of Object.entries(pounds)) out[Number(week)] = weight;
   return out;
 }
 
 /** A season peaking across `weeks`, with half-strength shoulders either side. */
 function peakingAt(from: number, to: number): number[] {
-  const out = new Array<number>(53).fill(0);
-  for (let w = from - 2; w <= to + 2; w++) if (w >= 1 && w <= 52) out[w] = 50;
+  const out = byWeek();
+  for (let w = from - 2; w <= to + 2; w++) if (w >= MIN_WEEK && w <= MAX_WEEK) out[w] = 50;
   for (let w = from; w <= to; w++) out[w] = 100;
   return out;
 }
 
 describe('weekOf', () => {
-  test('maps the year onto weeks 1..52, clamping the tail', () => {
-    expect(weekOf('01/01/2024')).toBe(1);
-    expect(weekOf('01/07/2024')).toBe(1);
-    expect(weekOf('01/08/2024')).toBe(2);
-    expect(weekOf('12/31/2024')).toBe(52); // day 366 would be week 53
+  test('maps the year onto weeks 0..51, clamping the tail', () => {
+    expect(weekOf('01/01/2024')).toBe(0);
+    expect(weekOf('01/07/2024')).toBe(0);
+    expect(weekOf('01/08/2024')).toBe(1);
+    expect(weekOf('12/31/2024')).toBe(51); // day 366 would fall past the last week
   });
 });
 
@@ -91,14 +92,14 @@ describe('toCalendarWeeks', () => {
     // `to < from` is how the schema says a span crosses the New Year, and it is produced here
     // and nowhere else — every step before this one counts from the start of the season.
     const spans = toCalendarWeeks([{ level: 'peak', from: 20, to: 30 }], 40);
-    expect(spans[0]).toMatchObject({ from: 7, to: 17 }); // week 40 + 19 = 7, + 29 = 17
+    expect(spans[0]).toMatchObject({ from: 8, to: 18 }); // 40 + 20 and 40 + 30, round the year
   });
 
-  test('leaves a season that already starts in January alone', () => {
+  test('leaves a season that already starts with the year alone', () => {
     const spans: { level: 'peak'; from: number; to: number }[] = [
       { level: 'peak', from: 20, to: 30 },
     ];
-    expect(toCalendarWeeks(spans, 1)).toEqual(spans);
+    expect(toCalendarWeeks(spans, 0)).toEqual(spans);
   });
 });
 
@@ -141,8 +142,8 @@ describe('spansFromSeasons', () => {
     // half a season's harvest is wide enough that merely drifting peaks still overlap — but a
     // crop scattered this far still has to be given an answer.
     const spike = (at: number): number[] => {
-      const weeks = new Array<number>(53).fill(0);
-      for (let w = at - 1; w <= at + 1; w++) if (w >= 1 && w <= 52) weeks[w] = 20;
+      const weeks = byWeek();
+      for (let w = at - 1; w <= at + 1; w++) if (w >= MIN_WEEK && w <= MAX_WEEK) weeks[w] = 20;
       weeks[at] = 100;
       return weeks;
     };
@@ -158,7 +159,7 @@ describe('spansFromSeasons', () => {
     // first peak week to its last would reach over the quiet middle, averaging out to one
     // 23-week "peak" spanning both harvests and the lull between them.
     const twoHarvests = (first: number) => {
-      const weeks = new Array<number>(53).fill(0);
+      const weeks = byWeek();
       for (let w = first; w <= first + 2; w++) weeks[w] = 100;
       for (let w = first + 20; w <= first + 22; w++) weeks[w] = 60; // a lesser second harvest
       return weeks;
@@ -179,7 +180,7 @@ describe('spansFromSeasons', () => {
   });
 
   test('keeps two harvests far apart as separate peaks', () => {
-    const twice = new Array<number>(53).fill(0);
+    const twice = byWeek();
     for (let w = 20; w <= 23; w++) twice[w] = 100;
     for (let w = 40; w <= 43; w++) twice[w] = 100;
     expect(spansFromSeasons([twice, twice, twice]).filter((s) => s.level === 'peak')).toHaveLength(
@@ -225,7 +226,7 @@ describe('spansFromSeasons', () => {
     // holes. Bridging a dip of a couple of weeks closes them. Real harvests are separated by
     // months, so nothing this narrow is a genuine break.
     const withHole = (gap: number): number[] => {
-      const weeks = new Array<number>(53).fill(0);
+      const weeks = byWeek();
       for (let w = 20; w <= 32; w++) weeks[w] = 100;
       for (let w = 26; w < 26 + gap; w++) weeks[w] = 1; // ships, but nowhere near its best
       return weeks;
@@ -243,7 +244,7 @@ describe('spansFromSeasons', () => {
     // threshold while the weeks around it stay flat. The pale band means "the peak may reach
     // here", so detached from any peak it promises abundance its neighbours do not have.
     const late = (bump: number): number[] => {
-      const weeks = new Array<number>(53).fill(0);
+      const weeks = byWeek();
       for (let w = 20; w <= 24; w++) weeks[w] = 100; // the peak
       for (let w = 25; w <= 40; w++) weeks[w] = 8; // a long, flat tail
       weeks[35] = bump;

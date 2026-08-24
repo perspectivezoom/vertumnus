@@ -46,7 +46,7 @@ function dayLabel(dayOfYear: number): string {
 
 /** Human-readable date range for a span, as an inline comment. */
 function spanLabel(span: Span): string {
-  return `${dayLabel((span.from - 1) * 7 + 1)} – ${dayLabel(span.to * 7)}`;
+  return `${dayLabel(span.from * 7 + 1)} – ${dayLabel((span.to + 1) * 7)}`;
 }
 
 const quote = (value: string) => `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;

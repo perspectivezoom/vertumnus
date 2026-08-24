@@ -11,9 +11,9 @@ export default {
       generated: false,
       default: true,
       spans: [
-        { level: 'available', from: 28, to: 29 }, // Jul 9 – Jul 22
-        { level: 'peak', from: 30, to: 33 }, // Jul 23 – Aug 19
-        { level: 'available', from: 34, to: 35 }, // Aug 20 – Sep 2
+        { level: 'available', from: 28, to: 29 }, // Jul 16 – Jul 29
+        { level: 'peak', from: 30, to: 33 }, // Jul 30 – Aug 26
+        { level: 'available', from: 34, to: 35 }, // Aug 27 – Sep 9
       ],
       sources: [
         {

@@ -2,6 +2,7 @@ import { cachePath, type MarsSource } from '@/data/raw/mars/client';
 import { MARS_REPORTS, type MarsReport } from '@/data/raw/mars/reports';
 import { parseCache, rehydrate } from '@/data/raw/format';
 import type { GeneratedProduce, Span } from '@/data/regions/render';
+import { byWeek, MAX_WEEK, MIN_WEEK, WEEKS_PER_YEAR, wrapWeek } from '@/src/lib/season';
 
 /** One reported shipment: the season it belongs to, the week it moved, and how much. */
 export interface Sample {
@@ -9,7 +10,6 @@ export interface Sample {
   weight: number;
 }
 
-const WEEKS = 52;
 const PEAK_SHARE = 0.5; // the busiest weeks carrying this much of a season are its peak
 const SEASON_SHARE = 0.9; // ...and carrying this much, its season; the rest is trickle
 const MIN_SEASON_SHARE = 0.1; // a season carrying less than this of the median gets no vote
@@ -31,23 +31,23 @@ interface Ballot {
   season: Set<number>; // contains `peak` — 90% of a harvest includes the busiest 50%
 }
 
-/** Our poster week for a MM/DD/YYYY date: ceil(dayOfYear / 7), clamped to 1..52. */
+/** Our poster week for a MM/DD/YYYY date: the week of the year it fell in, from 0. */
 export function weekOf(date: string): number {
   const [m, d, y] = date.split('/').map(Number) as [number, number, number];
   const dayOfYear = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86_400_000);
-  return Math.min(WEEKS, Math.max(1, Math.ceil(dayOfYear / 7)));
+  return Math.min(MAX_WEEK, Math.max(MIN_WEEK, Math.ceil(dayOfYear / 7) - 1));
 }
 
 /** Whole seasons of shipped weight, measured from the week each season begins. */
 export interface Seasons {
-  /** One array per season, index 0 unused, index 1 = the week the season opens. */
+  /** One array per season, index 0 = the week the season opens. */
   weeks: number[][];
-  /** The calendar week that index 1 stands for; 1 when the season is the calendar year. */
+  /** The calendar week that index 0 stands for; 0 when the season is the calendar year. */
   start: number;
 }
 
 /**
- * Group shipments into whole seasons, re-indexed so each one starts at week 1.
+ * Group shipments into whole seasons, re-indexed so each one starts at week 0.
  *
  * A season is not a calendar year. A crop harvested through the New Year has half of each
  * harvest either side of January 1st, so bucketing by year would hand the classifier the tail
@@ -62,7 +62,7 @@ export interface Seasons {
  * {@link toCalendarWeeks} puts the answer back on the calendar at the end.
  */
 export function weeklyVolumeBySeason(samples: Sample[], years: number[]): Seasons {
-  const pooled = new Array<number>(WEEKS + 1).fill(0);
+  const pooled = byWeek();
   for (const { date, weight } of samples) {
     const week = weekOf(date);
     pooled[week] = (pooled[week] ?? 0) + weight;
@@ -79,8 +79,8 @@ export function weeklyVolumeBySeason(samples: Sample[], years: number[]): Season
     const year = Number(date.split('/')[2]);
     // Weeks before the cut belong to the season that opened in the previous calendar year.
     const season = week >= start ? year : year - 1;
-    const weeks = bySeason.get(season) ?? new Array<number>(WEEKS + 1).fill(0);
-    const offset = ((week - start + WEEKS) % WEEKS) + 1;
+    const weeks = bySeason.get(season) ?? byWeek();
+    const offset = wrapWeek(week - start);
     weeks[offset] = (weeks[offset] ?? 0) + weight;
     bySeason.set(season, weeks);
   }
@@ -93,8 +93,8 @@ export function weeklyVolumeBySeason(samples: Sample[], years: number[]): Season
     for (let week = from; week <= to; week++) if (inSeason.has(week)) return true;
     return false;
   };
-  const opensLate = ships(start, WEEKS);
-  const closesNextYear = start > 1 && ships(1, start - 1);
+  const opensLate = ships(start, MAX_WEEK);
+  const closesNextYear = start > MIN_WEEK && ships(MIN_WEEK, start - 1);
   const fetched = (year: number) => year >= Math.min(...years) && year <= Math.max(...years);
 
   const whole = [...bySeason.entries()]
@@ -127,18 +127,18 @@ function seasonStart(inSeason: Set<number>): number {
   let best = { length: 0, end: 0 };
   let run = 0;
   // Twice round, so a gap straddling New Year is measured whole rather than as two.
-  for (let i = 0; i < WEEKS * 2; i++) {
-    const week = (i % WEEKS) + 1;
+  for (let i = 0; i < WEEKS_PER_YEAR * 2; i++) {
+    const week = wrapWeek(i);
     if (inSeason.has(week)) {
       run = 0;
       continue;
     }
     run += 1;
-    if (run > best.length && run <= WEEKS) best = { length: run, end: week };
+    if (run > best.length && run <= WEEKS_PER_YEAR) best = { length: run, end: week };
   }
-  if (best.length === 0) return 1;
+  if (best.length === 0) return MIN_WEEK;
   const middle = best.end - Math.floor((best.length - 1) / 2);
-  return ((((middle - 1) % WEEKS) + WEEKS) % WEEKS) + 1;
+  return wrapWeek(middle);
 }
 
 /**
@@ -177,12 +177,12 @@ export function spansFromSeasons(seasons: number[][]): Span[] {
   const peakVotes = (week: number) => ballots.filter((b) => b.peak.has(week)).length;
   const seasonVotes = (week: number) => ballots.filter((b) => b.season.has(week)).length;
 
-  const weekly = Array.from({ length: WEEKS + 1 }, (_, week) => {
-    if (week === 0) return OUT;
-    if (peakVotes(week) >= majority) return PEAK;
-    if (peakVotes(week) >= maybe) return UNCERTAIN;
-    return seasonVotes(week) >= majority ? AVAILABLE : OUT;
-  });
+  const weekly = byWeek(OUT);
+  for (let week = MIN_WEEK; week <= MAX_WEEK; week++) {
+    if (peakVotes(week) >= majority) weekly[week] = PEAK;
+    else if (peakVotes(week) >= maybe) weekly[week] = UNCERTAIN;
+    else if (seasonVotes(week) >= majority) weekly[week] = AVAILABLE;
+  }
 
   // A crop whose harvest lands somewhere different every year can have no week win a majority,
   // leaving it with no peak at all and sorting it to the end of the poster. Average the seasons'
@@ -200,7 +200,7 @@ export function spansFromSeasons(seasons: number[][]): Span[] {
   bridge(weekly, PEAK, PEAK_GAP);
 
   const spans: Span[] = [];
-  for (let week = 1; week <= WEEKS; week++) {
+  for (let week = MIN_WEEK; week <= MAX_WEEK; week++) {
     const level = LEVELS[weekly[week] ?? OUT];
     if (!level) continue;
     const last = spans.at(-1);
@@ -249,8 +249,8 @@ function anchorUncertain(spans: Span[]): Span[] {
  * the poster's geometry already reads.
  */
 export function toCalendarWeeks(spans: Span[], start: number): Span[] {
-  if (start === 1) return spans;
-  const calendar = (week: number) => ((week - 2 + start) % WEEKS) + 1;
+  if (start === MIN_WEEK) return spans;
+  const calendar = (week: number) => wrapWeek(week + start);
   return spans.map((span) => ({ ...span, from: calendar(span.from), to: calendar(span.to) }));
 }
 
@@ -278,15 +278,16 @@ function averagePeak(ballots: Ballot[]): { from: number; to: number } | null {
  * with two harvests, where the latter would return one run spanning the quiet middle.
  */
 function bestPeakRun({ weeks, peak }: Ballot): { from: number; to: number } | null {
-  let best = 0;
-  for (let week = 1; week <= WEEKS; week++) {
-    if ((weeks[week] ?? 0) > (weeks[best] ?? 0)) best = week;
+  let best = -1; // week 0 is a real week, so absence needs a value outside the year
+  for (let week = MIN_WEEK; week <= MAX_WEEK; week++) {
+    if ((weeks[week] ?? 0) > 0 && (best < 0 || (weeks[week] ?? 0) > (weeks[best] ?? 0)))
+      best = week;
   }
-  if (best === 0) return null;
+  if (best < 0) return null;
   let from = best;
   let to = best;
-  while (from > 1 && peak.has(from - 1)) from -= 1;
-  while (to < WEEKS && peak.has(to + 1)) to += 1;
+  while (from > MIN_WEEK && peak.has(from - 1)) from -= 1;
+  while (to < MAX_WEEK && peak.has(to + 1)) to += 1;
   return { from, to };
 }
 
@@ -299,9 +300,11 @@ function bestPeakRun({ weeks, peak }: Ballot): { from: number; to: number } | nu
  */
 function bridge(weekly: number[], level: number, maxGap: number): void {
   let run = 0;
-  for (let week = 1; week <= WEEKS + 1; week++) {
+  for (let week = MIN_WEEK; week <= MAX_WEEK; week++) {
     if ((weekly[week] ?? 0) >= level) {
-      if (run > 0 && run <= maxGap && week - run - 1 >= 1) {
+      // `run > 0` needs a week at `level` on the left too, which is why the gap cannot open the
+      // year: a season that simply starts late has no left bank to bridge from.
+      if (run > 0 && run <= maxGap && week - run > MIN_WEEK) {
         for (let w = week - run; w < week; w++) weekly[w] = level;
       }
       run = 0;
@@ -324,7 +327,6 @@ function bridge(weekly: number[], level: number, maxGap: number): void {
 function topWeeksCarrying(weeks: number[], share: number): Set<number> {
   const shipped = weeks
     .map((weight, week) => ({ weight, week }))
-    .slice(1, WEEKS + 1)
     .filter((entry) => entry.weight > 0)
     .sort((a, b) => b.weight - a.weight);
   const total = shipped.reduce((sum, entry) => sum + entry.weight, 0);

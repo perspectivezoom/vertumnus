@@ -11,10 +11,10 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 19, to: 19 }, // May 7 – May 13
-        { level: 'peak', from: 20, to: 22 }, // May 14 – Jun 3
-        { level: 'uncertain', from: 23, to: 23 }, // Jun 4 – Jun 10
-        { level: 'available', from: 24, to: 24 }, // Jun 11 – Jun 17
+        { level: 'available', from: 18, to: 18 }, // May 7 – May 13
+        { level: 'peak', from: 19, to: 21 }, // May 14 – Jun 3
+        { level: 'uncertain', from: 22, to: 22 }, // Jun 4 – Jun 10
+        { level: 'available', from: 23, to: 23 }, // Jun 11 – Jun 17
       ],
       sources: [
         {
@@ -30,10 +30,10 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 18, to: 19 }, // Apr 30 – May 13
-        { level: 'uncertain', from: 20, to: 20 }, // May 14 – May 20
-        { level: 'peak', from: 21, to: 24 }, // May 21 – Jun 17
-        { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
+        { level: 'available', from: 17, to: 18 }, // Apr 30 – May 13
+        { level: 'uncertain', from: 19, to: 19 }, // May 14 – May 20
+        { level: 'peak', from: 20, to: 23 }, // May 21 – Jun 17
+        { level: 'available', from: 24, to: 25 }, // Jun 18 – Jul 1
       ],
       sources: [
         {
@@ -49,9 +49,9 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 21, to: 21 }, // May 21 – May 27
-        { level: 'peak', from: 22, to: 24 }, // May 28 – Jun 17
-        { level: 'uncertain', from: 25, to: 26 }, // Jun 18 – Jul 1
+        { level: 'available', from: 20, to: 20 }, // May 21 – May 27
+        { level: 'peak', from: 21, to: 23 }, // May 28 – Jun 17
+        { level: 'uncertain', from: 24, to: 25 }, // Jun 18 – Jul 1
       ],
       sources: [
         {
@@ -67,9 +67,9 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'peak', from: 24, to: 27 }, // Jun 11 – Jul 8
-        { level: 'uncertain', from: 28, to: 30 }, // Jul 9 – Jul 29
-        { level: 'available', from: 31, to: 42 }, // Jul 30 – Oct 21
+        { level: 'peak', from: 23, to: 26 }, // Jun 11 – Jul 8
+        { level: 'uncertain', from: 27, to: 29 }, // Jul 9 – Jul 29
+        { level: 'available', from: 30, to: 41 }, // Jul 30 – Oct 21
       ],
       sources: [
         {
@@ -85,11 +85,11 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 18, to: 20 }, // Apr 30 – May 20
-        { level: 'uncertain', from: 21, to: 21 }, // May 21 – May 27
-        { level: 'peak', from: 22, to: 33 }, // May 28 – Aug 19
-        { level: 'uncertain', from: 34, to: 34 }, // Aug 20 – Aug 26
-        { level: 'available', from: 35, to: 41 }, // Aug 27 – Oct 14
+        { level: 'available', from: 17, to: 19 }, // Apr 30 – May 20
+        { level: 'uncertain', from: 20, to: 20 }, // May 21 – May 27
+        { level: 'peak', from: 21, to: 32 }, // May 28 – Aug 19
+        { level: 'uncertain', from: 33, to: 33 }, // Aug 20 – Aug 26
+        { level: 'available', from: 34, to: 40 }, // Aug 27 – Oct 14
       ],
       sources: [
         {
@@ -105,11 +105,11 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 22, to: 22 }, // May 28 – Jun 3
-        { level: 'uncertain', from: 23, to: 23 }, // Jun 4 – Jun 10
-        { level: 'peak', from: 24, to: 34 }, // Jun 11 – Aug 26
-        { level: 'uncertain', from: 35, to: 35 }, // Aug 27 – Sep 2
-        { level: 'available', from: 36, to: 41 }, // Sep 3 – Oct 14
+        { level: 'available', from: 21, to: 21 }, // May 28 – Jun 3
+        { level: 'uncertain', from: 22, to: 22 }, // Jun 4 – Jun 10
+        { level: 'peak', from: 23, to: 33 }, // Jun 11 – Aug 26
+        { level: 'uncertain', from: 34, to: 34 }, // Aug 27 – Sep 2
+        { level: 'available', from: 35, to: 40 }, // Sep 3 – Oct 14
       ],
       sources: [
         {
@@ -125,9 +125,9 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 21, to: 23 }, // May 21 – Jun 10
-        { level: 'peak', from: 24, to: 34 }, // Jun 11 – Aug 26
-        { level: 'available', from: 35, to: 36 }, // Aug 27 – Sep 9
+        { level: 'available', from: 20, to: 22 }, // May 21 – Jun 10
+        { level: 'peak', from: 23, to: 33 }, // Jun 11 – Aug 26
+        { level: 'available', from: 34, to: 35 }, // Aug 27 – Sep 9
       ],
       sources: [
         {
@@ -143,10 +143,10 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 21, to: 22 }, // May 21 – Jun 3
-        { level: 'uncertain', from: 23, to: 25 }, // Jun 4 – Jun 24
-        { level: 'peak', from: 26, to: 34 }, // Jun 25 – Aug 26
-        { level: 'available', from: 35, to: 41 }, // Aug 27 – Oct 14
+        { level: 'available', from: 20, to: 21 }, // May 21 – Jun 3
+        { level: 'uncertain', from: 22, to: 24 }, // Jun 4 – Jun 24
+        { level: 'peak', from: 25, to: 33 }, // Jun 25 – Aug 26
+        { level: 'available', from: 34, to: 40 }, // Aug 27 – Oct 14
       ],
       sources: [
         {
@@ -162,9 +162,9 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 24, to: 26 }, // Jun 11 – Jul 1
-        { level: 'peak', from: 27, to: 35 }, // Jul 2 – Sep 2
-        { level: 'available', from: 36, to: 40 }, // Sep 3 – Oct 7
+        { level: 'available', from: 23, to: 25 }, // Jun 11 – Jul 1
+        { level: 'peak', from: 26, to: 34 }, // Jul 2 – Sep 2
+        { level: 'available', from: 35, to: 39 }, // Sep 3 – Oct 7
       ],
       sources: [
         {
@@ -180,9 +180,9 @@ export default {
       generated: true,
       default: false,
       spans: [
-        { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
-        { level: 'peak', from: 27, to: 35 }, // Jul 2 – Sep 2
-        { level: 'available', from: 36, to: 38 }, // Sep 3 – Sep 23
+        { level: 'available', from: 24, to: 25 }, // Jun 18 – Jul 1
+        { level: 'peak', from: 26, to: 34 }, // Jul 2 – Sep 2
+        { level: 'available', from: 35, to: 37 }, // Sep 3 – Sep 23
       ],
       sources: [
         {
@@ -198,10 +198,10 @@ export default {
       generated: true,
       default: false,
       spans: [
-        { level: 'available', from: 24, to: 25 }, // Jun 11 – Jun 24
-        { level: 'peak', from: 26, to: 37 }, // Jun 25 – Sep 16
-        { level: 'uncertain', from: 38, to: 38 }, // Sep 17 – Sep 23
-        { level: 'available', from: 39, to: 43 }, // Sep 24 – Oct 28
+        { level: 'available', from: 23, to: 24 }, // Jun 11 – Jun 24
+        { level: 'peak', from: 25, to: 36 }, // Jun 25 – Sep 16
+        { level: 'uncertain', from: 37, to: 37 }, // Sep 17 – Sep 23
+        { level: 'available', from: 38, to: 42 }, // Sep 24 – Oct 28
       ],
       sources: [
         {
@@ -217,9 +217,9 @@ export default {
       generated: true,
       default: false,
       spans: [
-        { level: 'available', from: 28, to: 28 }, // Jul 9 – Jul 15
-        { level: 'peak', from: 29, to: 36 }, // Jul 16 – Sep 9
-        { level: 'available', from: 37, to: 40 }, // Sep 10 – Oct 7
+        { level: 'available', from: 27, to: 27 }, // Jul 9 – Jul 15
+        { level: 'peak', from: 28, to: 35 }, // Jul 16 – Sep 9
+        { level: 'available', from: 36, to: 39 }, // Sep 10 – Oct 7
       ],
       sources: [
         {
@@ -235,11 +235,11 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 22, to: 28 }, // May 28 – Jul 15
-        { level: 'uncertain', from: 29, to: 29 }, // Jul 16 – Jul 22
-        { level: 'peak', from: 30, to: 37 }, // Jul 23 – Sep 16
-        { level: 'uncertain', from: 38, to: 38 }, // Sep 17 – Sep 23
-        { level: 'available', from: 39, to: 42 }, // Sep 24 – Oct 21
+        { level: 'available', from: 21, to: 27 }, // May 28 – Jul 15
+        { level: 'uncertain', from: 28, to: 28 }, // Jul 16 – Jul 22
+        { level: 'peak', from: 29, to: 36 }, // Jul 23 – Sep 16
+        { level: 'uncertain', from: 37, to: 37 }, // Sep 17 – Sep 23
+        { level: 'available', from: 38, to: 41 }, // Sep 24 – Oct 21
       ],
       sources: [
         {
@@ -255,8 +255,8 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'peak', from: 26, to: 41 }, // Jun 25 – Oct 14
-        { level: 'available', from: 42, to: 43 }, // Oct 15 – Oct 28
+        { level: 'peak', from: 25, to: 40 }, // Jun 25 – Oct 14
+        { level: 'available', from: 41, to: 42 }, // Oct 15 – Oct 28
       ],
       sources: [
         {
@@ -272,10 +272,10 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 30, to: 31 }, // Jul 23 – Aug 5
-        { level: 'peak', from: 32, to: 42 }, // Aug 6 – Oct 21
-        { level: 'uncertain', from: 43, to: 43 }, // Oct 22 – Oct 28
-        { level: 'available', from: 44, to: 47 }, // Oct 29 – Nov 25
+        { level: 'available', from: 29, to: 30 }, // Jul 23 – Aug 5
+        { level: 'peak', from: 31, to: 41 }, // Aug 6 – Oct 21
+        { level: 'uncertain', from: 42, to: 42 }, // Oct 22 – Oct 28
+        { level: 'available', from: 43, to: 46 }, // Oct 29 – Nov 25
       ],
       sources: [
         {
@@ -291,9 +291,9 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 38, to: 38 }, // Sep 17 – Sep 23
-        { level: 'peak', from: 39, to: 45 }, // Sep 24 – Nov 11
-        { level: 'available', from: 46, to: 50 }, // Nov 12 – Dec 16
+        { level: 'available', from: 37, to: 37 }, // Sep 17 – Sep 23
+        { level: 'peak', from: 38, to: 44 }, // Sep 24 – Nov 11
+        { level: 'available', from: 45, to: 49 }, // Nov 12 – Dec 16
       ],
       sources: [
         {
@@ -309,10 +309,10 @@ export default {
       generated: true,
       default: true,
       spans: [
-        { level: 'available', from: 43, to: 43 }, // Oct 22 – Oct 28
-        { level: 'uncertain', from: 44, to: 44 }, // Oct 29 – Nov 4
-        { level: 'peak', from: 45, to: 49 }, // Nov 5 – Dec 9
-        { level: 'uncertain', from: 50, to: 50 }, // Dec 10 – Dec 16
+        { level: 'available', from: 42, to: 42 }, // Oct 22 – Oct 28
+        { level: 'uncertain', from: 43, to: 43 }, // Oct 29 – Nov 4
+        { level: 'peak', from: 44, to: 48 }, // Nov 5 – Dec 9
+        { level: 'uncertain', from: 49, to: 49 }, // Dec 10 – Dec 16
       ],
       sources: [
         {
