@@ -75,12 +75,16 @@ export async function marsJobs(all: MarsSource[], wanted: MarsSource[]): Promise
 /** Path of the raw cache for a source (origin comes from its report). */
 export function cachePath(src: MarsSource): string {
   const { origin } = MARS_REPORTS[src.report];
-  // MARS commodity names carry spaces, commas and parentheses ("Peppers, Bell Type"), so
-  // slugify rather than lowercasing them straight into a filename.
+  // MARS commodity names carry spaces, commas and parentheses ("Peppers, Bell Type"), so they
+  // cannot go straight into a filename. camelCase rather than hyphens, to match how the rest of
+  // the repo names things — and derived from the commodity, not from whatever the poster calls
+  // the crop, so a cache is named for what was actually fetched.
   const slug = src.commodity
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
+    .map((word, i) => (i === 0 ? word : word[0]!.toUpperCase() + word.slice(1)))
+    .join('');
   return `data/raw/mars/${origin}/${slug}.jsonc`;
 }
 

@@ -62,6 +62,24 @@ export default {
       ],
     },
     {
+      name: 'Corn',
+      color: '#e0c04a',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'available', from: 24, to: 25 }, // Jun 11 – Jun 24
+        { level: 'peak', from: 26, to: 26 }, // Jun 25 – Jul 1
+        { level: 'available', from: 27, to: 32 }, // Jul 2 – Aug 12
+      ],
+      sources: [
+        {
+          credit:
+            'USDA AMS Market News shipment volumes, 2019–2024 · Salinas-Watsonville, San Joaquin Valley, Central District',
+          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
+        },
+      ],
+    },
+    {
       name: 'Raspberries',
       color: '#ad5869',
       generated: true,
@@ -152,6 +170,28 @@ export default {
         { level: 'peak', from: 27, to: 31 }, // Jul 2 – Aug 5
         { level: 'uncertain', from: 32, to: 33 }, // Aug 6 – Aug 19
         { level: 'available', from: 34, to: 41 }, // Aug 20 – Oct 14
+      ],
+      sources: [
+        {
+          credit:
+            'USDA AMS Market News shipment volumes, 2019–2024 · Salinas-Watsonville, San Joaquin Valley, Central District',
+          url: 'https://www.ams.usda.gov/market-news/fruits-vegetables',
+        },
+      ],
+    },
+    {
+      name: 'Peppers, Bell',
+      color: '#7a8f4a',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'available', from: 24, to: 25 }, // Jun 11 – Jun 24
+        { level: 'uncertain', from: 26, to: 27 }, // Jun 25 – Jul 8
+        { level: 'peak', from: 28, to: 32 }, // Jul 9 – Aug 12
+        { level: 'uncertain', from: 33, to: 34 }, // Aug 13 – Aug 26
+        { level: 'available', from: 35, to: 35 }, // Aug 27 – Sep 2
+        { level: 'uncertain', from: 36, to: 40 }, // Sep 3 – Oct 7
+        { level: 'available', from: 41, to: 44 }, // Oct 8 – Nov 4
       ],
       sources: [
         {

@@ -69,7 +69,11 @@ const elCentro = (name: string, color: string, commodity = name): Reported => ({
  *   year. Aggregates, not shipments, so no season can be derived however much is fetched. Needs
  *   a different source, and it is the painful gap: citrus is what a Bay Area winter is made of.
  * - **Artichokes** — shipped every week of the year, so no season emerges.
- * - **Sweet corn, sugar snap peas, bell peppers** — fragmented into slivers.
+ * - **Sugar snap peas** — real supply the derivation cannot see, rather than a crop that is not
+ *   there: Foodwise lists peas April through November from some thirty growers, crediting one
+ *   coastal farm for the long tail (https://foodwise.org/foods/peas). Movement reports count
+ *   commercial shipping-point volume out of the districts above, so a crop carried by coastal
+ *   smallholders arrives as slivers. Wants a grower-level source, not a wider MARS pull.
  *
  * The list is comprehensive: hand-authored crops are declared here too, so anything in the
  * region file that appears nowhere below has been retired and the writer removes it.
@@ -82,10 +86,15 @@ const crops: Crop[] = [
   { ...fresno('Apricots', '#cea15e'), default: true },
   // summer
   { ...fresno('Raspberries', '#ad5869'), default: true },
+  { ...elCentro('Corn', '#e0c04a', 'Corn, Sweet'), default: true },
   { ...fresno('Peaches', '#d5a479'), default: true },
   { ...fresno('Nectarines', '#c77d5b'), default: true },
   { ...fresno('Plums', '#7e4b5e'), default: true },
   { ...fresno('Blackberries', '#3b3040'), default: true },
+  // Bell peppers are not a crop shoppers time their visit around, and the derivation shows why:
+  // a five-month run whose tail breaks into slivers as the seasons stop agreeing. Derived and
+  // offered in the picker, but not on the poster by default.
+  { ...elCentro('Peppers, Bell', '#7a8f4a', 'Peppers, Bell Type'), default: false },
   // Melons are grown here and sold here, but they read as supermarket produce rather than as
   // something to go to a market for, so they wait in the picker.
   { ...elCentro('Watermelons', '#c77580'), default: false },
