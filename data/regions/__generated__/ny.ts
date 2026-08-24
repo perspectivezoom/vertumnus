@@ -6,19 +6,755 @@ export default {
   schemaVersion: 1,
   items: [
     {
-      name: 'Blueberries',
-      color: '#5b7294',
-      generated: false,
-      default: true,
+      name: 'Parsnips',
+      color: '#cdb98a',
+      generated: true,
+      default: false,
       spans: [
-        { level: 'available', from: 28, to: 29 }, // Jul 16 – Jul 29
-        { level: 'peak', from: 30, to: 33 }, // Jul 30 – Aug 26
-        { level: 'available', from: 34, to: 35 }, // Aug 27 – Sep 9
+        { level: 'available', from: 0, to: 12 }, // Jan 1 – Apr 1
+        { level: 'peak', from: 13, to: 21 }, // Apr 2 – Jun 3
+        { level: 'peak', from: 39, to: 51 }, // Oct 1 – Dec 30
       ],
       sources: [
         {
-          credit: 'Cornell Cooperative Extension, Tompkins County',
-          url: 'https://ccetompkins.org/agriculture/buy-local/u-pick-blueberry-farms',
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Asparagus',
+      color: '#6f8f4e',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 17, to: 23 }, // Apr 30 – Jun 17
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Rhubarb',
+      color: '#b04a55',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 17, to: 29 }, // Apr 30 – Jul 29
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Turnip Greens',
+      color: '#5a7a44',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 17, to: 34 }, // Apr 30 – Sep 2
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Strawberries',
+      color: '#b7636e',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 22, to: 29 }, // Jun 4 – Jul 29
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Peas',
+      color: '#7fa552',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 22, to: 29 }, // Jun 4 – Jul 29
+        { level: 'peak', from: 35, to: 42 }, // Sep 3 – Oct 28
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Garlic',
+      color: '#cfc3ab',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 22, to: 29 }, // Jun 4 – Jul 29
+        { level: 'available', from: 30, to: 47 }, // Jul 30 – Dec 2
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Cherries, Sweet',
+      color: '#693038',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 25, to: 29 }, // Jun 25 – Jul 29
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Raspberries',
+      color: '#ad5869',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 26, to: 28 }, // Jul 2 – Jul 22
+        { level: 'peak', from: 35, to: 42 }, // Sep 3 – Oct 28
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Radishes',
+      color: '#bf5566',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 17, to: 38 }, // Apr 30 – Sep 30
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Beet Greens',
+      color: '#5f7a45',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 17, to: 38 }, // Apr 30 – Sep 30
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Cherries, Tart',
+      color: '#a33f43',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 26, to: 29 }, // Jul 2 – Jul 29
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Spinach',
+      color: '#4f7346',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 17, to: 41 }, // Apr 30 – Oct 21
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Lettuce',
+      color: '#8fb35c',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 17, to: 41 }, // Apr 30 – Oct 21
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Squash, Summer',
+      color: '#ddc25a',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 22, to: 40 }, // Jun 4 – Oct 14
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Zucchini',
+      color: '#6b8f4d',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 22, to: 40 }, // Jun 4 – Oct 14
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Peaches',
+      color: '#d5a479',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 26, to: 37 }, // Jul 2 – Sep 23
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Swiss Chard',
+      color: '#a24a52',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 22, to: 42 }, // Jun 4 – Oct 28
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Herbs',
+      color: '#6d8f5e',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 22, to: 42 }, // Jun 4 – Oct 28
+        { level: 'available', from: 43, to: 21 }, // Oct 29 – Jun 3
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Blueberries',
+      color: '#5b7294',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 26, to: 38 }, // Jul 2 – Sep 30
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Plums',
+      color: '#7e4b5e',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 26, to: 38 }, // Jul 2 – Sep 30
+        { level: 'available', from: 39, to: 41 }, // Oct 1 – Oct 21
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Peppers',
+      color: '#7a8f4a',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 26, to: 40 }, // Jul 2 – Oct 14
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Tomatoes',
+      color: '#b2584e',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 25, to: 42 }, // Jun 25 – Oct 28
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Blackberries',
+      color: '#3b3040',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 30, to: 38 }, // Jul 30 – Sep 30
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Prunes',
+      color: '#4f3a44',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 30, to: 38 }, // Jul 30 – Sep 30
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Beans, Snap',
+      color: '#6d9153',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 26, to: 42 }, // Jul 2 – Oct 28
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Cantaloupes',
+      color: '#d2a379',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 30, to: 38 }, // Jul 30 – Sep 30
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Potatoes',
+      color: '#a9855e',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 26, to: 42 }, // Jul 2 – Oct 28
+        { level: 'available', from: 43, to: 25 }, // Oct 29 – Jul 1
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Broccoli',
+      color: '#4f7a4a',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 22, to: 47 }, // Jun 4 – Dec 2
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Mustard Greens',
+      color: '#7d9445',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 22, to: 47 }, // Jun 4 – Dec 2
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Beets',
+      color: '#8c3550',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 22, to: 47 }, // Jun 4 – Dec 2
+        { level: 'available', from: 48, to: 8 }, // Dec 3 – Mar 4
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Cucumbers',
+      color: '#6f9457',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 26, to: 44 }, // Jul 2 – Nov 11
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Cabbage',
+      color: '#93a86b',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 23, to: 49 }, // Jun 11 – Dec 16
+        { level: 'available', from: 50, to: 12 }, // Dec 17 – Apr 1
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Leeks',
+      color: '#8fa86a',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 30, to: 42 }, // Jul 30 – Oct 28
+        { level: 'available', from: 43, to: 51 }, // Oct 29 – Dec 30
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Onions',
+      color: '#b98b6b',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 26, to: 47 }, // Jul 2 – Dec 2
+        { level: 'available', from: 48, to: 25 }, // Dec 3 – Jul 1
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Carrots',
+      color: '#d08243',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 26, to: 47 }, // Jul 2 – Dec 2
+        { level: 'available', from: 48, to: 13 }, // Dec 3 – Apr 8
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Apples',
+      color: '#a8443f',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 26, to: 47 }, // Jul 2 – Dec 2
+        { level: 'available', from: 48, to: 25 }, // Dec 3 – Jul 1
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Pears',
+      color: '#b3a45c',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 31, to: 42 }, // Aug 6 – Oct 28
+        { level: 'available', from: 43, to: 8 }, // Oct 29 – Mar 4
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Eggplant',
+      color: '#5b3f63',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 30, to: 44 }, // Jul 30 – Nov 11
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Squash, Winter',
+      color: '#b7783c',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 30, to: 44 }, // Jul 30 – Nov 11
+        { level: 'available', from: 45, to: 8 }, // Nov 12 – Mar 4
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Grapes',
+      color: '#765387',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 33, to: 42 }, // Aug 20 – Oct 28
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Corn',
+      color: '#e0c04a',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 32, to: 44 }, // Aug 13 – Nov 11
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Watermelon',
+      color: '#c77580',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 35, to: 42 }, // Sep 3 – Oct 28
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Collard Greens',
+      color: '#4a6b40',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 26, to: 51 }, // Jul 2 – Dec 30
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Kale',
+      color: '#47603f',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 30, to: 47 }, // Jul 30 – Dec 2
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Pumpkins',
+      color: '#cf7b35',
+      generated: true,
+      default: true,
+      spans: [
+        { level: 'peak', from: 35, to: 42 }, // Sep 3 – Oct 28
+        { level: 'available', from: 43, to: 47 }, // Oct 29 – Dec 2
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Cauliflower',
+      color: '#d8cfa8',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 30, to: 47 }, // Jul 30 – Dec 2
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Turnips',
+      color: '#a8798f',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 30, to: 47 }, // Jul 30 – Dec 2
+        { level: 'available', from: 48, to: 12 }, // Dec 3 – Apr 1
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
+        },
+      ],
+    },
+    {
+      name: 'Brussels Sprouts',
+      color: '#6b8a50',
+      generated: true,
+      default: false,
+      spans: [
+        { level: 'peak', from: 35, to: 47 }, // Sep 3 – Dec 2
+      ],
+      sources: [
+        {
+          credit: 'New York State Department of Agriculture and Markets harvest chart',
+          url: 'http://agriculture.ny.gov/harvest-chart',
         },
       ],
     },

@@ -3,6 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { type Crop, type RegionSources, regionSources } from '@/data/regions/crops';
 import { type Produce, renderRegionFile } from '@/data/regions/render';
 import { buildMarsProduce } from '@/data/regions/sources/mars';
+import { buildNyProduce, type ChartRow, readChart } from '@/data/regions/sources/nyHarvest';
 
 // Stage ②: build data/regions/__generated__/ from the crop lists and the committed raw caches.
 // Offline — it reads data/raw/ and never touches the network, so it needs no API key.
@@ -18,11 +19,18 @@ export function regionFilePath(regionId: string): string {
   return `data/regions/__generated__/${regionId}.ts`;
 }
 
-/** Build one crop's produce entry from its cached raw data. */
-async function buildCrop(crop: Crop): Promise<Produce> {
+/**
+ * Build one crop's produce entry from its cached raw data.
+ *
+ * `chart` is read once per region rather than per crop: New York's whole season comes from a
+ * single file, unlike MARS where each commodity has a cache of its own.
+ */
+async function buildCrop(crop: Crop, chart: ChartRow[]): Promise<Produce> {
   switch (crop.type) {
     case 'mars':
       return { ...(await buildMarsProduce(crop)), generated: true, default: crop.default };
+    case 'nyHarvest':
+      return { ...buildNyProduce(crop, chart), generated: true, default: crop.default };
     case 'manual': {
       const { name, color, default: shown, spans, sources } = crop;
       return { name, color, generated: false, default: shown, spans, sources };
@@ -36,8 +44,10 @@ async function buildCrop(crop: Crop): Promise<Produce> {
  * is exactly what `bun run regions` writes.
  */
 export async function renderRegion(region: RegionSources): Promise<string> {
+  // Read once, and only when something asks for it — the file exists for New York alone.
+  const chart = region.crops.some((crop) => crop.type === 'nyHarvest') ? await readChart() : [];
   const produce: Produce[] = [];
-  for (const crop of region.crops) produce.push(await buildCrop(crop));
+  for (const crop of region.crops) produce.push(await buildCrop(crop, chart));
   return renderRegionFile(region, produce);
 }
 

@@ -1,4 +1,5 @@
 import { marsJobs, type MarsSource } from '@/data/raw/mars/client';
+import { nyHarvestJobs } from '@/data/raw/nyharvest/client';
 import { type RegionSources, regionSources } from '@/data/regions/crops';
 
 // Stage ①: fetch source data into data/raw/. Needs MARS_API_KEY; nothing else does.
@@ -33,10 +34,18 @@ if (selected.length === 0) {
 const marsCrops = (regions: RegionSources[]): MarsSource[] =>
   regions.flatMap((region) => region.crops).filter((crop) => crop.type === 'mars');
 
+/** True when any selected region reads the New York chart, which is one file for all of them. */
+const wantsChart = selected.some((region) =>
+  region.crops.some((crop) => crop.type === 'nyHarvest')
+);
+
 // Each source is asked what it would fetch to answer the selected regions, given everything
 // every region wants. How crops map onto caches, and whether a committed one is already good
 // enough, are its business — this only decides how much of that work to do now.
-const jobs = await marsJobs(marsCrops(regionSources), marsCrops(selected));
+const jobs = [
+  ...(await marsJobs(marsCrops(regionSources), marsCrops(selected))),
+  ...(await nyHarvestJobs(wantsChart))
+];
 const pending = jobs.filter((job) => force || job.needed);
 
 /**

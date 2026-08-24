@@ -1,0 +1,156 @@
+// New York harvest and availability, read from the published chart alongside this file.
+// Regenerate with `bun run fetch`; the PDF is the cache, this is what was measured from it.
+//
+// Source: NYS Department of Agriculture and Markets, http://agriculture.ny.gov/harvest-chart
+// "From A(pples) to Z(ucchini), your guide to New York's produce".
+//
+// Weeks are 0-based and fractional, because the chart is: its bars are vector art at finer
+// than month resolution, so they are measured against an axis calibrated on the crops whose
+// availability spans the whole year. `harvest` is the state's harvest period, `available`
+// its availability period — the gap between them is storage, which is why apples carry one
+// and sweet corn does not.
+//
+// The chart itself notes these periods are approximate: harvest may begin a week to ten days
+// earlier in a warm year, and a cool spring delays maturity.
+{
+  "url": "http://agriculture.ny.gov/harvest-chart",
+  "fetchedAt": "2026-08-24T21:10:30.481Z",
+  "constants": {},
+  "fields": ["crop", "kind", "harvest", "available"],
+  "rows": [
+    ["Apples", "fruit", [[26.03, 47.66]], [[0, 52]]],
+    ["Blackberries", "fruit", [[30.34, 38.97]], [[30.37, 38.97]]],
+    ["Blueberries", "fruit", [[26.03, 38.97]], [[26.03, 38.97]]],
+    ["Cantaloupes", "fruit", [[30.37, 38.97]], [[30.34, 38.97]]],
+    ["Cherries, Sweet", "fruit", [[24.7, 30.31]], [[24.7, 30.31]]],
+    ["Cherries, Tart", "fruit", [[26.03, 30.31]], [[26.03, 30.31]]],
+    ["Currants", "fruit", [[30.37, 34.66]], [[30.37, 34.63]]],
+    ["Grapes", "fruit", [[32.89, 43.31]], [[32.89, 43.31]]],
+    ["Peaches", "fruit", [[26.03, 38.07]], [[26.03, 38.07]]],
+    [
+      "Pears",
+      "fruit",
+      [[31.49, 43.31]],
+      [
+        [0, 8.59],
+        [31.49, 52]
+      ]
+    ],
+    ["Plums", "fruit", [[26.03, 38.97]], [[26.03, 41.61]]],
+    ["Prunes", "fruit", [[30.37, 38.97]], [[30.37, 38.97]]],
+    [
+      "Raspberries",
+      "fruit",
+      [
+        [26.03, 29.26],
+        [34.69, 43.31]
+      ],
+      [
+        [26.03, 29.26],
+        [34.69, 43.31]
+      ]
+    ],
+    ["Strawberries", "fruit", [[21.69, 30.31]], [[21.69, 30.31]]],
+    ["Watermelon", "fruit", [[34.69, 43.31]], [[34.69, 43.31]]],
+    ["Asparagus", "vegetable", [[17.37, 23.89]], [[17.37, 23.89]]],
+    ["Beans, Dry", "vegetable", [[34.72, 52]], [[0.03, 52]]],
+    ["Beans, Lima", "vegetable", [[34.72, 43.33]], [[34.72, 43.33]]],
+    ["Beans, Snap", "vegetable", [[26.05, 43.33]], [[26.05, 43.33]]],
+    [
+      "Beets",
+      "vegetable",
+      [[21.69, 47.65]],
+      [
+        [0, 8.61],
+        [21.69, 52]
+      ]
+    ],
+    ["Beet Greens", "vegetable", [[17.37, 38.98]], [[17.37, 38.98]]],
+    ["Broccoli", "vegetable", [[21.69, 47.65]], [[21.69, 47.65]]],
+    ["Brussels Sprouts", "vegetable", [[34.72, 47.65]], [[34.72, 47.65]]],
+    [
+      "Cabbage",
+      "vegetable",
+      [[22.78, 49.5]],
+      [
+        [0.03, 12.96],
+        [22.78, 52]
+      ]
+    ],
+    [
+      "Carrots",
+      "vegetable",
+      [[26.05, 47.65]],
+      [
+        [0.03, 14.04],
+        [26.05, 52]
+      ]
+    ],
+    ["Cauliflower", "vegetable", [[30.4, 47.65]], [[30.4, 47.65]]],
+    ["Celery", "vegetable", [[32.06, 45.46]], [[32.09, 45.46]]],
+    ["Collard Greens", "vegetable", [[26.05, 52]], [[26.05, 52]]],
+    ["Corn", "vegetable", [[32.09, 44.59]], [[32.09, 44.59]]],
+    ["Cucumbers", "vegetable", [[26.05, 44.59]], [[26.05, 44.59]]],
+    ["Eggplant", "vegetable", [[30.4, 45.46]], [[30.4, 45.46]]],
+    ["Garlic", "vegetable", [[21.73, 30.31]], [[21.73, 47.65]]],
+    ["Herbs", "vegetable", [[21.73, 43.33]], [[0.03, 52]]],
+    ["Kale", "vegetable", [[30.4, 47.65]], [[30.4, 47.65]]],
+    ["Leeks", "vegetable", [[30.37, 43.33]], [[30.37, 52]]],
+    ["Lettuce", "vegetable", [[17.37, 41.94]], [[17.37, 41.94]]],
+    ["Mustard Greens", "vegetable", [[21.69, 47.65]], [[21.69, 47.65]]],
+    ["Onions", "vegetable", [[26.05, 47.65]], [[0, 52]]],
+    [
+      "Parsnips",
+      "vegetable",
+      [
+        [13.02, 21.63],
+        [39.1, 52]
+      ],
+      [
+        [0.03, 21.63],
+        [39.1, 52]
+      ]
+    ],
+    [
+      "Peas",
+      "vegetable",
+      [
+        [21.69, 30.31],
+        [34.72, 43.33]
+      ],
+      [
+        [21.69, 30.31],
+        [34.72, 43.33]
+      ]
+    ],
+    ["Peppers", "vegetable", [[26.05, 40.61]], [[26.05, 40.61]]],
+    ["Potatoes", "vegetable", [[26.05, 43.33]], [[0.03, 52]]],
+    ["Pumpkins", "vegetable", [[34.72, 43.33]], [[34.72, 47.65]]],
+    ["Radishes", "vegetable", [[17.34, 38.98]], [[17.37, 38.98]]],
+    ["Rhubarb", "vegetable", [[17.37, 30.31]], [[17.37, 30.31]]],
+    ["Spinach", "vegetable", [[17.34, 41.94]], [[17.37, 41.91]]],
+    ["Squash, Summer", "vegetable", [[21.69, 40.61]], [[21.69, 40.61]]],
+    [
+      "Squash, Winter",
+      "vegetable",
+      [[30.37, 45.43]],
+      [
+        [0, 8.64],
+        [30.37, 52]
+      ]
+    ],
+    ["Swiss Chard", "vegetable", [[21.69, 43.33]], [[21.69, 43.33]]],
+    ["Tomatoes", "vegetable", [[24.69, 43.33]], [[24.69, 43.33]]],
+    [
+      "Turnips",
+      "vegetable",
+      [[30.37, 47.65]],
+      [
+        [0.03, 12.96],
+        [30.37, 52]
+      ]
+    ],
+    ["Turnip Greens", "vegetable", [[17.34, 34.66]], [[17.37, 34.66]]],
+    ["Zucchini", "vegetable", [[21.69, 41.11]], [[21.69, 41.11]]]
+  ]
+}

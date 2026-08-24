@@ -1,5 +1,6 @@
 import type { Source, Span } from '@/data/regions/render';
 import type { MarsCrop } from '@/data/regions/sources/mars';
+import type { NyHarvestCrop } from '@/data/regions/sources/nyHarvest';
 import { ny } from '@/data/regions/crops/ny';
 import { sfbay } from '@/data/regions/crops/sfbay';
 
@@ -18,8 +19,8 @@ export interface ManualCrop {
   sources: Source[];
 }
 
-/** Where a crop's spans come from. Discriminated by `type` so other sources can join MARS. */
-export type Crop = MarsCrop | ManualCrop;
+/** Where a crop's spans come from. Discriminated by `type` so other sources can join. */
+export type Crop = MarsCrop | NyHarvestCrop | ManualCrop;
 
 export interface RegionSources {
   id: string; // becomes __generated__/<id>.ts, and the URL path
