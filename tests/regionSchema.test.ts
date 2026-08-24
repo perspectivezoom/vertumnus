@@ -10,6 +10,7 @@ const produceWith = (spans: Span[]) => ({
   name: 'Widget',
   color: '#2a78d6',
   generated: false,
+  default: true,
   spans,
   sources: [{ credit: 'src', url: null }],
 });
@@ -85,6 +86,7 @@ describe('RegionSchema', () => {
       name,
       color: '#2a78d6',
       generated: false,
+      default: true,
       spans: [{ level: 'peak', from, to }],
       sources: [{ credit: 'src', url: null }],
     });
@@ -125,6 +127,7 @@ describe('RegionSchema', () => {
         name: 'NoPeak',
         color: '#2a78d6',
         generated: false,
+        default: true,
         spans: [{ level: 'available', from: 1, to: 10 }],
         sources: [{ credit: 'src', url: null }],
       };

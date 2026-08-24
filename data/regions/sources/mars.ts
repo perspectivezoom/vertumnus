@@ -211,6 +211,8 @@ export interface MarsCrop extends MarsSource {
   type: 'mars';
   name: string; // produce name as it appears on the poster
   color: string; // ribbon color
+  /** Whether the poster shows this crop unless a URL says otherwise. See Produce.default. */
+  default: boolean;
 }
 
 /**

@@ -23,7 +23,12 @@ const DISTRICTS = [
 // fruit and grapes; El Centro carries vegetables and melons. They share no commodities, so each
 // crop has exactly one source — but they do share growing districts (both report San Joaquin
 // Valley and Central District), which is why DISTRICTS is filtered separately and identically.
-const fresno = (name: string, color: string, commodity = name): MarsCrop => ({
+// Deliberately short of a whole crop: `default` is left to the list below, so that whether a
+// crop is on the poster is stated by the crop rather than inherited from the office that
+// happens to report it.
+type Reported = Omit<MarsCrop, 'default'>;
+
+const fresno = (name: string, color: string, commodity = name): Reported => ({
   type: 'mars',
   name,
   color,
@@ -32,7 +37,7 @@ const fresno = (name: string, color: string, commodity = name): MarsCrop => ({
   years: YEARS,
   districts: DISTRICTS,
 });
-const elCentro = (name: string, color: string, commodity = name): MarsCrop => ({
+const elCentro = (name: string, color: string, commodity = name): Reported => ({
   type: 'mars',
   name,
   color,
@@ -71,23 +76,25 @@ const elCentro = (name: string, color: string, commodity = name): MarsCrop => ({
  */
 const crops: Crop[] = [
   // spring
-  fresno('Strawberries', '#b7636e'),
-  fresno('Cherries', '#693038'),
-  fresno('Blueberries', '#5b7294'),
-  fresno('Apricots', '#cea15e'),
+  { ...fresno('Strawberries', '#b7636e'), default: true },
+  { ...fresno('Cherries', '#693038'), default: true },
+  { ...fresno('Blueberries', '#5b7294'), default: true },
+  { ...fresno('Apricots', '#cea15e'), default: true },
   // summer
-  fresno('Raspberries', '#ad5869'),
-  fresno('Peaches', '#d5a479'),
-  fresno('Nectarines', '#c77d5b'),
-  fresno('Plums', '#7e4b5e'),
-  fresno('Blackberries', '#3b3040'),
-  elCentro('Watermelons', '#c77580'),
-  elCentro('Cantaloupes', '#d2a379'),
+  { ...fresno('Raspberries', '#ad5869'), default: true },
+  { ...fresno('Peaches', '#d5a479'), default: true },
+  { ...fresno('Nectarines', '#c77d5b'), default: true },
+  { ...fresno('Plums', '#7e4b5e'), default: true },
+  { ...fresno('Blackberries', '#3b3040'), default: true },
+  // Melons are grown here and sold here, but they read as supermarket produce rather than as
+  // something to go to a market for, so they wait in the picker.
+  { ...elCentro('Watermelons', '#c77580'), default: false },
+  { ...elCentro('Cantaloupes', '#d2a379'), default: false },
   // autumn
-  elCentro('Tomatoes', '#b2584e'),
-  fresno('Grapes', '#765387'),
-  fresno('Pomegranates', '#88414a'),
-  fresno('Persimmons', '#b4693d'),
+  { ...elCentro('Tomatoes', '#b2584e'), default: true },
+  { ...fresno('Grapes', '#765387'), default: true },
+  { ...fresno('Pomegranates', '#88414a'), default: true },
+  { ...fresno('Persimmons', '#b4693d'), default: true },
 ];
 
 /**

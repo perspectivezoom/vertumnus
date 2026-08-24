@@ -9,6 +9,7 @@ const crops: Crop[] = [
     type: 'manual',
     name: 'Blueberries',
     color: '#5b7294',
+    default: true,
     why: 'no movement report covers New York growers; picking windows come from a Cornell extension listing instead',
     spans: [
       { level: 'available', from: 28, to: 29 }, // farms open (Hall's Hill 9-Jul, Vern Negus 11-Jul, Glenhaven 15-Jul)

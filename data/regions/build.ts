@@ -22,10 +22,10 @@ export function regionFilePath(regionId: string): string {
 async function buildCrop(crop: Crop): Promise<Produce> {
   switch (crop.type) {
     case 'mars':
-      return { ...(await buildMarsProduce(crop)), generated: true };
+      return { ...(await buildMarsProduce(crop)), generated: true, default: crop.default };
     case 'manual': {
-      const { name, color, spans, sources } = crop;
-      return { name, color, generated: false, spans, sources };
+      const { name, color, default: shown, spans, sources } = crop;
+      return { name, color, generated: false, default: shown, spans, sources };
     }
   }
 }

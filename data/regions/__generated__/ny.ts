@@ -9,6 +9,7 @@ export default {
       name: 'Blueberries',
       color: '#5b7294',
       generated: false,
+      default: true,
       spans: [
         { level: 'available', from: 28, to: 29 }, // Jul 9 – Jul 22
         { level: 'peak', from: 30, to: 33 }, // Jul 23 – Aug 19

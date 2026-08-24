@@ -27,6 +27,7 @@ export const ProduceSchema = z.object({
   spans: z.array(SeasonSpanSchema).refine(hasNoOverlap, { error: 'week spans overlap' }),
   sources: z.array(SourceSchema).min(1),
   generated: z.boolean(),
+  default: z.boolean(),
 });
 
 export const RegionSchema = z

@@ -9,6 +9,7 @@ export default {
       name: 'Cherries',
       color: '#693038',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 19, to: 19 }, // May 7 – May 13
         { level: 'peak', from: 20, to: 22 }, // May 14 – Jun 3
@@ -27,6 +28,7 @@ export default {
       name: 'Blueberries',
       color: '#5b7294',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 19, to: 20 }, // May 7 – May 20
         { level: 'peak', from: 21, to: 24 }, // May 21 – Jun 17
@@ -44,6 +46,7 @@ export default {
       name: 'Apricots',
       color: '#cea15e',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 21, to: 21 }, // May 21 – May 27
         { level: 'peak', from: 22, to: 24 }, // May 28 – Jun 17
@@ -62,6 +65,7 @@ export default {
       name: 'Raspberries',
       color: '#ad5869',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 21, to: 23 }, // May 21 – Jun 10
         { level: 'peak', from: 24, to: 29 }, // Jun 11 – Jul 22
@@ -81,6 +85,7 @@ export default {
       name: 'Tomatoes',
       color: '#b2584e',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 25, to: 25 }, // Jun 18 – Jun 24
         { level: 'peak', from: 26, to: 30 }, // Jun 25 – Jul 29
@@ -104,6 +109,7 @@ export default {
       name: 'Strawberries',
       color: '#b7636e',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 17, to: 20 }, // Apr 23 – May 20
         { level: 'uncertain', from: 21, to: 21 }, // May 21 – May 27
@@ -122,6 +128,7 @@ export default {
       name: 'Nectarines',
       color: '#c77d5b',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 21, to: 23 }, // May 21 – Jun 10
         { level: 'peak', from: 24, to: 34 }, // Jun 11 – Aug 26
@@ -139,6 +146,7 @@ export default {
       name: 'Plums',
       color: '#7e4b5e',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 23, to: 26 }, // Jun 4 – Jul 1
         { level: 'peak', from: 27, to: 31 }, // Jul 2 – Aug 5
@@ -157,6 +165,7 @@ export default {
       name: 'Watermelons',
       color: '#c77580',
       generated: true,
+      default: false,
       spans: [
         { level: 'available', from: 25, to: 26 }, // Jun 18 – Jul 1
         { level: 'peak', from: 27, to: 34 }, // Jul 2 – Aug 26
@@ -175,6 +184,7 @@ export default {
       name: 'Peaches',
       color: '#d5a479',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 21, to: 24 }, // May 21 – Jun 17
         { level: 'uncertain', from: 25, to: 27 }, // Jun 18 – Jul 8
@@ -193,6 +203,7 @@ export default {
       name: 'Cantaloupes',
       color: '#d2a379',
       generated: true,
+      default: false,
       spans: [
         { level: 'available', from: 28, to: 28 }, // Jul 9 – Jul 15
         { level: 'peak', from: 29, to: 36 }, // Jul 16 – Sep 9
@@ -211,6 +222,7 @@ export default {
       name: 'Blackberries',
       color: '#3b3040',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 23, to: 28 }, // Jun 4 – Jul 15
         { level: 'uncertain', from: 29, to: 29 }, // Jul 16 – Jul 22
@@ -230,6 +242,7 @@ export default {
       name: 'Grapes',
       color: '#765387',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 29, to: 30 }, // Jul 16 – Jul 29
         { level: 'peak', from: 31, to: 44 }, // Jul 30 – Nov 4
@@ -248,6 +261,7 @@ export default {
       name: 'Pomegranates',
       color: '#88414a',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 38, to: 38 }, // Sep 17 – Sep 23
         { level: 'uncertain', from: 39, to: 39 }, // Sep 24 – Sep 30
@@ -266,6 +280,7 @@ export default {
       name: 'Persimmons',
       color: '#b4693d',
       generated: true,
+      default: true,
       spans: [
         { level: 'available', from: 44, to: 44 }, // Oct 29 – Nov 4
         { level: 'peak', from: 45, to: 49 }, // Nov 5 – Dec 9

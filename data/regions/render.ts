@@ -16,12 +16,25 @@ export interface Produce {
   name: string;
   color: string;
   generated: boolean;
+  /**
+   * Whether a poster shows this crop unless a URL says otherwise.
+   *
+   * The crop list is everything a region *can* show; this is what it shows on arrival. A crop
+   * can be worth deriving and still not belong on the first poster someone sees — a melon that
+   * grows here but reads as supermarket produce. Every crop states this for itself: an editorial
+   * call is not something to inherit from a default buried in the build.
+   */
+  default: boolean;
   spans: Span[];
   sources: Source[];
 }
 
-/** What a source produces; `generated` is filled in by the renderer. */
-export type GeneratedProduce = Omit<Produce, 'generated'>;
+/**
+ * What a source produces. `generated` and `default` are not a source's to decide — the first is
+ * a fact about how the entry was made, the second an editorial call from the crop list — so the
+ * build fills both in.
+ */
+export type GeneratedProduce = Omit<Produce, 'generated' | 'default'>;
 
 const MONTHS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 
@@ -50,6 +63,7 @@ function serializeProduce(produce: Produce): string {
     `name: ${quote(produce.name)},`,
     `color: ${quote(produce.color)},`,
     `generated: ${produce.generated},`,
+    `default: ${produce.default},`,
     'spans: [',
     spans,
     '],',

@@ -11,6 +11,8 @@ export interface ManualCrop {
   type: 'manual';
   name: string;
   color: string;
+  /** Whether the poster shows this crop unless a URL says otherwise. See Produce.default. */
+  default: boolean;
   why: string; // why no source derives this one
   spans: Span[];
   sources: Source[];

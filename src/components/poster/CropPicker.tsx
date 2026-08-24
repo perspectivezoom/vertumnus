@@ -2,7 +2,7 @@ import { Check } from 'lucide-react';
 
 import type { Produce } from '@/data/regions/schema';
 import { Expander, optionClass } from '@/src/components/poster/Expander';
-import { cropSlug, cropsParam } from '@/src/lib/crops';
+import { cropSlug, cropsParam, defaultCrops } from '@/src/lib/crops';
 import { useQueryParams, useRegion, useSetQueryParams } from '@/src/lib/params';
 
 /**
@@ -27,7 +27,8 @@ export function CropPicker() {
   const { items } = useRegion();
   const { crops } = useQueryParams();
   const setParams = useSetQueryParams();
-  const chosen = crops.length > 0 ? new Set(crops) : new Set(items.map((i) => cropSlug(i.name)));
+  const chosen =
+    crops.length > 0 ? new Set(crops) : new Set(defaultCrops(items).map((i) => cropSlug(i.name)));
 
   const toggle = (item: Produce): void => {
     const slug = cropSlug(item.name);
