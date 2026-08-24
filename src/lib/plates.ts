@@ -1,3 +1,11 @@
+import nyApple from '@/src/images/plates/ny/POM00003788.webp';
+import nyBlackberry from '@/src/images/plates/ny/POM00007218.webp';
+import nyGrape from '@/src/images/plates/ny/POM00006213.webp';
+import nyPeach from '@/src/images/plates/ny/POM00005800.webp';
+import nyPear from '@/src/images/plates/ny/POM00007082.webp';
+import nyPersimmon from '@/src/images/plates/ny/POM00001330.webp';
+import nyPlum from '@/src/images/plates/ny/POM00004839.webp';
+import nyStrawberry from '@/src/images/plates/ny/POM00004404.webp';
 import cherry from '@/src/images/plates/sfbay/POM00004450.webp';
 import grape from '@/src/images/plates/sfbay/POM00006021.webp';
 import nectarine from '@/src/images/plates/sfbay/POM00005704.webp';
@@ -81,6 +89,69 @@ export const PLATES: Record<string, readonly Plate[]> = {
     },
     // No pear on any poster yet; it fills a gap when the depicted plates run out.
     { accession: 'POM00007001', src: pear, subject: 'Pear', origin: 'Santa Clara, CA' },
+  ],
+  // Painted from fruit grown around the New York market rather than across the whole state the
+  // seasons describe: five of these towns are in New Jersey or Connecticut, within the ring the
+  // city's greenmarkets have always drawn on. The collection is thin on upstate specimens, and a
+  // Hudson Valley pear says more about this poster than an Ontario County one would.
+  ny: [
+    {
+      accession: 'POM00003788',
+      src: nyApple,
+      subject: 'Apple',
+      origin: 'Orangeburg, NY',
+      crop: 'Apples',
+    },
+    {
+      accession: 'POM00006213',
+      src: nyGrape,
+      subject: 'Grape',
+      origin: 'Beacon, NY',
+      crop: 'Grapes',
+    },
+    {
+      accession: 'POM00005800',
+      src: nyPeach,
+      subject: 'Peach',
+      origin: 'East Orange, NJ',
+      crop: 'Peaches',
+    },
+    {
+      accession: 'POM00004404',
+      src: nyStrawberry,
+      subject: 'Strawberry',
+      origin: 'Clifton, NJ',
+      crop: 'Strawberries',
+    },
+    {
+      accession: 'POM00007082',
+      src: nyPear,
+      subject: 'Pear',
+      origin: 'Spring Valley, NY',
+      crop: 'Pears',
+    },
+    {
+      accession: 'POM00004839',
+      src: nyPlum,
+      subject: 'Plum',
+      origin: 'New Canaan, CT',
+      crop: 'Plums',
+    },
+    {
+      accession: 'POM00007218',
+      src: nyBlackberry,
+      subject: 'Blackberry',
+      origin: 'Little Silver, NJ',
+      crop: 'Blackberries',
+    },
+    // New York grows no persimmons the state chart records, so this one depicts nothing on the
+    // poster and fills a gap only once the others are placed.
+    {
+      accession: 'POM00001330',
+      src: nyPersimmon,
+      subject: 'Persimmon',
+      origin: 'Newark, NJ',
+    },
   ],
 };
 

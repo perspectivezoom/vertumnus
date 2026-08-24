@@ -95,6 +95,16 @@ describe('platesFor', () => {
   });
 
   test('a region with no plates yields none', () => {
-    expect(platesFor('ny', shown('Blueberries'))).toEqual([]);
+    // A new region has no imagery until someone finds some, and the poster has to render anyway.
+    expect(platesFor('nowhere', shown('Blueberries'))).toEqual([]);
+  });
+
+  test('a plate depicting nothing on the poster still comes last, not never', () => {
+    // New York's persimmon depicts no New York crop, so it can only fill a leftover gap — but
+    // it must still be offered, or the last gap goes empty while a usable plate sits unused.
+    const order = platesFor('ny', shown('Apples')).map((p) => p.subject);
+    expect(order[0]).toBe('Apple');
+    expect(order).toContain('Persimmon');
+    expect(order.indexOf('Persimmon')).toBeGreaterThan(order.indexOf('Apple'));
   });
 });
