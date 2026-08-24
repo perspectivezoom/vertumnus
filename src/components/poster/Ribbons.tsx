@@ -54,6 +54,15 @@ const CHIP_PAD_X = 7;
 const CHIP_PAD_Y = 4;
 const CHIP_RADIUS = 5;
 const CURVE_LEAD = 1; // weeks the smoothed curve starts climbing before the week it belongs to
+/**
+ * How far past the plot a ribbon is given to reach the baseline.
+ *
+ * A crop in season through the final week has nowhere left to fall, so the fill meets the frame
+ * at full height and reads as cut off rather than ended. Landing it exactly PAD_X out puts the
+ * taper in the month-axis margin — the one strip of the chart box that carries nothing at these
+ * x positions — so the ribbon runs off the edge without a clip path or any overhang to trim.
+ */
+const EDGE_RUNOFF = PAD_X;
 const MIN_CONTRAST = 4.5; // WCAG AA for body text, against CHART_BG
 const AXIS_FONT = 11; // month labels
 // Advance ÷ font size, used only where there is no DOM to measure against. Deliberately generous:
@@ -329,9 +338,20 @@ function buildStreamgraph(
       }));
       // Extend a flat step to the year-end edge so the fill spans the full width.
       const last = slices.at(-1);
-      return last
+      const full = last
         ? [...slices, { x: weekToX(WEEKS_PER_YEAR + 1), top: last.top, bottom: last.bottom }]
         : slices;
+      const ground = { top: baseline, bottom: baseline };
+      // Runway either side, so a crop still in season on the last week of December falls away
+      // past the frame instead of being sheared off by it. The landing points sit exactly on
+      // the chart's own edges, so the taper fills the month-axis margin and no further — see
+      // EDGE_RUNOFF. This is presentation only: it adds no week the data does not have, and
+      // both points are flat on the baseline, so the whitespace search ignores them.
+      return [
+        { x: weekToX(1) - EDGE_RUNOFF, ...ground },
+        ...full,
+        { x: weekToX(WEEKS_PER_YEAR + 1) + EDGE_RUNOFF, ...ground },
+      ];
     };
 
     const { lower, upper } = weeklyBand(item.spans);
