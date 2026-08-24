@@ -140,18 +140,20 @@ function Header({ region, y }: { region: string; y: number }) {
 
 // ── Card ────────────────────────────────────────────────────────────────────────────────────
 
-const CARD_PAD = 12; // inset between the card's edge and the chart it holds
 const CARD_RADIUS = 12;
 // Ribbons paints its separator hairlines and its drift tint against this same colour, where it
 // is CHART_BG. The two have to agree, or overlapping ridges stop reading as separate shapes.
 const CARD_COLOR = '#ffffff';
 
 /**
- * The card the chart sits on, inset from its own edges.
+ * The card the chart sits on, which the chart fills exactly.
  *
  * Invisible while the paper is also white, but it is the chart's ground rather than decoration:
  * the moment the paper carries a tint or an illustration, this is what keeps the ridges legible
  * and what CARD_COLOR above has to agree with.
+ *
+ * There is no inset. The chart brings its own margins — PAD_X for the month axis at each side,
+ * PAD_TOP and PAD_BOTTOM for the labels above and below.
  */
 function Card({
   items,
@@ -171,13 +173,8 @@ function Card({
   return (
     <>
       <rect x={x} y={y} width={width} height={height} rx={CARD_RADIUS} fill={CARD_COLOR} />
-      <g transform={`translate(${x + CARD_PAD} ${y + CARD_PAD})`}>
-        <Ribbons
-          items={items}
-          plates={plates}
-          width={width - CARD_PAD * 2}
-          height={height - CARD_PAD * 2}
-        />
+      <g transform={`translate(${x} ${y})`}>
+        <Ribbons items={items} plates={plates} width={width} height={height} />
       </g>
     </>
   );
