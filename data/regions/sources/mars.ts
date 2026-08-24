@@ -38,17 +38,107 @@ export function weekOf(date: string): number {
   return Math.min(WEEKS, Math.max(1, Math.ceil(dayOfYear / 7)));
 }
 
-/** Shipped weight per week (index 0 unused), one array per season. */
-export function weeklyVolumeBySeason(samples: Sample[]): number[][] {
+/** Whole seasons of shipped weight, measured from the week each season begins. */
+export interface Seasons {
+  /** One array per season, index 0 unused, index 1 = the week the season opens. */
+  weeks: number[][];
+  /** The calendar week that index 1 stands for; 1 when the season is the calendar year. */
+  start: number;
+}
+
+/**
+ * Group shipments into whole seasons, re-indexed so each one starts at week 1.
+ *
+ * A season is not a calendar year. A crop harvested through the New Year has half of each
+ * harvest either side of January 1st, so bucketing by year would hand the classifier the tail
+ * of one harvest and the head of the next as though they were one — and since a share of the
+ * harvest is scale-free, a fragment does not look like a fragment. It looks like a small
+ * season, and confidently reports its own busiest weeks as a peak. Only whole seasons vote,
+ * which costs a winter crop one of its years and is the honest price.
+ *
+ * Re-indexing rather than keeping calendar weeks is what spares every later step from knowing
+ * any of this: in season coordinates a harvest is one straight run from the first week to the
+ * last, so classifying, voting and bridging stay the linear walks they were written as.
+ * {@link toCalendarWeeks} puts the answer back on the calendar at the end.
+ */
+export function weeklyVolumeBySeason(samples: Sample[], years: number[]): Seasons {
+  const pooled = new Array<number>(WEEKS + 1).fill(0);
+  for (const { date, weight } of samples) {
+    const week = weekOf(date);
+    pooled[week] = (pooled[week] ?? 0) + weight;
+  }
+  // California ships a trickle of many crops the year round, and a few pallets in January must
+  // not decide where a season begins or cost one its vote. The same 90% band the classifier
+  // uses decides which weeks count as shipping here, so trickle is out of it by construction.
+  const inSeason = topWeeksCarrying(pooled, SEASON_SHARE);
+  const start = seasonStart(inSeason);
+
   const bySeason = new Map<number, number[]>();
   for (const { date, weight } of samples) {
-    const year = Number(date.split('/')[2]);
-    const weeks = bySeason.get(year) ?? new Array<number>(WEEKS + 1).fill(0);
     const week = weekOf(date);
-    weeks[week] = (weeks[week] ?? 0) + weight;
-    bySeason.set(year, weeks);
+    const year = Number(date.split('/')[2]);
+    // Weeks before the cut belong to the season that opened in the previous calendar year.
+    const season = week >= start ? year : year - 1;
+    const weeks = bySeason.get(season) ?? new Array<number>(WEEKS + 1).fill(0);
+    const offset = ((week - start + WEEKS) % WEEKS) + 1;
+    weeks[offset] = (weeks[offset] ?? 0) + weight;
+    bySeason.set(season, weeks);
   }
-  return [...bySeason.entries()].sort(([a], [b]) => a - b).map(([, weeks]) => weeks);
+
+  // A season only votes if the whole of it was fetched. Which calendar years that needs depends
+  // on where the crop actually ships: the cut falls in dead weeks, so a summer crop's season is
+  // over well before December and needs one year, while a winter crop's runs into the next and
+  // needs both. Asking the pooled shape rather than assuming keeps six summer seasons intact.
+  const ships = (from: number, to: number) => {
+    for (let week = from; week <= to; week++) if (inSeason.has(week)) return true;
+    return false;
+  };
+  const opensLate = ships(start, WEEKS);
+  const closesNextYear = start > 1 && ships(1, start - 1);
+  const fetched = (year: number) => year >= Math.min(...years) && year <= Math.max(...years);
+
+  const whole = [...bySeason.entries()]
+    .filter(([season]) => !opensLate || fetched(season))
+    .filter(([season]) => !closesNextYear || fetched(season + 1))
+    .sort(([a], [b]) => a - b)
+    .map(([, weeks]) => weeks);
+  return { weeks: whole, start };
+}
+
+/**
+ * The week a season begins: the middle of the longest stretch outside the crop's season band.
+ *
+ * Outside the band rather than empty, because plenty of crops never stop entirely — blackberries
+ * and blueberries report every week of the year. What marks the turn of a season is the long
+ * quiet, not a zero, so the gap is measured against the same 90% band that separates a harvest
+ * from a trickle. Three of the Bay Area crops have no empty week at all and still get a sound
+ * cut this way; only volume spread perfectly evenly over the year leaves no gap to find, and
+ * then the calendar year stands, which is the right answer for a crop with no season to speak of.
+ *
+ * Deliberately the longest *run* rather than simply the quietest week. A crop harvested twice
+ * has a lull between the harvests, and if that lull happened to be the year's quietest point,
+ * cutting there would split every year into two half-seasons — the same bug in a worse form.
+ * A lull between harvests is short; the gap between seasons is long.
+ *
+ * Taking the middle of that run puts the cut as far from either harvest as the data allows, so
+ * a season running long in one particular year still lands on the correct side of it.
+ */
+function seasonStart(inSeason: Set<number>): number {
+  let best = { length: 0, end: 0 };
+  let run = 0;
+  // Twice round, so a gap straddling New Year is measured whole rather than as two.
+  for (let i = 0; i < WEEKS * 2; i++) {
+    const week = (i % WEEKS) + 1;
+    if (inSeason.has(week)) {
+      run = 0;
+      continue;
+    }
+    run += 1;
+    if (run > best.length && run <= WEEKS) best = { length: run, end: week };
+  }
+  if (best.length === 0) return 1;
+  const middle = best.end - Math.floor((best.length - 1) / 2);
+  return ((((middle - 1) % WEEKS) + WEEKS) % WEEKS) + 1;
 }
 
 /**
@@ -147,6 +237,21 @@ function anchorUncertain(spans: Span[]): Span[] {
     else merged.push({ ...span });
   }
   return merged;
+}
+
+/**
+ * Put spans measured from the start of a season back onto the calendar.
+ *
+ * The whole derivation runs in season coordinates, where week 1 is whenever this crop's year
+ * begins — so it never has to think about the New Year, and every step above stays a straight
+ * walk from the first week to the last. Undoing the offset here is what turns a span that ran
+ * off the end of a winter season into `to < from`, the wrapped form the schema describes and
+ * the poster's geometry already reads.
+ */
+export function toCalendarWeeks(spans: Span[], start: number): Span[] {
+  if (start === 1) return spans;
+  const calendar = (week: number) => ((week - 2 + start) % WEEKS) + 1;
+  return spans.map((span) => ({ ...span, from: calendar(span.from), to: calendar(span.to) }));
 }
 
 /**
@@ -270,7 +375,8 @@ export async function deriveSeason(src: MarsSource): Promise<Span[]> {
     date: String(row.report_begin_date),
     weight: Number(row[volumeField]) || 0,
   }));
-  return spansFromSeasons(weeklyVolumeBySeason(samples));
+  const { weeks, start } = weeklyVolumeBySeason(samples, src.years);
+  return toCalendarWeeks(spansFromSeasons(weeks), start);
 }
 
 export interface MarsCrop extends MarsSource {

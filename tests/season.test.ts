@@ -1,6 +1,12 @@
 import { describe, expect, test } from 'bun:test';
 
-import { spansFromSeasons, weeklyVolumeBySeason, weekOf } from '@/data/regions/sources/mars';
+import {
+  type Sample,
+  spansFromSeasons,
+  toCalendarWeeks,
+  weeklyVolumeBySeason,
+  weekOf,
+} from '@/data/regions/sources/mars';
 
 /** A season's weekly volumes (index 0 unused) from {week: pounds} entries. */
 function season(byWeek: Record<number, number>): number[] {
@@ -27,14 +33,72 @@ describe('weekOf', () => {
 });
 
 describe('weeklyVolumeBySeason', () => {
-  test('keeps each season separate rather than pooling them', () => {
-    const seasons = weeklyVolumeBySeason([
-      { date: '05/09/2023', weight: 100 },
-      { date: '05/09/2024', weight: 25 },
+  const YEARS = [2023, 2024];
+
+  /** A crop harvested November to January, once per listed year. */
+  const winterCrop = (years: number[]): Sample[] =>
+    years.flatMap((year) => [
+      ...['11/07', '11/28', '12/19'].map((d) => ({ date: `${d}/${year}`, weight: 100 })),
+      ...['01/09', '01/30'].map((d) => ({ date: `${d}/${year + 1}`, weight: 100 })),
     ]);
-    expect(seasons).toHaveLength(2);
-    expect(seasons[0]?.[19]).toBe(100);
-    expect(seasons[1]?.[19]).toBe(25);
+
+  test('keeps each season separate rather than pooling them', () => {
+    const { weeks } = weeklyVolumeBySeason(
+      [
+        { date: '05/09/2023', weight: 100 },
+        { date: '05/09/2024', weight: 25 },
+      ],
+      YEARS,
+    );
+    const shipped = weeks.map((season) => season.reduce((sum, v) => sum + v, 0));
+    expect(shipped).toEqual([100, 25]);
+  });
+
+  test('a harvest running through the New Year becomes one unbroken run', () => {
+    // Cut on January 1st, each bucket holds the tail of one harvest and the head of the next.
+    // Cut in the empty summer and each holds one harvest — which in season coordinates is a
+    // single stretch of weeks, so nothing downstream has to know the calendar turned over.
+    const { weeks, start } = weeklyVolumeBySeason(
+      winterCrop([2021, 2022, 2023]),
+      [2021, 2022, 2023, 2024],
+    );
+    expect(weeks).toHaveLength(3);
+    expect(start).toBeGreaterThan(20); // somewhere in the summer, not January
+    for (const season of weeks) {
+      const shipped = season.flatMap((v, week) => (v > 0 ? [week] : []));
+      expect(Math.max(...shipped) - Math.min(...shipped)).toBeLessThan(26);
+    }
+  });
+
+  test('drops a season whose far half was never fetched', () => {
+    // The same crop, but the range stops at the end of 2022: the harvest opening in November
+    // 2022 finishes in a January nobody fetched. Counted, that half-season would report its own
+    // busiest weeks as a peak with as much confidence as a whole one.
+    expect(weeklyVolumeBySeason(winterCrop([2021, 2022]), [2021, 2022]).weeks).toHaveLength(1);
+  });
+
+  test('a summer crop still gets one season per calendar year', () => {
+    // Its dead weeks are already around New Year, so the cut barely moves and no year is lost.
+    const summer = [2019, 2020, 2021].flatMap((year) =>
+      ['06/06', '07/04', '08/01'].map((d) => ({ date: `${d}/${year}`, weight: 100 })),
+    );
+    expect(weeklyVolumeBySeason(summer, [2019, 2020, 2021]).weeks).toHaveLength(3);
+  });
+});
+
+describe('toCalendarWeeks', () => {
+  test('a span running off the end of a winter season comes back wrapped', () => {
+    // `to < from` is how the schema says a span crosses the New Year, and it is produced here
+    // and nowhere else — every step before this one counts from the start of the season.
+    const spans = toCalendarWeeks([{ level: 'peak', from: 20, to: 30 }], 40);
+    expect(spans[0]).toMatchObject({ from: 7, to: 17 }); // week 40 + 19 = 7, + 29 = 17
+  });
+
+  test('leaves a season that already starts in January alone', () => {
+    const spans: { level: 'peak'; from: number; to: number }[] = [
+      { level: 'peak', from: 20, to: 30 },
+    ];
+    expect(toCalendarWeeks(spans, 1)).toEqual(spans);
   });
 });
 
