@@ -106,19 +106,22 @@ export function Sources() {
 
         <Heading>How a season is derived</Heading>
         <p>
-          Each crop&rsquo;s shipments are bucketed into weeks by the period the shipment moved in.
-          Then each season is judged on its own, against its own best week: below a quarter of it,
-          the crop is not in season; at or above three quarters, that is what we consider as
-          &ldquo;peak&rdquo; availability. After this initial determination, the six seasons are
-          combined, by vote. Pooling shipments across years first and thresholding after was tried
-          first by Claude and abandoned — it smeared harvests that drift year to year into a band
-          full of holes.
+          Each crop&rsquo;s shipments are bucketed into weeks, and split into annual seasons bounded
+          by the lowest volume weeks. Then each season is judged on its own, by how much of its
+          harvest each week carried.
         </p>
         <p>
-          A gap of a week or two within a single season is bridged, since seasons rarely align
-          exactly and a brief disagreement is noise rather than a break. On the other hand breaks
-          across different seasons are deliberately <em>not</em> smoothed over, and are captured by
-          uncertain regions. The whole derivation is about a hundred lines in{' '}
+          After experimenting with different thresholds, it seemed reasonable for &ldquo;peak&rdquo;
+          to be defined as the weeks that together ship half the year&rsquo;s crop, and the
+          available season as the weeks that ship ninety percent. After this initial determination,
+          the six seasons are combined, by vote. For peak weeks that only get partial voting, an
+          uncertain peak concept is displayed.
+        </p>
+        <p>
+          A gap of a few weeks within a single season is bridged, since seasons rarely align exactly
+          and a brief disagreement is noise rather than a break. On the other hand breaks across
+          different seasons are deliberately <em>not</em> smoothed over, and are captured by
+          uncertain regions. The whole derivation can be found at{' '}
           <ExternalLink href={repoFile('data/regions/sources/mars.ts')}>
             sources/mars.ts
           </ExternalLink>
