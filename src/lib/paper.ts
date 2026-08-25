@@ -18,6 +18,9 @@ export const PAPER_SIZES = [
   { name: 'A5', w: 14.8, h: 21, unit: 'cm' },
   { name: 'A4', w: 21, h: 29.7, unit: 'cm' },
   { name: 'A3', w: 29.7, h: 42, unit: 'cm' },
+  // The largest sheet the artwork supports: the watercolour plates are cut to reach 300dpi
+  // here and no further. See TARGET_W in scripts/plates.ts.
+  { name: 'A2', w: 42, h: 59.4, unit: 'cm' },
 ] as const satisfies readonly PaperSize[];
 
 export const DEFAULT_PAPER = PAPER_SIZES[0]; // Letter, 8.5 × 11 in

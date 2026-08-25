@@ -1,5 +1,8 @@
 # build output
 dist/
+
+# plate originals: 60MB of scans, refetched from Commons by `bun run plates`
+data/raw/plates/
 # generated types
 .astro/
 
