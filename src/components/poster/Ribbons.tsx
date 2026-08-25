@@ -100,6 +100,9 @@ interface Slice {
   bottom: number;
 }
 
+/** A slice's height without its position, for carrying one week's level to another x. */
+const level = ({ top, bottom }: Slice) => ({ top, bottom });
+
 interface Label {
   /** Centre of the chip, so an imprecise width estimate shows as even padding either side. */
   x: number;
@@ -343,16 +346,17 @@ function buildStreamgraph(
       const full = last
         ? [...slices, { x: weekToX(WEEKS_PER_YEAR), top: last.top, bottom: last.bottom }]
         : slices;
+      // Runway either side (see EDGE_RUNOFF), where the ribbon either lands or leaves the page.
+      // In season at both ends is one season the calendar cut in half — apples run from autumn
+      // through to spring — so it carries off flat, and a taper is left to mean a season that
+      // really does stop in the last week of the year.
+      const wraps = (weekly[MIN_WEEK] ?? 0) > 0 && (weekly[MAX_WEEK] ?? 0) > 0;
       const ground = { top: baseline, bottom: baseline };
-      // Runway either side, so a crop still in season on the last week of December falls away
-      // past the frame instead of being sheared off by it. The landing points sit exactly on
-      // the chart's own edges, so the taper fills the month-axis margin and no further — see
-      // EDGE_RUNOFF. This is presentation only: it adds no week the data does not have, and
-      // both points are flat on the baseline, so the whitespace search ignores them.
+      const first = slices[0];
       return [
-        { x: weekToX(MIN_WEEK) - EDGE_RUNOFF, ...ground },
+        { x: weekToX(MIN_WEEK) - EDGE_RUNOFF, ...(wraps && first ? level(first) : ground) },
         ...full,
-        { x: weekToX(WEEKS_PER_YEAR) + EDGE_RUNOFF, ...ground },
+        { x: weekToX(WEEKS_PER_YEAR) + EDGE_RUNOFF, ...(wraps && last ? level(last) : ground) },
       ];
     };
 
