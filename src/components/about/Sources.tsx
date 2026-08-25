@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import {
   ExternalLink,
   Heading,
+  Subheading,
   LINK_CLASS,
   Notice,
   repoDir,
@@ -37,9 +38,23 @@ export function Sources() {
           data for.
         </p>
         <p>
+          Due to the locality, each region has different data sources. In SF, we are relying on
+          specific USDA shipping data, whereas in NY we are relying on a published NY agriculture
+          harvest chart. Both of them have shortcomings in terms of fidelity, in addition to the
+          inherent gaps of the subject matter.
+        </p>
+        <p>
+          Really, this entire project is somewhat questionable in terms of intended audience:
+          Regular farmers&rsquo; market attendees will simply build up this instinct over time. This
+          is only useful for the intermittent attendees and newcomers. But, y&rsquo;know, I happen
+          to be one of those.
+        </p>
+
+        <Heading>San Francisco Bay Area</Heading>
+        <p>
           While the initial vision was to have bespoke sources for each crop (and the project is
           still set up to accommodate sources per crop), as a first approximation, the first attempt
-          looks at{' '}
+          to chart SF produce looks at{' '}
           <ExternalLink href="https://www.ams.usda.gov/market-news/fruits-vegetables">
             USDA Market News
           </ExternalLink>{' '}
@@ -54,14 +69,8 @@ export function Sources() {
           factors. I&rsquo;ve tried to encode this uncertainty with the half opacity regions, where
           they were at peak availability for some years and not others.
         </p>
-        <p>
-          Really, this entire project is somewhat questionable in terms of intended audience:
-          Regular farmers&rsquo; market attendees will simply build up this instinct over time. This
-          is only useful for the intermittent attendees and newcomers. But, y&rsquo;know, I happen
-          to be one of those.
-        </p>
 
-        <Heading>USDA Market News Data</Heading>
+        <Subheading>USDA Market News Data</Subheading>
         <p>
           <ExternalLink href="https://www.ams.usda.gov/market-news/fruits-vegetables">
             USDA Market News
@@ -104,7 +113,7 @@ export function Sources() {
           .
         </p>
 
-        <Heading>How a season is derived</Heading>
+        <Subheading>How a season is derived</Subheading>
         <p>
           Each crop&rsquo;s shipments are bucketed into weeks, and split into annual seasons bounded
           by the lowest volume weeks. Then each season is judged on its own, by how much of its
@@ -128,7 +137,7 @@ export function Sources() {
           .
         </p>
 
-        <Heading>Caveats</Heading>
+        <Subheading>Caveats</Subheading>
         <ul className="flex flex-col gap-3">
           <li>
             <strong className="font-medium text-neutral-900">Shipment volume is a proxy.</strong> It
@@ -151,6 +160,68 @@ export function Sources() {
             periodic aggregates, not shipments. It needs a different source.
           </li>
         </ul>
+
+        <Heading>New York</Heading>
+        <p>
+          New York produce does not seem to be derivable from USDA market shipping reports. Luckily,
+          the New York State Department of Agriculture published a PDF{' '}
+          <ExternalLink href="http://agriculture.ny.gov/harvest-chart">
+            From A(pples) to Z(ucchini)
+          </ExternalLink>{' '}
+          in 2016, which, unlike SF publications that I've looked at, is usable as a data source
+          directly, with no number crunching whatsoever.
+        </p>
+
+        <Subheading>
+          The New York State Department of Agriculture and Markets harvest chart
+        </Subheading>
+        <p>
+          <ExternalLink href="http://agriculture.ny.gov/harvest-chart">
+            From A(pples) to Z(ucchini)
+          </ExternalLink>
+          , published by the New York State Department of Agriculture and Markets in 2016, contains
+          exactly the information that we want for our customizable poster. It reports both the peak
+          and available bands, and at week level granularity, rather than month level granularity.
+          Good job, New York. The poster alone contains all the data that I wanted for San Franciso
+          in the first place, and as such, you can think of the vertumnus NY poster as an
+          unashamedly thinly customizable shell of the data contained in this PDF.
+        </p>
+
+        <Subheading>Caveats</Subheading>
+        <ul className="flex flex-col gap-3">
+          <li>
+            <strong className="font-medium text-neutral-900">It rests on a single source.</strong>{' '}
+            GrowNYC publishes a Greenmarket harvest calendar that looks like corroboration and is
+            not &mdash; it is the same Pride of New York chart, redistributed.{' '}
+            <ExternalLink href="https://www.nass.usda.gov/Quick_Stats/Ag_Overview/stateOverview.php?state=NEW+YORK">
+              USDA NASS
+            </ExternalLink>{' '}
+            confirms that apples, grapes, sweet corn and a handful of others are grown at scale, but
+            it publishes only sixteen commodities for the state and says nothing about most of this
+            list.
+          </li>
+          <li>
+            <strong className="font-medium text-neutral-900">No uncertainty data.</strong> The SF
+            Bay Area&rsquo;s half opacity bands come from six years of shipments disagreeing with
+            each other. The NY PDF is compiled data with no uncertainty information encoded, so
+            there is no spread to draw and every New York ribbon has a hard edge.
+          </li>
+        </ul>
+
+        <Subheading>Why there is no shipment data</Subheading>
+        <p>
+          Of the twenty-three Market News movement reports, not one carries produce grown in New
+          York. The eastern offices look promising by name and are not: Philadelphia and Washington
+          are import terminals, reporting fruit arriving at a port rather than leaving a farm.
+          Philadelphia lists 1,567 apple rows across 2019&ndash;2024 and every one of them is from
+          Chile, New Zealand, China or Argentina.
+        </p>
+        <p>
+          The only New York fruit and vegetable reports Market News publishes are terminal market{' '}
+          <em>prices</em>, which are rejected here for the same reason they are rejected for
+          California: counting price quotes measures how long a crop is offered, not how much of it
+          arrives.
+        </p>
 
         <Heading>The USDA Pomological Watercolor Collection</Heading>
         <p>

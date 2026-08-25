@@ -31,9 +31,20 @@ export function Body({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** A subheading within a section. */
+/** A subheading within a section — a region, or a topic that spans them. */
 export function Heading({ children }: { children: React.ReactNode }) {
-  return <h2 className="pt-4 text-lg font-semibold text-neutral-900">{children}</h2>;
+  return <h2 className="pt-6 text-xl font-semibold text-neutral-900">{children}</h2>;
+}
+
+/**
+ * A heading below {@link Heading}, for a topic within one of them.
+ *
+ * Two regions describe the same things — where the data came from, how a season is drawn out of
+ * it, what to distrust — about entirely different sources. Nesting those under the region keeps
+ * a reader from having to hold "which source was this paragraph about" in their head.
+ */
+export function Subheading({ children }: { children: React.ReactNode }) {
+  return <h3 className="pt-2 text-base font-semibold text-neutral-800">{children}</h3>;
 }
 
 /**
