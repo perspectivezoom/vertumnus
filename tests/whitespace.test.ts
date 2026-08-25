@@ -49,8 +49,9 @@ describe('findVoids', () => {
   });
 
   test('reports one placement for a half holding a single gap', () => {
-    // The left side is drawn over except for one band across its middle. Both seeds climb to
-    // that band's centre, and converging is how the search decides it is one gap, not two.
+    // The left side is drawn over except for one band across its middle. One plate fills that
+    // band's height, so a second could only sit beside it — which is a row of pictures rather
+    // than a margin, and the search drops it.
     const occ = occupancyOf(
       [
         { x: 500, y: 0, w: 500, h: 1000 },
@@ -130,27 +131,6 @@ describe('findVoids', () => {
     const above = box!.y;
     const below = 700 - (box!.y + box!.h);
     expect(Math.abs(above - below)).toBeLessThan(SIZE.height * 0.05);
-  });
-
-  test('shares a side between two plates rather than centring the first in all of it', () => {
-    // Two plates down one open column. Centring each as it is placed puts the first in the
-    // middle of the whole side and leaves the second wherever it fits, which reads as one
-    // centred plate and one pushed aside; both should instead take a share of the run.
-    const occ = occupancyOf([{ x: 500, y: 0, w: 500, h: 1000 }], SIZE, 100);
-    const [upper, lower] = findVoids(occ, OPTS)
-      .filter((b) => b.x < occ.cols / 2)
-      .map((b) => toUnits(b, occ, SIZE))
-      .sort((a, b) => a.y - b.y);
-    expect(upper).toBeDefined();
-    expect(lower).toBeDefined();
-
-    const above = upper!.y;
-    const between = lower!.y - (upper!.y + upper!.h);
-    const below = SIZE.height - (lower!.y + lower!.h);
-    // Each sits in the middle of its own share, so the outer margins match each other and the
-    // gap between them is shared evenly.
-    expect(Math.abs(above - below)).toBeLessThan(SIZE.height * 0.06);
-    expect(Math.abs(above - between / 2)).toBeLessThan(SIZE.height * 0.06);
   });
 
   test('a blank chart yields placements on both sides', () => {

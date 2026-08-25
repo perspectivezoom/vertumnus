@@ -49,9 +49,8 @@ export function findVoids(occ: Occupancy, opts: VoidOptions): Box[] {
   ];
 
   return halves.flatMap((half, side) => {
-    // Seeds start against the poster's outer edge, where the art will sit, and at two depths so
-    // a side split into an upper and a lower gap is found as two rather than one. A seed landing
-    // on a ribbon is fine — settleSeeds steps it to open ground before climbing.
+    // Against the outer edge, where the art will sit, at two depths so a side split into an
+    // upper and a lower gap is found as two. Landing on a ribbon is fine; claim steps off it.
     const edge = side === 0 ? half.x + SEED_INSET : half.x + half.w - 1 - SEED_INSET;
     const seeds = SEED_DEPTHS.map((depth): [number, number] => [
       edge,
@@ -64,10 +63,8 @@ export function findVoids(occ: Occupancy, opts: VoidOptions): Box[] {
 /**
  * Settle each seed into the gap it belongs to, within one region of the grid.
  *
- * Every seed steps to open ground, climbs to the most open point it can reach, and claims a box
- * there. Each claim is marked on a private copy before the next seed runs, so seeds that would
- * have settled together instead find that gap taken — which is how "one gap or two" gets
- * answered by the grid rather than assumed by us. Pure: `occ` is never modified.
+ * A seed takes a foothold on open ground, then walks and grows to fill the gap around it.
+ * Pure: `occ` is never modified.
  */
 export function settleSeeds(
   occ: Occupancy,
@@ -81,28 +78,105 @@ export function settleSeeds(
       for (let x = box.x; x < box.x + box.w; x++) working.cells[y * working.cols + x] = value;
     }
   };
-
-  const placed: Box[] = [];
+  const footholds: Box[] = [];
   for (const seed of seeds) {
-    const from = nearestEmpty(working, seed, bounds);
-    if (!from) continue;
-    const peak = climb(distanceField(working), working, from, bounds);
-    const box = growAspect(working, peak, bounds, opts);
-    if (!box || box.h < opts.minHeight) continue;
-    placed.push(box);
-    mark(box, 1);
+    const foot = claim(working, seed, bounds);
+    if (!foot) continue;
+    footholds.push(foot);
+    mark(foot, 1);
   }
 
-  // Centre only once every box exists. Done as each is placed, the first would centre itself in
-  // the whole run — taking the middle of the side — and later ones would take what was left over
-  // and read as pushed aside. Lifting each box out of the grid before measuring its own space is
-  // what lets two plates down one side settle at a share of it each.
-  return placed.map((box) => {
-    mark(box, 0);
-    const centred = centreVertically(working, box, bounds);
-    mark(centred, 1);
-    return centred;
-  });
+  // Each settles with the others in place but itself lifted out, so it measures the room it can
+  // have rather than counting its own foothold against itself. Art runs down a margin, so a
+  // placement is kept only if it stacks clear of the ones before it: boxes sharing rows would
+  // read as a row of pictures, and the gap is better spent on one larger plate.
+  const kept: Box[] = [];
+  for (const foot of footholds) {
+    mark(foot, 0);
+    const box = settle(working, foot, bounds, opts);
+    const sharesRows = kept.some((k) => box.y < k.y + k.h && k.y < box.y + box.h);
+    if (box.h < opts.minHeight || sharesRows) continue;
+    mark(box, 1);
+    kept.push(box);
+  }
+  return kept;
+}
+
+/**
+ * A foothold on open ground, which {@link settle} then walks and grows.
+ *
+ * Deliberately the smallest thing that can be walked — anything more would be a second, weaker
+ * copy of the search settle already does.
+ */
+function claim(occ: Occupancy, seed: [number, number], bounds: Box): Box | null {
+  const from = nearestEmpty(occ, seed, bounds);
+  return from ? { x: from[0], y: from[1], w: 1, h: 1 } : null;
+}
+
+/**
+ * The largest clear rectangle reachable by pushing each of `box`'s four sides outwards — not the
+ * region's largest, but the one this box can reach, which is what makes it *its* gap.
+ */
+function freeAround(occ: Occupancy, box: Box, bounds: Box): Box {
+  const rowClear = (y: number, l: number, r: number) => {
+    if (y < bounds.y || y >= bounds.y + bounds.h) return false;
+    for (let x = l; x <= r; x++) if (occ.cells[y * occ.cols + x]) return false;
+    return true;
+  };
+  const colClear = (x: number, t: number, b: number) => {
+    if (x < bounds.x || x >= bounds.x + bounds.w) return false;
+    for (let y = t; y <= b; y++) if (occ.cells[y * occ.cols + x]) return false;
+    return true;
+  };
+  let { x: l, y: t } = box;
+  let r = box.x + box.w - 1;
+  let b = box.y + box.h - 1;
+  for (let grew = true; grew;) {
+    grew = false;
+    if (rowClear(t - 1, l, r)) {
+      t--;
+      grew = true;
+    }
+    if (rowClear(b + 1, l, r)) {
+      b++;
+      grew = true;
+    }
+    if (colClear(l - 1, t, b)) {
+      l--;
+      grew = true;
+    }
+    if (colClear(r + 1, t, b)) {
+      r++;
+      grew = true;
+    }
+  }
+  return { x: l, y: t, w: r - l + 1, h: b - t + 1 };
+}
+
+/** Passes of centre-then-regrow. Three is the most any current poster has needed. */
+const SETTLE_PASSES = 6;
+
+/**
+ * Walk a box to the middle of its gap and grow it there, until it stops moving.
+ *
+ * Growing puts it somewhere new, so it repeats. Growing once and never re-examining left New
+ * York's apple at 23×35 cells in a corner of a gap with room for 33×49. Each pass lands in space
+ * at least as open, so the box never shrinks and this reaches a fixed point.
+ */
+function settle(occ: Occupancy, box: Box, bounds: Box, opts: VoidOptions): Box {
+  let current = box;
+  for (let pass = 0; pass < SETTLE_PASSES; pass++) {
+    const room = freeAround(occ, current, bounds);
+    const centre: [number, number] = [
+      room.x + Math.floor(room.w / 2),
+      room.y + Math.floor(room.h / 2),
+    ];
+    const grown = growAspect(occ, centre, bounds, opts);
+    if (!grown) return current;
+    if (grown.x === current.x && grown.y === current.y && grown.h === current.h) return grown;
+    current = grown;
+  }
+  return current;
 }
 
 /**
@@ -139,70 +213,6 @@ export function toUnits(box: Box, occ: Occupancy, size: { width: number; height:
   const sx = size.width / occ.cols;
   const sy = size.height / occ.rows;
   return { x: box.x * sx, y: box.y * sy, w: box.w * sx, h: box.h * sy };
-}
-
-/**
- * Distance from every empty cell to the nearest drawn cell or edge, by two-pass chamfer.
- *
- * The local maxima of this field are the visual centres of the open areas — "put it in the
- * middle of the gap", computed instead of eyeballed.
- */
-export function distanceField(occ: Occupancy): Float32Array {
-  const { cols, rows, cells } = occ;
-  const d = new Float32Array(cols * rows);
-  const FAR = 1e6;
-  for (let i = 0; i < cells.length; i++) d[i] = cells[i] ? 0 : FAR;
-
-  const at = (x: number, y: number): number =>
-    x < 0 || y < 0 || x >= cols || y >= rows ? 0 : (d[y * cols + x] ?? 0);
-
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      const i = y * cols + x;
-      d[i] = Math.min(
-        d[i] ?? FAR,
-        at(x - 1, y) + 1,
-        at(x, y - 1) + 1,
-        at(x - 1, y - 1) + Math.SQRT2,
-        at(x + 1, y - 1) + Math.SQRT2,
-      );
-    }
-  }
-  for (let y = rows - 1; y >= 0; y--) {
-    for (let x = cols - 1; x >= 0; x--) {
-      const i = y * cols + x;
-      d[i] = Math.min(
-        d[i] ?? FAR,
-        at(x + 1, y) + 1,
-        at(x, y + 1) + 1,
-        at(x + 1, y + 1) + Math.SQRT2,
-        at(x - 1, y + 1) + Math.SQRT2,
-      );
-    }
-  }
-  return d;
-}
-
-/**
- * Slide a box to sit in the middle of the clear run above and below it.
- *
- * A box is grown from the most open *point*, which is not the middle of the gap it ends up in:
- * growth stops as soon as any one side is blocked, so the box keeps whatever bias the peak had
- * and can end up hard against a ribbon with a band of paper left over on the other side. Reading
- * down a column of art, that lopsidedness is what the eye notices.
- */
-function centreVertically(occ: Occupancy, box: Box, bounds: Box): Box {
-  const rowClear = (y: number): boolean => {
-    if (y < bounds.y || y >= bounds.y + bounds.h) return false;
-    for (let x = box.x; x < box.x + box.w; x++) if (occ.cells[y * occ.cols + x]) return false;
-    return true;
-  };
-  let top = box.y;
-  let bottom = box.y + box.h - 1;
-  while (rowClear(top - 1)) top--;
-  while (rowClear(bottom + 1)) bottom++;
-  const slack = bottom - top + 1 - box.h;
-  return slack > 0 ? { ...box, y: top + Math.floor(slack / 2) } : box;
 }
 
 /**
@@ -248,44 +258,6 @@ function growAspect(
     };
   }
   return found;
-}
-
-/** Walk uphill on the distance field until no neighbour is more open. */
-function climb(
-  d: Float32Array,
-  occ: Occupancy,
-  seed: [number, number],
-  bounds: Box,
-): [number, number] {
-  let [x, y] = seed;
-  for (let step = 0; step < occ.cols * occ.rows; step++) {
-    let best = d[y * occ.cols + x] ?? 0;
-    let bx = x;
-    let by = y;
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        const nx = x + dx;
-        const ny = y + dy;
-        if (
-          nx < bounds.x ||
-          ny < bounds.y ||
-          nx >= bounds.x + bounds.w ||
-          ny >= bounds.y + bounds.h
-        )
-          continue;
-        const v = d[ny * occ.cols + nx] ?? 0;
-        if (v > best) {
-          best = v;
-          bx = nx;
-          by = ny;
-        }
-      }
-    }
-    if (bx === x && by === y) break;
-    x = bx;
-    y = by;
-  }
-  return [x, y];
 }
 
 /**
