@@ -1,9 +1,16 @@
+import { rm } from 'node:fs/promises';
+
 import tailwind from 'bun-plugin-tailwind';
 
 // Deploy base: '/' for a root or custom-domain site, '/<repo>/' for a GitHub project page.
 // publicPath makes asset URLs absolute (so they load at any route depth); the define feeds
 // the same value to the client router (see src/App.tsx).
 const BASE = '/';
+
+// Chunk and asset names carry a content hash, so a rebuild writes new files beside the old ones
+// rather than over them. Left alone the directory only grows, and every stale chunk from every
+// past build gets published. Start from nothing so dist is exactly this build's output.
+await rm('./dist', { recursive: true, force: true });
 
 const result = await Bun.build({
   entrypoints: ['./index.html'],
