@@ -30,7 +30,7 @@ export function Banner() {
   return (
     <div
       data-screen-only
-      className="pointer-events-none fixed inset-0 flex items-center justify-center p-6"
+      className="pointer-events-none fixed inset-0 flex items-center justify-center p-4 sm:p-6"
     >
       <AnimatePresence initial={false}>
         {hideBanner ? (
@@ -62,7 +62,9 @@ export function Banner() {
             key="card"
             layoutId="banner"
             transition={{ layout: boxMorph }}
-            className="pointer-events-auto relative max-w-[90vw] rounded-lg border border-neutral-200 bg-white p-6 shadow-xl"
+            // Bounded by its parent and scrollable inside that: a phone held sideways is
+            // shorter than this card, and clipped controls would be unreachable.
+            className="pointer-events-auto relative max-h-full max-w-full overflow-y-auto overscroll-contain rounded-lg border border-neutral-200 bg-white p-5 shadow-xl sm:max-w-[90vw] sm:p-6"
           >
             <div className="absolute top-3 right-3 flex items-center gap-2">
               <PrintButton />
@@ -93,14 +95,23 @@ function PrintButton() {
   );
 }
 
-/** Lays out the banner's (growing) content: the intro, then the controls. */
+/**
+ * Lays out the banner's (growing) content: the reading beside the controls.
+ *
+ * Two columns wherever there is room, since the card covers the poster it configures and a
+ * stack of this is nearly twice as tall. Only a screen too narrow to divide gets the stack.
+ */
 function BannerContent() {
   return (
-    <div className="flex min-w-[32rem] max-w-[36rem] flex-col gap-4">
+    // The width floor stops the card collapsing around short content, but is wider than a phone.
+    <div className="flex w-full flex-col gap-4 sm:w-auto sm:min-w-[32rem] sm:max-w-[36rem] sm:flex-row sm:gap-6">
       <Intro />
-      <RegionPicker />
-      <CropPicker />
-      <PaperSizeSelector />
+      {/* Side by side, this column is the one under the floating buttons, so it starts below. */}
+      <div className="flex flex-col gap-4 sm:flex-1 sm:pt-8">
+        <RegionPicker />
+        <CropPicker />
+        <PaperSizeSelector />
+      </div>
     </div>
   );
 }
@@ -108,8 +119,9 @@ function BannerContent() {
 /** The banner's title and description. */
 function Intro() {
   return (
-    <div className="flex flex-col gap-3">
-      <h2 className="text-center text-lg font-semibold text-neutral-900">Vertumnus</h2>
+    <div className="flex flex-col gap-3 sm:flex-1">
+      {/* Stacked, the floating buttons are over this row; in columns they clear it. */}
+      <h2 className="pr-24 text-lg font-semibold text-neutral-900 sm:pr-0">Vertumnus</h2>
       <p className="text-sm leading-relaxed text-neutral-600">
         Printable posters of what&rsquo;s in season at farmers&rsquo; markets. Data is specific to
         your region, with week-level granularity.

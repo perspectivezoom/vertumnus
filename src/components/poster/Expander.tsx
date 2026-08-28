@@ -39,9 +39,10 @@ export function Expander({
       </button>
 
       {/* Capped and scrollable: the point of a control is to watch the poster change as you
-          use it, and a list long enough to cover the chart defeats that. */}
+          use it, and a list long enough to cover the chart defeats that. Also capped against
+          the viewport, which a landscape phone leaves shorter than the fixed figure. */}
       {expanded && (
-        <ul className="flex max-h-64 flex-col gap-0.5 overflow-y-auto overscroll-contain">
+        <ul className="flex max-h-[min(16rem,40dvh)] flex-col gap-0.5 overflow-y-auto overscroll-contain">
           {children}
         </ul>
       )}

@@ -11,7 +11,9 @@ import { Banner } from '@/src/components/poster/Banner';
  */
 export function PosterShell() {
   return (
-    <main className="min-h-screen bg-neutral-100 p-6">
+    // Centred because the poster is capped by viewport height, so what it does not use would
+    // otherwise all pool below it. `dvh` tracks a phone's growing and shrinking browser chrome.
+    <main className="flex min-h-dvh items-center justify-center bg-neutral-100 p-6">
       <Outlet />
       <Banner />
     </main>

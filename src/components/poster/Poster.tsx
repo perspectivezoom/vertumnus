@@ -67,7 +67,8 @@ export function Poster() {
 
   // Fit both axes by capping *width* from the paper ratio: max-height would clamp the height
   // while leaving width maximal, letterboxing the poster and casting the shadow round the box.
-  const maxWidth = `min(64rem, calc((100vh - 3rem) * ${w} / ${h}))`;
+  // 3rem is the shell's padding; `dvh` tracks a phone's retracting browser chrome.
+  const maxWidth = `min(64rem, calc((100dvh - 3rem) * ${w} / ${h}))`;
   return (
     <>
       <PageSize width={w} height={h} unit={unit} />
