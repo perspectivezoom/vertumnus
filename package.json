@@ -9,6 +9,7 @@
     "fetch": "bun data/raw/fetch.ts",
     "regions": "bun data/regions/build.ts",
     "plates": "bun scripts/plates.ts",
+    "session": "bun scripts/session.ts",
     "dependencies": "bun scripts/dependencies.ts",
     "check": "tsc --noEmit",
     "lint": "oxlint",
