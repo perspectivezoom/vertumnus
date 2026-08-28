@@ -52,14 +52,14 @@ export function Licenses() {
         <hr className="border-neutral-300" />
 
         <p>
-          Vertumnus builds off of other people&rsquo;s work, all of it either public domain or
-          openly licensed. Acknowledgements of that work and their license disclosures are as
-          follows:
+          Vertumnus builds off of other people&rsquo;s work, a mixture of either public domain,
+          openly licensed, or of unclear license. Acknowledgements of that work and their license
+          disclosures are as follows:
         </p>
 
         <Heading>Data and artwork</Heading>
         <p>
-          Crop seasonality data is derived from{' '}
+          SF Bay Area crop seasonality is derived from{' '}
           <ExternalLink href="https://www.ams.usda.gov/market-news/fruits-vegetables">
             USDA Agricultural Marketing Service
           </ExternalLink>{' '}
@@ -78,9 +78,29 @@ export function Licenses() {
           .
         </p>
         <p>
-          Both are works of the United States government and in the public domain &mdash; no
-          permission is needed to use them, and none is claimed here. They are credited because the
-          project cites what it is built from, not because any licence demands it.
+          Both of those are works of the United States federal government and in the public domain
+          &mdash; no permission is needed to use them, and none is claimed here. They are credited
+          because the project cites what it is built from, not because any licence demands it.
+        </p>
+        <p>
+          New York seasonality is a different situation. It comes from{' '}
+          <ExternalLink href="http://agriculture.ny.gov/harvest-chart">
+            a chart published by the New York State Department of Agriculture and Markets
+          </ExternalLink>
+          , and the rule that puts federal works in the public domain covers federal works only. New
+          York&rsquo;s agencies differ from each other on the question, and this Department
+          publishes no copyright terms in either direction.
+        </p>
+        <p>
+          This project takes from the chart a set of factual information. Facts are not subject to
+          copyright in the United States, so the seasons drawn from them are published here without
+          asking permission.
+        </p>
+        <p>
+          The repository additionally keeps a cached copy of the chart PDF as an original truth to
+          rederive those facts. That PDF copy is their document and subject to copyright, and it is
+          kept on the understanding that we will take it down if the Department preferred that a
+          github repo not redistribute said document.
         </p>
 
         <Heading>Typefaces</Heading>
