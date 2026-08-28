@@ -10,6 +10,7 @@
     "regions": "bun data/regions/build.ts",
     "plates": "bun scripts/plates.ts",
     "session": "bun scripts/session.ts",
+    "transcript": "bun scripts/transcript.ts",
     "dependencies": "bun scripts/dependencies.ts",
     "check": "tsc --noEmit",
     "lint": "oxlint",

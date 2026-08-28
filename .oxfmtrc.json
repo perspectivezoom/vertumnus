@@ -11,7 +11,13 @@
   "arrowParens": "always",
   "bracketSameLine": false,
   "bracketSpacing": true,
-  "ignorePatterns": ["public", ".claude"],
+  "ignorePatterns": [
+    "public",
+    ".claude",
+    // The generated transcript is served to the browser as-is, so it stays minified —
+    // formatting it would roughly treble a file whose whole job is to be fetched.
+    "data/transcript/__generated__"
+  ],
   "overrides": [
     {
       // Raw data caches (written by data/raw/format.ts). oxfmt formats these, but they
