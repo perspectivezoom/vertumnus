@@ -14,6 +14,10 @@
  * in the log verbatim — the MARS key was, and reached the committed file once already before it
  * was caught by hand. That is not a thing to leave to whoever runs this next, so the redaction
  * is part of the script and the script refuses to run when it cannot perform it.
+ *
+ * Pairs with `bun run transcript`, which derives the session browser's data from what this
+ * writes. Run the two together: refreshing one without the other leaves the browser describing a
+ * different point in the project than the log it came from.
  */
 import { homedir } from 'node:os';
 

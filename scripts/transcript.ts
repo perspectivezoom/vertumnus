@@ -9,9 +9,17 @@
  * history and the session cover the same 39 days and every commit has prompts behind it — it is
  * a property of how this project was built, checked on every run rather than assumed.
  *
- * Re-run whenever the transcript grows, which includes the commit that files the last batch into
- * topics. So it must be safe to run repeatedly: it reads the curation and never writes it, and
- * anything not yet filed is reported and passed through rather than dropped or guessed at.
+ * A cache, refreshed deliberately, the way the MARS data is — not a build step. It reads the git
+ * log, so committing its own output would make it stale again immediately; chasing that would put
+ * a 1.7 MB churn in every commit to no one's benefit. Run it with `bun run session`, which
+ * refreshes the log it reads: the two inputs then go stale together and the snapshot stays
+ * coherent, describing an earlier point in the project rather than a torn one.
+ *
+ * Run it right after a commit, so the tail of unfiled work is short. Exchanges later than the
+ * last commit have no commit to belong to, and the views that group by commit cannot show them.
+ *
+ * Safe to run repeatedly whenever you do: it reads the curation and never writes it, and anything
+ * not yet filed is reported and passed through rather than dropped or guessed at.
  */
 import { homedir } from 'node:os';
 
