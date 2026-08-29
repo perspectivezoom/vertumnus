@@ -38,6 +38,43 @@ export interface Selection {
  */
 const VIEW = 'view';
 const PROMPT = 'prompt';
+const PROMPTS = 'prompts';
+const RESPONSES = 'responses';
+
+/**
+ * How much of a turn to draw.
+ *
+ * A property of the reading rather than of any one view: a chapter collapsed to its prompts is
+ * the same request as a list of search results, and answering it twice would mean two components
+ * that drift. Either half takes any of the three, including combinations the control does not
+ * offer — a uniform rule is easier to hold than one carrying an exception.
+ */
+export const Density = {
+  Full: 'full',
+  Short: 'short',
+  Hidden: 'hidden',
+} as const;
+
+export type Density = (typeof Density)[keyof typeof Density];
+
+const density = (raw: string | null, fallback: Density): Density =>
+  (Object.values(Density) as string[]).includes(raw ?? '') ? (raw as Density) : fallback;
+
+/**
+ * Change some parameters and leave the rest alone.
+ *
+ * There are four now and they are independent — density outlives a change of chapter, and a
+ * citation should not reset it. `setParams` replaces the whole query string, so anything not
+ * named here would be dropped.
+ */
+function merge(params: URLSearchParams, changes: Record<string, string | null>): URLSearchParams {
+  const next = new URLSearchParams(params);
+  for (const [key, value] of Object.entries(changes)) {
+    if (value === null) next.delete(key);
+    else next.set(key, value);
+  }
+  return next;
+}
 
 export interface Heading {
   title: string;
@@ -55,6 +92,14 @@ export interface Chosen {
   select: (next: Selection) => void;
   /** Point the URL at one exchange, and put that URL on the clipboard. */
   cite: (id: string) => void;
+  densities: Densities;
+  setDensity: (next: Partial<Densities>) => void;
+}
+
+/** How much of each half of a turn to draw. Always chosen together, so carried together. */
+export interface Densities {
+  prompts: Density;
+  responses: Density;
 }
 
 /**
@@ -92,17 +137,33 @@ export function useSelection(data: Transcript): Chosen {
     heading: headingOf(data, selection),
     exchanges,
     focused,
-    // Replace rather than push: choosing a chapter is moving around one page, and stacking a
-    // history entry per click would bury whatever the reader was on before they arrived.
-    select: (next) => setParams({ [VIEW]: toParam(next) }, { replace: true }),
+    densities: {
+      prompts: density(params.get(PROMPTS), Density.Full),
+      responses: density(params.get(RESPONSES), Density.Full),
+    },
+    // Absent means full, so the common reading leaves no parameters behind at all.
+    setDensity: (next) =>
+      setParams(
+        merge(params, {
+          ...(next.prompts && { [PROMPTS]: next.prompts === Density.Full ? null : next.prompts }),
+          ...(next.responses && {
+            [RESPONSES]: next.responses === Density.Full ? null : next.responses,
+          }),
+        }),
+        { replace: true },
+      ),
+    // Choosing a view clears the citation under it, but not how the reader was reading. Replaced
+    // rather than pushed: a history entry per click would bury wherever they came in from.
+    select: (next) =>
+      setParams(merge(params, { [VIEW]: toParam(next), [PROMPT]: null }), { replace: true }),
     cite: (id) => {
       // The view is kept alongside the citation, so a pasted link reopens the same surroundings
       // the citer was looking at rather than resolving to the topic and losing a thread or
       // collection they had chosen.
-      const next = { [VIEW]: toParam(selection), [PROMPT]: shortId(id) };
+      const next = merge(params, { [VIEW]: toParam(selection), [PROMPT]: shortId(id) });
       setParams(next, { replace: true });
       const url = new URL(window.location.href);
-      url.search = new URLSearchParams(next).toString();
+      url.search = next.toString();
       void navigator.clipboard?.writeText(url.toString());
     },
   };

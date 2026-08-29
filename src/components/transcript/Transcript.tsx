@@ -11,6 +11,7 @@ import type { Transcript as Session } from '@/data/transcript/schema';
 import { TranscriptContents } from '@/src/components/transcript/TranscriptContents';
 import { TranscriptTurn, TURN_GAP, TURN_WIDTH } from '@/src/components/transcript/TranscriptTurn';
 import { shortId, useSelection } from '@/src/components/transcript/selection';
+import { TranscriptDensity } from '@/src/components/transcript/TranscriptDensity';
 import { type State, useTranscript } from '@/src/components/transcript/useTranscript';
 
 export function Transcript() {
@@ -20,7 +21,8 @@ export function Transcript() {
 
 /** The two panes: the table of contents, and whatever it is pointing at. */
 function Panes({ data }: { data: Session }) {
-  const { selection, heading, exchanges, focused, select, cite } = useSelection(data);
+  const { selection, heading, exchanges, focused, select, cite, densities, setDensity } =
+    useSelection(data);
 
   // Scrolls after the exchanges are on the page, which is why it is an effect and not part of
   // resolving the citation: the element a link names does not exist until its topic has rendered.
@@ -58,12 +60,14 @@ function Panes({ data }: { data: Session }) {
             {heading.blurb && (
               <p className="text-sm leading-relaxed text-neutral-600">{heading.blurb}</p>
             )}
+            <TranscriptDensity densities={densities} onChange={setDensity} />
           </div>
           {exchanges.map((exchange) => (
             <TranscriptTurn
               key={exchange.id}
               exchange={exchange}
               focused={exchange.id === focused}
+              densities={densities}
               onCite={() => cite(exchange.id)}
             />
           ))}
