@@ -54,7 +54,7 @@ function Chapters({ data, weigh, selection, onSelect }: Pane) {
   );
   const [open, setOpen] = useState<string | null>(containing?.id ?? null);
   return (
-    <Group title="Chapters" note="Strictly chronological roughly grouped by topic.">
+    <Group {...data.groups.chapters}>
       {data.chapters.map((chapter) => {
         const expanded = open === chapter.id;
         return (
@@ -93,7 +93,7 @@ function Chapters({ data, weigh, selection, onSelect }: Pane) {
 
 function Threads({ data, weigh, selection, onSelect }: Pane) {
   return (
-    <Group title="Threads" note="Work performed at multiple times across chapters.">
+    <Group {...data.groups.threads}>
       {data.threads.map((thread) => (
         <Entry
           key={thread.id}
@@ -109,7 +109,7 @@ function Threads({ data, weigh, selection, onSelect }: Pane) {
 
 function Collections({ data, selection, onSelect }: Pane) {
   return (
-    <Group title="Collections" note="Interesting topics to highlight.">
+    <Group {...data.groups.collections}>
       {Object.entries(data.collections).map(([id, collection]) => (
         <Entry
           key={id}
@@ -131,7 +131,7 @@ function Group({
   children,
 }: {
   title: string;
-  note?: string;
+  note: string;
   children: React.ReactNode;
 }) {
   return (
@@ -139,7 +139,7 @@ function Group({
       <h2 className="px-2 pt-5 pb-1 text-[11px] font-semibold tracking-wider text-neutral-400 uppercase">
         {title}
       </h2>
-      {note && <p className="px-2 pb-1 text-[11px] leading-snug text-neutral-400">{note}</p>}
+      <p className="px-2 pb-1 text-[11px] leading-snug text-neutral-400">{note}</p>
       {children}
     </section>
   );

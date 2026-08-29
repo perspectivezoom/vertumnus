@@ -17,6 +17,8 @@
 export interface Topic {
   id: string;
   title: string;
+  /** What this run of commits was doing. One sentence. */
+  blurb: string;
   /** Short SHAs, in history order. */
   commits: string[];
 }
@@ -65,6 +67,20 @@ export interface Highlight {
   exchange: string;
   note: string;
 }
+
+/**
+ * How each index introduces itself in the table of contents.
+ *
+ * Here rather than in the component for the same reason every blurb is: it is a claim about how
+ * the transcript has been organised, and organising it is what this file does. The titles are
+ * fixed by the code — there are three kinds because there are three types above — but what each
+ * one means to a reader is an editorial matter.
+ */
+export const GROUPS = {
+  chapters: { title: 'Chapters', note: 'Strictly chronological roughly grouped by topic.' },
+  threads: { title: 'Threads', note: 'Work performed at multiple times across chapters.' },
+  collections: { title: 'Collections', note: 'Interesting topics to highlight.' },
+} as const;
 
 export const THREADS: Thread[] = [
   {
@@ -167,85 +183,198 @@ export const COLLECTIONS = {
  * run of commits stops being one topic is a judgement call, and so is every chapter title here.
  */
 export const TOPICS: Topic[] = [
-  { id: 'scaffold', title: 'Standing up the project', commits: ['7e433f4', '93be98b', '81e8420'] },
+  {
+    id: 'scaffold',
+    blurb: 'An Astro install with React bolted on, before any of it had been questioned.',
+    title: 'Standing up the project',
+    commits: ['7e433f4', '93be98b', '81e8420'],
+  },
   {
     id: 'first-data',
+    blurb: 'Hand-written Bay Area seasons, a schema to hold them, and tests to keep them honest.',
     title: 'First data and a schema',
     commits: ['f2be5df', '51f489d', '3647c38'],
   },
   {
     id: 'toolchain',
+    blurb:
+      'Biome, then oxlint; Astro, then bun native; TypeScript 6, then 7 — most of the initial stack replaced inside a day.',
     title: 'Settling the toolchain',
     commits: ['38e2125', 'cd0be06', '74ad57f', 'f923725', '8066ed7', '358fdb7'],
   },
-  { id: 'streamgraph', title: 'First pass: a streamgraph', commits: ['d75fc5f'] },
+  {
+    id: 'streamgraph',
+    blurb: 'The first attempt at drawing a year of produce, as stacked bands.',
+    title: 'First pass: a streamgraph',
+    commits: ['d75fc5f'],
+  },
   {
     id: 'ribbons',
+    blurb:
+      'Turning the bands into ribbons that could carry a label, and cleaning up twice on the way.',
     title: 'Ribbons take shape',
     commits: ['8c375ba', 'e5996a4', '37ff719', '25b9e45', '601ee01'],
   },
-  { id: 'banner', title: 'The banner', commits: ['1bfc740', '4148309', 'd366311', '5f5bdb3'] },
-  { id: 'paper-size', title: 'Choosing the paper', commits: ['db8ac1c', '9d58c43'] },
+  {
+    id: 'banner',
+    blurb: 'The floating card that introduces the poster and holds its controls.',
+    title: 'The banner',
+    commits: ['1bfc740', '4148309', 'd366311', '5f5bdb3'],
+  },
+  {
+    id: 'paper-size',
+    blurb: 'Letting a reader pick the sheet, and making the poster take its proportions from it.',
+    title: 'Choosing the paper',
+    commits: ['db8ac1c', '9d58c43'],
+  },
   {
     id: 'routing',
+    blurb: 'A second region stubbed out, and URLs that can name which one you are looking at.',
     title: 'Regions and routing',
     commits: ['bc5d243', 'afe4b18', 'b8b143c', 'b331ed3'],
   },
-  { id: 'mars-first', title: 'Finding USDA MARS', commits: ['d7ad261'] },
-  { id: 'svg-poster', title: 'All the way to SVG', commits: ['4d7dd3e', '48b8d30'] },
-  { id: 'mars-terminal', title: 'Terminal data, and portrait', commits: ['1a32a3c', '523b2e5'] },
+  {
+    id: 'mars-first',
+    blurb: 'Finding that USDA Market News publishes shipment data at all.',
+    title: 'Finding USDA MARS',
+    commits: ['d7ad261'],
+  },
+  {
+    id: 'svg-poster',
+    blurb: 'Abandoning HTML for the poster, so that what is on screen is what prints.',
+    title: 'All the way to SVG',
+    commits: ['4d7dd3e', '48b8d30'],
+  },
+  {
+    id: 'mars-terminal',
+    blurb: 'Switching to terminal reports, and turning the sheet upright.',
+    title: 'Terminal data, and portrait',
+    commits: ['1a32a3c', '523b2e5'],
+  },
   {
     id: 'mars-movement',
+    blurb: 'Discovering the terminal reports were the wrong ones, and rebuilding around movement.',
     title: 'Movement reports, not prices',
     commits: ['ea78335', '4d45795', 'eac0893'],
   },
-  { id: 'ridgeline', title: 'Streamgraph to ridgeline', commits: ['06d8a69'] },
+  {
+    id: 'ridgeline',
+    blurb: 'Giving each crop its own baseline, so a quiet season reads as quiet rather than thin.',
+    title: 'Streamgraph to ridgeline',
+    commits: ['06d8a69'],
+  },
   {
     id: 'peak-voting',
+    blurb:
+      'A first answer to which weeks are peak, six years of data to vote on it, and a band for where the years disagree.',
     title: 'Deciding what "peak" means',
     commits: ['5fee654', '0fcd929', '06a6506', '251c265'],
   },
   {
     id: 'chart-labels',
+    blurb: 'Labels moved off the ridges, gridlines behind them, and a serif to set it all in.',
     title: 'Labels, gridlines and a serif',
     commits: ['ee0bd55', 'f1b4d61', '633de99', 'cb95a5f'],
   },
   {
     id: 'district-filter',
+    blurb:
+      'Narrowing statewide volume to the districts a vendor could drive in from — and giving up on citrus.',
     title: 'Filtering to local districts',
     commits: ['6527b18', '1d96ca6', 'ab39b1b', 'b4cda6c', '1a21e14'],
   },
-  { id: 'playfair', title: 'Playfair for the headline', commits: ['66c5857'] },
+  {
+    id: 'playfair',
+    blurb: 'A display face for the headline, and nothing else.',
+    title: 'Playfair for the headline',
+    commits: ['66c5857'],
+  },
   {
     id: 'poster-furniture',
+    blurb: 'The fine print, the parts the poster is assembled from, and one border removed.',
     title: 'Footer, frame and parts',
     commits: ['c211566', 'd510101', '5283b95'],
   },
-  { id: 'colors', title: 'Desaturating the crops', commits: ['fa81f8a'] },
-  { id: 'whitespace', title: 'Placing the watercolours', commits: ['867a67b', '4796e0b'] },
-  { id: 'crop-picker', title: 'Choosing crops', commits: ['4d337b2', '678d93b'] },
-  { id: 'about-scaffold', title: 'An about section', commits: ['e7d2efd', 'd1a4b9a'] },
-  { id: 'licenses', title: 'Licensing', commits: ['50717ed', '15098ee'] },
-  { id: 'sources-page', title: 'Saying where it came from', commits: ['e05d4a2', '8f96690'] },
-  { id: 'print', title: 'Printing, and better plates', commits: ['9782829', 'd930e31'] },
-  { id: 'crop-defaults', title: 'Which crops show by default', commits: ['06cfffb', '6efa4d0'] },
+  {
+    id: 'colors',
+    blurb: 'Pulling the saturation out of every crop, so twelve of them can sit together.',
+    title: 'Desaturating the crops',
+    commits: ['fa81f8a'],
+  },
+  {
+    id: 'whitespace',
+    blurb: 'Measuring the space the chart leaves empty, and putting the first watercolours in it.',
+    title: 'Placing the watercolours',
+    commits: ['867a67b', '4796e0b'],
+  },
+  {
+    id: 'crop-picker',
+    blurb:
+      'Letting a reader choose which crops appear, and keeping the plates tied to what is shown.',
+    title: 'Choosing crops',
+    commits: ['4d337b2', '678d93b'],
+  },
+  {
+    id: 'about-scaffold',
+    blurb: 'Somewhere to explain the project, and a namespace to keep the poster separate from it.',
+    title: 'An about section',
+    commits: ['e7d2efd', 'd1a4b9a'],
+  },
+  {
+    id: 'licenses',
+    blurb: 'What this is built from, and what anyone may do with it.',
+    title: 'Licensing',
+    commits: ['50717ed', '15098ee'],
+  },
+  {
+    id: 'sources-page',
+    blurb: 'Where the data came from, how it was interpreted, and where a model wrote the words.',
+    title: 'Saying where it came from',
+    commits: ['e05d4a2', '8f96690'],
+  },
+  {
+    id: 'print',
+    blurb: 'Making the browser print dialog produce the artifact the whole project is for.',
+    title: 'Printing, and better plates',
+    commits: ['9782829', 'd930e31'],
+  },
+  {
+    id: 'crop-defaults',
+    blurb: 'Deciding which crops a reader sees before choosing anything, declared crop by crop.',
+    title: 'Which crops show by default',
+    commits: ['06cfffb', '6efa4d0'],
+  },
   {
     id: 'season-smoothing',
+    blurb:
+      'Second thoughts about the algorithm: one-week spikes, a crop ending on Dec 31, and weeks counted from zero.',
     title: 'Spikes, dips and the year boundary',
     commits: ['41183d4', '80021f4', 'c2b1a7c', '96b9780', '0ffa40e'],
   },
-  { id: 'ny-data', title: 'A second region', commits: ['49ad669'] },
+  {
+    id: 'ny-data',
+    blurb: 'New York, from a state harvest chart, because no shipment report covers it.',
+    title: 'A second region',
+    commits: ['49ad669'],
+  },
   {
     id: 'ny-plates',
+    blurb: 'Plates for the second region, and the resolution to print them at.',
     title: 'New York plates, at print resolution',
     commits: ['3fdc0cc', '18be289', 'ff1110f', '73c7f8b'],
   },
   {
     id: 'ny-provenance',
+    blurb: 'What a state agency chart permits, which is not what a federal one does.',
     title: 'What New York data may be republished',
     commits: ['332d94a', '4dabc0b', '5310c07'],
   },
-  { id: 'perf-mobile', title: 'Performance and small screens', commits: ['620812b', '6bd998d'] },
+  {
+    id: 'perf-mobile',
+    blurb: 'Measuring what the poster actually costs to load, and making it work on a phone.',
+    title: 'Performance and small screens',
+    commits: ['620812b', '6bd998d'],
+  },
 ];
 
 export const CHAPTERS: Chapter[] = [

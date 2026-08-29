@@ -30,7 +30,7 @@ export interface Selection {
 
 export interface Heading {
   title: string;
-  /** A topic has none of its own; its chapter's would be about the wrong thing. */
+  /** Every kind carries one except a topic, where it is optional. */
   blurb?: string | undefined;
 }
 
@@ -117,8 +117,10 @@ export function headingOf(data: Transcript, selection: Selection): Heading {
       const chapter = data.chapters.find((c) => c.id === selection.id);
       return { title: chapter?.title ?? selection.id, blurb: chapter?.blurb };
     }
-    case View.Topic:
-      return { title: data.topics.find((t) => t.id === selection.id)?.title ?? selection.id };
+    case View.Topic: {
+      const topic = data.topics.find((t) => t.id === selection.id);
+      return { title: topic?.title ?? selection.id, blurb: topic?.blurb };
+    }
     case View.Thread: {
       const thread = data.threads.find((t) => t.id === selection.id);
       return { title: thread?.title ?? selection.id, blurb: thread?.blurb };

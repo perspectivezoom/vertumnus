@@ -23,7 +23,7 @@
  */
 import { homedir } from 'node:os';
 
-import { CHAPTERS, COLLECTIONS, THREADS, TOPICS } from '@/data/transcript/curation';
+import { CHAPTERS, COLLECTIONS, GROUPS, THREADS, TOPICS } from '@/data/transcript/curation';
 import type { Commit, Exchange, Step } from '@/data/transcript/schema';
 
 const IN = 'docs/session.jsonl';
@@ -236,6 +236,7 @@ const orphanExchanges = exchanges.filter((e) => !e.commit);
 // ── Writing ─────────────────────────────────────────────────────────────────────────────────
 
 const payload = {
+  groups: GROUPS,
   commits,
   exchanges,
   topics: TOPICS,

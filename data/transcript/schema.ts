@@ -58,6 +58,7 @@ const HighlightSchema: z.ZodType<Highlight> = z.object({
 const TopicSchema: z.ZodType<Topic> = z.object({
   id: z.string(),
   title: z.string(),
+  blurb: z.string(),
   commits: z.array(z.string()),
 });
 const ThreadSchema: z.ZodType<Thread> = z.object({
@@ -79,7 +80,15 @@ export const CollectionSchema = z.object({
   entries: z.array(HighlightSchema),
 });
 
+/** The label and note each of the three indexes introduces itself with. */
+const GroupSchema = z.object({ title: z.string(), note: z.string() });
+
 export const TranscriptSchema = z.object({
+  groups: z.object({
+    chapters: GroupSchema,
+    threads: GroupSchema,
+    collections: GroupSchema,
+  }),
   commits: z.array(CommitSchema),
   exchanges: z.array(ExchangeSchema),
   topics: z.array(TopicSchema),
