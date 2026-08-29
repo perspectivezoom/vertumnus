@@ -57,8 +57,9 @@ export const Density = {
 
 export type Density = (typeof Density)[keyof typeof Density];
 
-const density = (raw: string | null, fallback: Density): Density =>
-  (Object.values(Density) as string[]).includes(raw ?? '') ? (raw as Density) : fallback;
+/** A density if the URL spelled one, or null to let the default stand. */
+const density = (raw: string | null): Density | null =>
+  (Object.values(Density) as string[]).includes(raw ?? '') ? (raw as Density) : null;
 
 /**
  * Change some parameters and leave the rest alone.
@@ -112,18 +113,22 @@ export const ID_LENGTH = 8;
 
 export const shortId = (id: string): string => id.slice(0, ID_LENGTH);
 
+/**
+ * Everything the URL says about how the transcript is being read, every value resolved.
+ *
+ * Downstream never sees a missing parameter or an unparsed string, which is why this module is
+ * the only one that touches the query string at all.
+ */
+export interface Reading {
+  selection: Selection;
+  /** Full id of the cited exchange — the URL carries only the first {@link ID_LENGTH}. */
+  cited: string | null;
+  densities: Densities;
+}
+
 export function useSelection(data: Transcript): Chosen {
-  const [params, setParams] = useSearchParams();
-
-  const cited = params.get(PROMPT);
-  const focused = cited ? (data.exchanges.find((e) => shortId(e.id) === cited)?.id ?? null) : null;
-
-  // An unreadable or absent parameter opens at the beginning rather than failing: these URLs get
-  // typed by hand and pasted into prose, and a broken one should still show the transcript. A
-  // citation with no view of its own opens the topic it belongs to, so the link lands somewhere
-  // rather than on an exchange with no surroundings.
-  const selection =
-    parseSelection(params.get(VIEW)) ?? (focused ? homeOf(data, focused) : null) ?? opening(data);
+  const [reading, write] = useReading(data);
+  const { selection, cited, densities } = reading;
 
   // Filtering runs over all 558 exchanges, so it is memoised on the selection's contents rather
   // than its identity — the parsed selection is a fresh object on every render.
@@ -136,38 +141,92 @@ export function useSelection(data: Transcript): Chosen {
     selection,
     heading: headingOf(data, selection),
     exchanges,
-    focused,
-    densities: {
-      prompts: density(params.get(PROMPTS), Density.Full),
-      responses: density(params.get(RESPONSES), Density.Full),
-    },
-    // Absent means full, so the common reading leaves no parameters behind at all.
-    setDensity: (next) =>
-      setParams(
-        merge(params, {
-          ...(next.prompts && { [PROMPTS]: next.prompts === Density.Full ? null : next.prompts }),
-          ...(next.responses && {
-            [RESPONSES]: next.responses === Density.Full ? null : next.responses,
-          }),
-        }),
-        { replace: true },
-      ),
-    // Choosing a view clears the citation under it, but not how the reader was reading. Replaced
-    // rather than pushed: a history entry per click would bury wherever they came in from.
-    select: (next) =>
-      setParams(merge(params, { [VIEW]: toParam(next), [PROMPT]: null }), { replace: true }),
+    focused: cited,
+    densities,
+    setDensity: (next) => void write({ densities: { ...densities, ...next } }),
+    // Choosing a view clears the citation under it, but not how the reader was reading.
+    select: (next) => void write({ selection: next, cited: null }),
     cite: (id) => {
-      // The view is kept alongside the citation, so a pasted link reopens the same surroundings
-      // the citer was looking at rather than resolving to the topic and losing a thread or
-      // collection they had chosen.
-      const next = merge(params, { [VIEW]: toParam(selection), [PROMPT]: shortId(id) });
-      setParams(next, { replace: true });
+      // The view is written explicitly even though it has not changed: it may have been implicit,
+      // and a pasted link should reopen the surroundings the citer was in rather than resolve to
+      // the exchange's own topic and lose a thread or collection they had chosen.
+      const next = write({ selection, cited: id });
       const url = new URL(window.location.href);
       url.search = next.toString();
       void navigator.clipboard?.writeText(url.toString());
     },
   };
 }
+
+/**
+ * The reading with nothing in the URL at all: the opening chapter, nothing cited, everything
+ * drawn in full.
+ *
+ * A function rather than a constant because one of the three depends on the transcript — where
+ * it begins is whichever chapter the curation put first.
+ */
+function defaults(data: Transcript): Reading {
+  return {
+    selection: opening(data),
+    cited: null,
+    densities: { prompts: Density.Full, responses: Density.Full },
+  };
+}
+
+/**
+ * The URL as typed values, and a way to write them back.
+ *
+ * Each parameter is read as an override of {@link defaults}, and written by omitting anything
+ * that equals its default — one rule and its exact inverse, in one place. Before this they sat
+ * in different functions, absent meaning full in one and full meaning omit in the other, with
+ * nothing keeping the two in step.
+ *
+ * `write` returns the parameters it set, because citing needs the resulting URL and not only the
+ * navigation to it.
+ */
+function useReading(data: Transcript): [Reading, (changes: Partial<Reading>) => URLSearchParams] {
+  const [params, setParams] = useSearchParams();
+  const base = defaults(data);
+
+  const short = params.get(PROMPT);
+  const cited = (short && data.exchanges.find((e) => shortId(e.id) === short)?.id) || base.cited;
+
+  // The one parameter whose fallback is a resolution rather than a default: a citation with no
+  // view of its own opens the topic it belongs to, so a link lands somewhere rather than on an
+  // exchange with no surroundings.
+  const selection =
+    parseSelection(params.get(VIEW)) ?? (cited ? homeOf(data, cited) : null) ?? base.selection;
+
+  const reading: Reading = {
+    selection,
+    cited,
+    densities: {
+      prompts: density(params.get(PROMPTS)) ?? base.densities.prompts,
+      responses: density(params.get(RESPONSES)) ?? base.densities.responses,
+    },
+  };
+
+  const write = (changes: Partial<Reading>) => {
+    const next = merge(params, {
+      ...(changes.selection && { [VIEW]: toParam(changes.selection) }),
+      ...('cited' in changes && { [PROMPT]: changes.cited ? shortId(changes.cited) : null }),
+      ...(changes.densities && {
+        [PROMPTS]: unless(changes.densities.prompts, base.densities.prompts),
+        [RESPONSES]: unless(changes.densities.responses, base.densities.responses),
+      }),
+    });
+    // Replaced rather than pushed: a history entry per click would bury wherever the reader
+    // came in from.
+    setParams(next, { replace: true });
+    return next;
+  };
+
+  return [reading, write];
+}
+
+/** A value to write, or null to leave it out because it is what absence already means. */
+const unless = (value: Density, fallback: Density): string | null =>
+  value === fallback ? null : value;
 
 /** The topic an exchange belongs to, by way of the commit its work landed in. */
 function homeOf(data: Transcript, id: string): Selection | null {
