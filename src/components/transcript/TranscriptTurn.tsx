@@ -9,6 +9,7 @@
  * of verbs in place of a sequence of work.
  */
 import type { Exchange, Step } from '@/data/transcript/schema';
+import { shortId } from '@/src/components/transcript/selection';
 import { TranscriptMarkdown } from '@/src/components/transcript/TranscriptMarkdown';
 
 /** Shared so a tool row can indent to exactly where the text in a bubble starts. */
@@ -22,10 +23,25 @@ export const TURN_WIDTH = 'max-w-[85%]';
 
 const BUBBLE = `${INSET} ${TURN_WIDTH} rounded-lg py-3 font-mono text-[13px] leading-relaxed break-words`;
 
-export function TranscriptTurn({ exchange }: { exchange: Exchange }) {
+export function TranscriptTurn({
+  exchange,
+  focused,
+  onCite,
+}: {
+  exchange: Exchange;
+  focused: boolean;
+  onCite: () => void;
+}) {
   return (
-    <div className={`flex flex-col ${TURN_GAP}`}>
-      <Prompt text={exchange.prompt} />
+    // `scroll-mt` so an exchange arrived at by link stops clear of the top of the window rather
+    // than flush against it, with no sign of what came before.
+    <div
+      id={shortId(exchange.id)}
+      className={`flex scroll-mt-6 flex-col rounded-lg ${TURN_GAP} ${
+        focused ? 'bg-green-100/40 ring-1 ring-green-300' : ''
+      }`}
+    >
+      <Prompt text={exchange.prompt} at={exchange.ts} onCite={onCite} />
       {exchange.steps.map((step, n) => (
         // Index as key: steps never reorder, being a record of something that already happened.
         <StepOf key={n} step={step} />
@@ -34,14 +50,47 @@ export function TranscriptTurn({ exchange }: { exchange: Exchange }) {
   );
 }
 
-/** What the human typed. */
-function Prompt({ text }: { text: string }) {
+/** What the human typed, and when. */
+function Prompt({ text, at, onCite }: { text: string; at: string; onCite: () => void }) {
   return (
-    <p
-      className={`${BUBBLE} self-end rounded-br-sm border border-green-200 bg-green-50/70 whitespace-pre-wrap text-neutral-900`}
+    <div
+      className={`${BUBBLE} flex flex-col gap-1 self-end rounded-br-sm border-green-200 bg-green-50/70`}
     >
-      {text}
-    </p>
+      <p className="whitespace-pre-wrap text-neutral-900">{text}</p>
+      <Stamp at={at} onCite={onCite} />
+    </div>
+  );
+}
+
+const WHEN = new Intl.DateTimeFormat(undefined, {
+  day: 'numeric',
+  month: 'short',
+  hour: 'numeric',
+  minute: '2-digit',
+});
+
+/**
+ * When the prompt was sent, and the handle the exchange is cited by.
+ *
+ * The timestamp is the link, the way it is everywhere else a conversation is published. It is
+ * more discoverable than an icon that appears on hover, and it earns its place twice: even for a
+ * reader who never copies it, when something was said is part of the record.
+ *
+ * It is only a handle, though — the id in the URL is the exchange's own, not the time. Two
+ * prompts a second apart would share a minute, and a published link has to stay pointing at what
+ * it pointed at.
+ */
+function Stamp({ at, onCite }: { at: string; onCite: () => void }) {
+  const when = new Date(at);
+  return (
+    <button
+      type="button"
+      onClick={onCite}
+      title={`${when.toLocaleString()} — copy a link to this exchange`}
+      className="self-end font-mono text-[11px] text-green-800/45 hover:text-green-800 hover:underline"
+    >
+      {WHEN.format(when)}
+    </button>
   );
 }
 

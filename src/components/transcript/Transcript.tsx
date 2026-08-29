@@ -5,10 +5,12 @@
  * either arrived or did not. `Panes` is the section itself, and takes the data as an ordinary
  * prop — so nothing below here carries a maybe-loaded transcript around, or re-proves it arrived.
  */
+import { useEffect } from 'react';
+
 import type { Transcript as Session } from '@/data/transcript/schema';
 import { TranscriptContents } from '@/src/components/transcript/TranscriptContents';
 import { TranscriptTurn, TURN_GAP, TURN_WIDTH } from '@/src/components/transcript/TranscriptTurn';
-import { useSelection } from '@/src/components/transcript/selection';
+import { shortId, useSelection } from '@/src/components/transcript/selection';
 import { type State, useTranscript } from '@/src/components/transcript/useTranscript';
 
 export function Transcript() {
@@ -18,7 +20,14 @@ export function Transcript() {
 
 /** The two panes: the table of contents, and whatever it is pointing at. */
 function Panes({ data }: { data: Session }) {
-  const { selection, heading, exchanges, select } = useSelection(data);
+  const { selection, heading, exchanges, focused, select, cite } = useSelection(data);
+
+  // Scrolls after the exchanges are on the page, which is why it is an effect and not part of
+  // resolving the citation: the element a link names does not exist until its topic has rendered.
+  useEffect(() => {
+    if (!focused) return;
+    document.getElementById(shortId(focused))?.scrollIntoView({ block: 'start' });
+  }, [focused, exchanges]);
 
   return (
     <div className="flex flex-col gap-6 px-6">
@@ -51,7 +60,12 @@ function Panes({ data }: { data: Session }) {
             )}
           </div>
           {exchanges.map((exchange) => (
-            <TranscriptTurn key={exchange.id} exchange={exchange} />
+            <TranscriptTurn
+              key={exchange.id}
+              exchange={exchange}
+              focused={exchange.id === focused}
+              onCite={() => cite(exchange.id)}
+            />
           ))}
         </section>
       </div>

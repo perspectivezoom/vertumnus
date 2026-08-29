@@ -28,6 +28,17 @@ export interface Selection {
   id: string;
 }
 
+/**
+ * The two query parameters, spelled out.
+ *
+ * These URLs exist to be pasted into prose, so they are read far more often than they are typed
+ * — `?view=chapter:controls&prompt=2110f39e` explains itself where `?v=…&e=…` does not, at the
+ * cost of thirteen characters. `prompt` rather than `exchange` because the id it carries is the
+ * prompt's own, and the timestamp that yields the link sits on the prompt.
+ */
+const VIEW = 'view';
+const PROMPT = 'prompt';
+
 export interface Heading {
   title: string;
   /** Every kind carries one except a topic, where it is optional. */
@@ -39,15 +50,35 @@ export interface Chosen {
   heading: Heading;
   /** The exchanges the selection covers, in the order that selection presents them. */
   exchanges: Exchange[];
+  /** The full id of the exchange a link pointed at, if it pointed at one. */
+  focused: string | null;
   select: (next: Selection) => void;
+  /** Point the URL at one exchange, and put that URL on the clipboard. */
+  cite: (id: string) => void;
 }
+
+/**
+ * How much of an exchange id a citation carries.
+ *
+ * The ids are UUIDs and a link in prose is meant to be readable. Six characters already separate
+ * all 558; eight leaves room to grow without ever having to reissue a link someone published.
+ */
+export const ID_LENGTH = 8;
+
+export const shortId = (id: string): string => id.slice(0, ID_LENGTH);
 
 export function useSelection(data: Transcript): Chosen {
   const [params, setParams] = useSearchParams();
 
+  const cited = params.get(PROMPT);
+  const focused = cited ? (data.exchanges.find((e) => shortId(e.id) === cited)?.id ?? null) : null;
+
   // An unreadable or absent parameter opens at the beginning rather than failing: these URLs get
-  // typed by hand and pasted into prose, and a broken one should still show the transcript.
-  const selection = parseSelection(params.get('v')) ?? opening(data);
+  // typed by hand and pasted into prose, and a broken one should still show the transcript. A
+  // citation with no view of its own opens the topic it belongs to, so the link lands somewhere
+  // rather than on an exchange with no surroundings.
+  const selection =
+    parseSelection(params.get(VIEW)) ?? (focused ? homeOf(data, focused) : null) ?? opening(data);
 
   // Filtering runs over all 558 exchanges, so it is memoised on the selection's contents rather
   // than its identity — the parsed selection is a fresh object on every render.
@@ -60,15 +91,34 @@ export function useSelection(data: Transcript): Chosen {
     selection,
     heading: headingOf(data, selection),
     exchanges,
+    focused,
     // Replace rather than push: choosing a chapter is moving around one page, and stacking a
     // history entry per click would bury whatever the reader was on before they arrived.
-    select: (next) => setParams({ v: toParam(next) }, { replace: true }),
+    select: (next) => setParams({ [VIEW]: toParam(next) }, { replace: true }),
+    cite: (id) => {
+      // The view is kept alongside the citation, so a pasted link reopens the same surroundings
+      // the citer was looking at rather than resolving to the topic and losing a thread or
+      // collection they had chosen.
+      const next = { [VIEW]: toParam(selection), [PROMPT]: shortId(id) };
+      setParams(next, { replace: true });
+      const url = new URL(window.location.href);
+      url.search = new URLSearchParams(next).toString();
+      void navigator.clipboard?.writeText(url.toString());
+    },
   };
+}
+
+/** The topic an exchange belongs to, by way of the commit its work landed in. */
+function homeOf(data: Transcript, id: string): Selection | null {
+  const exchange = data.exchanges.find((e) => e.id === id);
+  if (!exchange) return null;
+  const topic = data.topics.find((t) => t.commits.includes(exchange.commit));
+  return topic ? { view: View.Topic, id: topic.id } : null;
 }
 
 // ── Reading a selection out of the URL, and back into it ────────────────────────────────────
 
-/** `?v=topic:banner` — one parameter, rather than four that must never be set at once. */
+/** `?view=topic:banner` — one parameter, rather than four that must never be set at once. */
 export function parseSelection(raw: string | null): Selection | null {
   const [view, ...rest] = (raw ?? '').split(':');
   const id = rest.join(':');
