@@ -16,44 +16,10 @@
 import { homedir } from 'node:os';
 
 import { CHAPTERS, COLLECTIONS, THREADS, TOPICS } from '@/data/transcript/curation';
+import type { Commit, Exchange, Step } from '@/data/transcript/schema';
 
 const IN = 'docs/session.jsonl';
 const OUT = 'data/transcript/__generated__/transcript.json';
-
-/**
- * One thing Claude did: said something, or reached for a tool.
- *
- * `detail` is the one fact about a call worth reading — which file, which command — and it is a
- * summary rather than the arguments on purpose. The full inputs would take the file from 1.4 MB
- * to 3.6 MB, and the results to 5.3 MB, to fill a panel nobody opens. A line that says
- * `Edit src/lib/season.ts` carries the useful part at a twelfth of the cost.
- */
-type Step = { kind: 'text'; text: string } | { kind: 'tool'; name: string; detail: string };
-
-/**
- * One prompt and everything Claude did before the next one.
- *
- * A sequence rather than a reply and a bag of tool names, because that is the shape of the work:
- * 95% of exchanges span more than one assistant message, and in 79% Claude speaks again *after*
- * a tool call. Flattening those into one string loses the order, which is the part that reads as
- * reasoning — checked this, found that, so did the other.
- */
-interface Exchange {
-  id: string;
-  ts: string;
-  commit: string;
-  prompt: string;
-  steps: Step[];
-  /** The prompt cut Claude off mid-work. Frequently, though not always, a correction. */
-  interrupted: boolean;
-}
-
-interface Commit {
-  sha: string;
-  subject: string;
-  date: string;
-  exchanges: string[];
-}
 
 // ── Reading the log ─────────────────────────────────────────────────────────────────────────
 

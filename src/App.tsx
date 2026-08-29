@@ -38,6 +38,9 @@ const Licenses = lazy(async () => ({
 const Sources = lazy(async () => ({
   default: (await import('@/src/components/about/Sources')).Sources,
 }));
+const Transcript = lazy(async () => ({
+  default: (await import('@/src/components/transcript/Transcript')).Transcript,
+}));
 
 export function App() {
   return (
@@ -51,6 +54,7 @@ export function App() {
             <Route index element={<AboutIndex />} />
             <Route path="sources" element={<Sources />} />
             <Route path="ai" element={<Ai />} />
+            <Route path="transcript" element={<Transcript />} />
             <Route path="licenses" element={<Licenses />} />
           </Route>
           <Route element={<PosterShell />}>

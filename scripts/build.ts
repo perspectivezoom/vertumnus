@@ -38,11 +38,6 @@ if (!result.success) {
   process.exit(1);
 }
 
-// The transcript is fetched at runtime rather than imported, so the bundler never sees it: 1.4 MB
-// of conversation belongs in nobody's JavaScript, and only the AI section ever asks for it. Copied
-// under a fixed name for the same reason — a content hash would leave nothing stable to fetch.
-await Bun.write('dist/transcript.json', Bun.file('data/transcript/__generated__/transcript.json'));
-
 /**
  * Tell the browser about the chunks the first paint needs, so it fetches them at once.
  *

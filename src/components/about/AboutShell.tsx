@@ -14,9 +14,13 @@ export const SECTIONS = [
   },
   {
     path: 'ai',
-    label: 'AI',
-    blurb:
-      'Write up on how AI was used in this project, including the raw AI conversation transcript.',
+    label: 'AI usage',
+    blurb: 'Write up on how AI was used in this project.',
+  },
+  {
+    path: 'transcript',
+    label: 'AI transcript',
+    blurb: 'The ~500 prompt AI conversation that built this project, in full.',
   },
   {
     path: 'licenses',
