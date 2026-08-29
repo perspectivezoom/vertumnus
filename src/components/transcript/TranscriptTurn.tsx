@@ -27,11 +27,19 @@ export function TranscriptTurn({
   exchange,
   focused,
   densities,
+  highlight = '',
+  place = null,
+  onOpen,
   onCite,
 }: {
   exchange: Exchange;
   focused: boolean;
   densities: Densities;
+  /** A query to pick out, when the reader arrived here by searching for it. */
+  highlight?: string;
+  /** Where this sits in the curation, shown when the surrounding view does not say. */
+  place?: string | null;
+  onOpen: () => void;
   onCite: () => void;
 }) {
   return (
@@ -43,6 +51,15 @@ export function TranscriptTurn({
         focused ? 'bg-green-100/40 ring-1 ring-green-300' : ''
       }`}
     >
+      {place && (
+        <button
+          type="button"
+          onClick={onOpen}
+          className="self-start px-1 text-[11px] text-neutral-400 hover:text-green-700 hover:underline"
+        >
+          {place}
+        </button>
+      )}
       {/* Each half reads its own density and all nine combinations resolve. Some are of no use
           — hiding the prompts leaves replies to nothing — but a rule with an exception in it is
           harder to hold than one without, and the control simply declines to offer those. */}
@@ -51,6 +68,7 @@ export function TranscriptTurn({
           text={exchange.prompt}
           at={exchange.ts}
           short={densities.prompts === Density.Short}
+          highlight={highlight}
           onCite={onCite}
         />
       )}
@@ -59,7 +77,9 @@ export function TranscriptTurn({
           // Index as key: steps never reorder, being a record of something that already happened.
           <StepOf key={n} step={step} />
         ))}
-      {densities.responses === Density.Short && <Gist steps={exchange.steps} />}
+      {densities.responses === Density.Short && (
+        <Gist steps={exchange.steps} highlight={highlight} />
+      )}
     </div>
   );
 }
@@ -69,11 +89,13 @@ function Prompt({
   text,
   at,
   short,
+  highlight,
   onCite,
 }: {
   text: string;
   at: string;
   short: boolean;
+  highlight: string;
   onCite: () => void;
 }) {
   return (
@@ -83,7 +105,7 @@ function Prompt({
       {/* Clamped rather than truncated: the whole prompt stays in the page, so a browser's own
           find still reaches it and nothing is lost by reading at this density. */}
       <p className={`whitespace-pre-wrap text-neutral-900 ${short ? 'line-clamp-2' : ''}`}>
-        {text}
+        <Marked text={text} query={highlight} />
       </p>
       <Stamp at={at} onCite={onCite} />
     </div>
@@ -97,15 +119,24 @@ function Prompt({
  * is here for, and parsing every reply to show three lines of it would be the expensive half of
  * the work for the cheap half of the result.
  */
-function Gist({ steps }: { steps: readonly Step[] }) {
-  const said = steps.find((step) => step.kind === 'text');
+function Gist({ steps, highlight }: { steps: readonly Step[]; highlight: string }) {
+  const texts = steps.filter((step) => step.kind === 'text');
+  // The step that matched, not the first: a hit is usually paragraphs in, and opening on an
+  // unrelated sentence would look like a miss.
+  const needle = highlight.trim().toLowerCase();
+  const said =
+    (needle && texts.find((step) => step.text.toLowerCase().includes(needle))) ?? texts[0];
   const tools = steps.filter((step) => step.kind === 'tool').length;
   if (!said && !tools) return null;
   return (
     <div
       className={`${BUBBLE} flex flex-col gap-1 self-start rounded-bl-sm border-neutral-200 bg-white text-neutral-700`}
     >
-      {said && <p className="line-clamp-3 whitespace-pre-wrap">{said.text}</p>}
+      {said && (
+        <p className="line-clamp-3 whitespace-pre-wrap">
+          <Marked text={around(said.text, needle)} query={highlight} />
+        </p>
+      )}
       {tools > 0 && (
         <p className="text-xs text-neutral-400">
           {tools} tool call{tools === 1 ? '' : 's'}
@@ -175,6 +206,32 @@ function ToolCall({ name, detail }: { name: string; detail: string }) {
       <span className="shrink-0 font-medium text-neutral-500">{name}</span>
       {detail && <span className="truncate">{detail}</span>}
     </p>
+  );
+}
+
+/** How much of the surrounding text a collapsed reply carries, either side of the match. */
+const CONTEXT = 160;
+
+/** The passage around the match, so three clamped lines are the three that matter. */
+function around(text: string, needle: string): string {
+  const at = needle ? text.toLowerCase().indexOf(needle) : -1;
+  if (at <= CONTEXT) return text;
+  return `…${text.slice(at - CONTEXT)}`;
+}
+
+/** The query picked out wherever it occurs, so a hit is visible without hunting for it. */
+function Marked({ text, query }: { text: string; query: string }) {
+  const needle = query.trim();
+  if (!needle) return text;
+  const parts = text.split(new RegExp(`(${needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+  return parts.map((part, n) =>
+    part.toLowerCase() === needle.toLowerCase() ? (
+      <mark key={n} className="rounded bg-green-200/70 text-neutral-900">
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
   );
 }
 

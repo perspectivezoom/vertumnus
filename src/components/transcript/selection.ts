@@ -1,8 +1,8 @@
 /**
  * What the reader is looking through, and everything that follows from it.
  *
- * All four indexes answer the same two questions — what is this called, and what is in it — so
- * they are one type with a discriminator rather than four parallel paths through the component.
+ * Every index answers the same two questions — what is this called, and what is in it — so they
+ * are one type with a discriminator rather than a parallel path each through the component.
  *
  * The choice lives in the URL rather than in state, because a section of a transcript is a thing
  * worth linking to. So going back in the browser walks back through the reading.
@@ -13,12 +13,20 @@ import { useSearchParams } from 'react-router';
 
 import type { Exchange, Transcript } from '@/data/transcript/schema';
 
-/** The four ways in. Chapters and topics are the table of contents; the other two cut across it. */
+/**
+ * The ways in. Chapters and topics are the table of contents; the rest cut across it.
+ *
+ * Search is one of them rather than a parameter beside them: it answers the same two questions
+ * every view does — what is this called, and what is in it — and a second parameter deciding
+ * what the pane shows would have to be merged with this one on every write. Its id is whatever
+ * was typed, where the others name curation.
+ */
 export const View = {
   Chapter: 'chapter',
   Topic: 'topic',
   Thread: 'thread',
   Collection: 'collection',
+  Search: 'search',
 } as const;
 
 export type View = (typeof View)[keyof typeof View];
@@ -29,12 +37,12 @@ export interface Selection {
 }
 
 /**
- * The two query parameters, spelled out.
+ * The query parameters, spelled out.
  *
- * These URLs exist to be pasted into prose, so they are read far more often than they are typed
- * — `?view=chapter:controls&prompt=2110f39e` explains itself where `?v=…&e=…` does not, at the
- * cost of thirteen characters. `prompt` rather than `exchange` because the id it carries is the
- * prompt's own, and the timestamp that yields the link sits on the prompt.
+ * These URLs exist to be pasted into prose, so they are read far more often than typed —
+ * `?view=chapter:controls&prompt=2110f39e` explains itself where `?v=…&e=…` does not. `prompt`
+ * rather than `exchange` because the id it carries is the prompt's own, and the timestamp that
+ * yields the link sits on the prompt.
  */
 const VIEW = 'view';
 const PROMPT = 'prompt';
@@ -95,6 +103,10 @@ export interface Chosen {
   cite: (id: string) => void;
   densities: Densities;
   setDensity: (next: Partial<Densities>) => void;
+  /** Run a query, and collapse the replies so the hits fit on a screen. */
+  search: (query: string) => void;
+  /** Leave for an exchange's own topic — how a search hit is followed back into the record. */
+  open: (id: string) => void;
 }
 
 /** How much of each half of a turn to draw. Always chosen together, so carried together. */
@@ -126,9 +138,22 @@ export interface Reading {
   densities: Densities;
 }
 
+/**
+ * What to change about the reading. Omitting a field leaves it alone; `null` clears it.
+ *
+ * The two differ for the view: clearing lets the default answer, where naming the opening chapter
+ * writes an opinion into the URL that the reader never expressed.
+ */
+export type Changes = Partial<{
+  selection: Selection | null;
+  cited: string | null;
+  densities: Densities;
+}>;
+
 export function useSelection(data: Transcript): Chosen {
   const [reading, write] = useReading(data);
   const { selection, cited, densities } = reading;
+  const base = defaults(data).densities;
 
   // Filtering runs over all 558 exchanges, so it is memoised on the selection's contents rather
   // than its identity — the parsed selection is a fresh object on every render.
@@ -146,6 +171,24 @@ export function useSelection(data: Transcript): Chosen {
     setDensity: (next) => void write({ densities: { ...densities, ...next } }),
     // Choosing a view clears the citation under it, but not how the reader was reading.
     select: (next) => void write({ selection: next, cited: null }),
+    search: (query) =>
+      void write(
+        query
+          ? // Collapsed, because a hundred hits shown whole is the log again with gaps in it.
+            // Short rather than hidden: most queries match something Claude said.
+            {
+              selection: { view: View.Search, id: query },
+              cited: null,
+              densities: { ...densities, responses: Density.Short },
+            }
+          : // Leaving says nothing about density: this collapsed it, but what the reader had
+            // before is recorded nowhere, and restoring a guess could undo a deliberate choice.
+            { selection: null, cited: null },
+      ),
+    // Expanded, unlike leaving a search: following a hit is asking to read the thing, and a
+    // collapsed reply is the one state in which that cannot be done.
+    open: (id) =>
+      void write({ selection: homeOf(data, id) ?? opening(data), cited: id, densities: base }),
     cite: (id) => {
       // The view is written explicitly even though it has not changed: it may have been implicit,
       // and a pasted link should reopen the surroundings the citer was in rather than resolve to
@@ -184,7 +227,7 @@ function defaults(data: Transcript): Reading {
  * `write` returns the parameters it set, because citing needs the resulting URL and not only the
  * navigation to it.
  */
-function useReading(data: Transcript): [Reading, (changes: Partial<Reading>) => URLSearchParams] {
+function useReading(data: Transcript): [Reading, (changes: Changes) => URLSearchParams] {
   const [params, setParams] = useSearchParams();
   const base = defaults(data);
 
@@ -206,9 +249,11 @@ function useReading(data: Transcript): [Reading, (changes: Partial<Reading>) => 
     },
   };
 
-  const write = (changes: Partial<Reading>) => {
+  const write = (changes: Changes) => {
     const next = merge(params, {
-      ...(changes.selection && { [VIEW]: toParam(changes.selection) }),
+      ...('selection' in changes && {
+        [VIEW]: changes.selection ? toParam(changes.selection) : null,
+      }),
       ...('cited' in changes && { [PROMPT]: changes.cited ? shortId(changes.cited) : null }),
       ...(changes.densities && {
         [PROMPTS]: unless(changes.densities.prompts, base.densities.prompts),
@@ -227,6 +272,22 @@ function useReading(data: Transcript): [Reading, (changes: Partial<Reading>) => 
 /** A value to write, or null to leave it out because it is what absence already means. */
 const unless = (value: Density, fallback: Density): string | null =>
   value === fallback ? null : value;
+
+/**
+ * Every exchange whose prompt or reply contains the query, in the order they happened.
+ *
+ * Substring matching over 1.5 MB measures in single-digit milliseconds, so an index would be
+ * machinery in front of something already imperceptible.
+ */
+export function matching(data: Transcript, query: string): Exchange[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [];
+  return data.exchanges.filter(
+    (e) =>
+      e.prompt.toLowerCase().includes(needle) ||
+      e.steps.some((s) => s.kind === 'text' && s.text.toLowerCase().includes(needle)),
+  );
+}
 
 /** The topic an exchange belongs to, by way of the commit its work landed in. */
 function homeOf(data: Transcript, id: string): Selection | null {
@@ -262,9 +323,14 @@ export const opening = (data: Transcript): Selection => ({
 
 // ── Resolving it against the data ───────────────────────────────────────────────────────────
 
-/** The commits a selection covers. A collection cites exchanges directly, so it covers none. */
+/**
+ * The commits a selection covers — none for the two that are not runs of history: a collection
+ * cites exchanges directly, and a search matches them wherever they fell.
+ */
 export function commitsOf(data: Transcript, selection: Selection): string[] {
   switch (selection.view) {
+    case View.Search:
+      return [];
     case View.Chapter: {
       const chapter = data.chapters.find((c) => c.id === selection.id);
       return chapter?.topics.flatMap((id) => topicCommits(data, id)) ?? [];
@@ -283,6 +349,8 @@ const topicCommits = (data: Transcript, id: string): string[] =>
 
 export function headingOf(data: Transcript, selection: Selection): Heading {
   switch (selection.view) {
+    case View.Search:
+      return { title: `Search: ${selection.id}` };
     case View.Chapter: {
       const chapter = data.chapters.find((c) => c.id === selection.id);
       return { title: chapter?.title ?? selection.id, blurb: chapter?.blurb };
@@ -303,6 +371,7 @@ export function headingOf(data: Transcript, selection: Selection): Heading {
 }
 
 export function exchangesOf(data: Transcript, selection: Selection): Exchange[] {
+  if (selection.view === View.Search) return matching(data, selection.id);
   if (selection.view === View.Collection) {
     // A collection keeps the order it was written in rather than the order things happened: the
     // sequence is the curator's argument, not a chronology.

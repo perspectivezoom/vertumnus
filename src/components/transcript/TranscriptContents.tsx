@@ -8,7 +8,7 @@
  */
 import { useState } from 'react';
 
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search } from 'lucide-react';
 
 import type { Transcript } from '@/data/transcript/schema';
 import { type Selection, View } from '@/src/components/transcript/selection';
@@ -28,20 +28,51 @@ export function TranscriptContents({
   data,
   selection,
   onSelect,
+  onSearch,
 }: {
   data: Transcript;
   selection: Selection;
   onSelect: (next: Selection) => void;
+  onSearch: (query: string) => void;
 }) {
   const pane = { data, weigh: weigher(data), selection, onSelect };
   return (
     // Clear of the scrollbar this pane grows when a chapter is opened, which would otherwise
     // sit on top of the counts.
     <nav className="flex flex-col pr-3">
+      <Find
+        query={selection.view === View.Search ? selection.id : ''}
+        total={data.exchanges.length}
+        onSearch={onSearch}
+      />
       <Chapters {...pane} />
       <Threads {...pane} />
       <Collections {...pane} />
     </nav>
+  );
+}
+
+/** The search box, which selects a view like every other control in this pane. */
+function Find({
+  query,
+  total,
+  onSearch,
+}: {
+  query: string;
+  total: number;
+  onSearch: (query: string) => void;
+}) {
+  return (
+    <label className="relative mt-1 flex items-center">
+      <Search className="pointer-events-none absolute left-2 h-4 w-4 text-neutral-400" />
+      <input
+        type="search"
+        value={query}
+        onChange={(event) => onSearch(event.target.value)}
+        placeholder={`Search ${total} exchanges`}
+        className="w-full rounded-md border border-neutral-300 bg-white py-1.5 pr-2 pl-8 text-sm placeholder:text-neutral-400 focus:border-green-600 focus:outline-none"
+      />
+    </label>
   );
 }
 
