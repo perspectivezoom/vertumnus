@@ -13,20 +13,37 @@
  * topics. So it must be safe to run repeatedly: it reads the curation and never writes it, and
  * anything not yet filed is reported and passed through rather than dropped or guessed at.
  */
+import { homedir } from 'node:os';
+
 import { CHAPTERS, COLLECTIONS, THREADS, TOPICS } from '@/data/transcript/curation';
 
 const IN = 'docs/session.jsonl';
 const OUT = 'data/transcript/__generated__/transcript.json';
 
-/** One prompt and what Claude said back, the unit the browser navigates to. */
+/**
+ * One thing Claude did: said something, or reached for a tool.
+ *
+ * `detail` is the one fact about a call worth reading — which file, which command — and it is a
+ * summary rather than the arguments on purpose. The full inputs would take the file from 1.4 MB
+ * to 3.6 MB, and the results to 5.3 MB, to fill a panel nobody opens. A line that says
+ * `Edit src/lib/season.ts` carries the useful part at a twelfth of the cost.
+ */
+type Step = { kind: 'text'; text: string } | { kind: 'tool'; name: string; detail: string };
+
+/**
+ * One prompt and everything Claude did before the next one.
+ *
+ * A sequence rather than a reply and a bag of tool names, because that is the shape of the work:
+ * 95% of exchanges span more than one assistant message, and in 79% Claude speaks again *after*
+ * a tool call. Flattening those into one string loses the order, which is the part that reads as
+ * reasoning — checked this, found that, so did the other.
+ */
 interface Exchange {
   id: string;
   ts: string;
   commit: string;
   prompt: string;
-  reply: string;
-  /** Tool names in call order — what Claude *did*, without the 4.5 MB of arguments and output. */
-  tools: string[];
+  steps: Step[];
   /** The prompt cut Claude off mid-work. Frequently, though not always, a correction. */
   interrupted: boolean;
 }
@@ -61,19 +78,49 @@ function promptText(entry: Record<string, unknown>): string | null {
   return text;
 }
 
-function assistantParts(entry: Record<string, unknown>): { text: string; tools: string[] } | null {
+/**
+ * The one readable fact about a tool call: which file, which command, which pattern.
+ *
+ * Every tool names its subject differently, so this is a list of the keys that carry one, tried
+ * in order of how specific they are. A call with none of them gets an empty string and shows as
+ * its bare name, which is honest — some tools genuinely have nothing to say about themselves.
+ */
+function toolDetail(input: unknown): string {
+  if (!input || typeof input !== 'object') return '';
+  const fields = input as Record<string, unknown>;
+  const path = fields.file_path ?? fields.path ?? fields.notebook_path;
+  // Repo-relative where possible, `~` otherwise. Not for privacy — the working directory is all
+  // over the prose anyway — but because the interesting half of the path is the end of it.
+  if (typeof path === 'string') {
+    return path.replace(`${process.cwd()}/`, '').replace(homedir(), '~');
+  }
+  for (const key of ['command', 'pattern', 'query', 'description'] as const) {
+    const value = fields[key];
+    if (typeof value === 'string') return value.split('\n')[0]!.slice(0, 100);
+  }
+  return '';
+}
+
+/** What Claude did in one assistant message, in the order the blocks appear. */
+function assistantSteps(entry: Record<string, unknown>): Step[] | null {
   if (entry.type !== 'assistant' || entry.isSidechain) return null;
   const message = entry.message as { content?: unknown } | undefined;
   const content = message?.content;
   if (!Array.isArray(content)) return null;
-  const text = content
-    .filter((b): b is { type: string; text: string } => b?.type === 'text')
-    .map((b) => b.text)
-    .join('\n\n');
-  const tools = content
-    .filter((b): b is { type: string; name: string } => b?.type === 'tool_use')
-    .map((b) => b.name);
-  return { text, tools };
+
+  const steps: Step[] = [];
+  for (const block of content as {
+    type?: string;
+    text?: string;
+    name?: string;
+    input?: unknown;
+  }[]) {
+    if (block.type === 'text' && block.text) steps.push({ kind: 'text', text: block.text });
+    if (block.type === 'tool_use' && block.name) {
+      steps.push({ kind: 'tool', name: block.name, detail: toolDetail(block.input) });
+    }
+  }
+  return steps;
 }
 
 const lines = (await Bun.file(IN).text()).split('\n').filter(Boolean);
@@ -100,8 +147,7 @@ for (const line of lines) {
       ts: String(entry.timestamp),
       commit: '',
       prompt,
-      reply: '',
-      tools: [],
+      steps: [],
       interrupted: pendingInterrupt,
     };
     pendingInterrupt = false;
@@ -109,11 +155,8 @@ for (const line of lines) {
     continue;
   }
 
-  const parts = assistantParts(entry);
-  if (parts && current) {
-    if (parts.text) current.reply += (current.reply ? '\n\n' : '') + parts.text;
-    current.tools.push(...parts.tools);
-  }
+  const steps = assistantSteps(entry);
+  if (steps && current) current.steps.push(...steps);
 }
 
 // ── Joining to the history ──────────────────────────────────────────────────────────────────
