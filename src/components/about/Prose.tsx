@@ -14,7 +14,9 @@
  * words should reach for this; anything that is mostly data should not.
  */
 export function Article({ children }: { children: React.ReactNode }) {
-  return <article className="flex max-w-[65ch] flex-col gap-6">{children}</article>;
+  return (
+    <article className="mx-auto flex w-full max-w-[65ch] flex-col gap-6 px-6">{children}</article>
+  );
 }
 
 /** A section's title. */

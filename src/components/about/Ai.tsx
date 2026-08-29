@@ -1,4 +1,4 @@
-import { Body, SectionTitle } from '@/src/components/about/Prose';
+import { Article, Body, SectionTitle } from '@/src/components/about/Prose';
 
 /**
  * How the project was built alongside a model, and the record of it.
@@ -8,15 +8,14 @@ import { Body, SectionTitle } from '@/src/components/about/Prose';
  */
 export function Ai() {
   return (
-    <>
-      <SectionTitle>AI</SectionTitle>
+    <Article>
+      <SectionTitle>AI usage</SectionTitle>
       <Body>
         <p className="text-neutral-400 italic">
-          To come: commentary on building this with a model, and a searchable transcript of the
-          sessions that produced it — including where the model reached something original, and
-          where an assumption of its had to be corrected.
+          To come: commentary on building this with a model. The conversation itself is in the AI
+          transcript section.
         </p>
       </Body>
-    </>
+    </Article>
   );
 }

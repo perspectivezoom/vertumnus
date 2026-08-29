@@ -41,7 +41,9 @@ export function AboutShell() {
   return (
     <div className="min-h-screen bg-neutral-100">
       <header className="border-b border-neutral-200 bg-white">
-        <div className="mx-auto flex max-w-3xl flex-wrap items-baseline gap-x-6 gap-y-2 px-6 py-4">
+        {/* Spans the page. Aligning to the section below would mean knowing how wide it wants to
+            be, and that is the section's business — see Article. */}
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 px-6 py-4">
           <Link
             to="/"
             className="font-poster text-lg font-semibold text-green-900 hover:text-green-700"
@@ -67,7 +69,8 @@ export function AboutShell() {
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-10">
+      {/* No column and no padding: every section brings its own. */}
+      <main className="flex w-full flex-col gap-6 py-10">
         <Outlet />
       </main>
     </div>

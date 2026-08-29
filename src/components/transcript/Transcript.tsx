@@ -14,17 +14,28 @@ export function Transcript() {
 
   const { data } = state;
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
+    <div className="flex flex-col gap-6 px-6">
+      <header className="flex max-w-[65ch] flex-col gap-2">
         <h1 className="font-poster text-3xl font-bold text-neutral-900">AI transcript</h1>
         <p className="text-[15px] leading-relaxed text-neutral-600">
           Every prompt and reply that built this project, {data.exchanges.length} in all.
         </p>
       </header>
-      <div className="flex flex-col">
-        {data.exchanges.map((exchange) => (
-          <Turn key={exchange.id} exchange={exchange} />
-        ))}
+
+      {/* Stacked below `lg`, where two columns would leave neither readable. */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        {/* Empty until the contents land. Scrolls in its own right, since the index will outrun
+            the window — and `items-start` above is what stops it being stretched to the
+            conversation's height, which would defeat the stickiness. */}
+        <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:w-72 lg:overflow-y-auto" />
+
+        {/* `min-w-0` because a flex item's minimum is its content: one unbroken line of log
+            output would otherwise widen this column until the page scrolled. */}
+        <section className="flex min-w-0 flex-1 flex-col">
+          {data.exchanges.map((exchange) => (
+            <Turn key={exchange.id} exchange={exchange} />
+          ))}
+        </section>
       </div>
     </div>
   );
