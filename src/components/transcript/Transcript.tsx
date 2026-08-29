@@ -5,7 +5,7 @@
  * — this is the section existing and the data arriving, so that everything after it has something
  * real to be built against rather than a fixture.
  */
-import type { Exchange } from '@/data/transcript/schema';
+import { TranscriptTurn, TURN_GAP } from '@/src/components/transcript/TranscriptTurn';
 import { type State, useTranscript } from '@/src/components/transcript/useTranscript';
 
 export function Transcript() {
@@ -31,32 +31,12 @@ export function Transcript() {
 
         {/* `min-w-0` because a flex item's minimum is its content: one unbroken line of log
             output would otherwise widen this column until the page scrolled. */}
-        <section className="flex min-w-0 flex-1 flex-col">
+        <section className={`flex min-w-0 flex-1 flex-col ${TURN_GAP} py-2`}>
           {data.exchanges.map((exchange) => (
-            <Turn key={exchange.id} exchange={exchange} />
+            <TranscriptTurn key={exchange.id} exchange={exchange} />
           ))}
         </section>
       </div>
-    </div>
-  );
-}
-
-/** One prompt, then each thing Claude did about it. */
-function Turn({ exchange }: { exchange: Exchange }) {
-  return (
-    // `break-words` because the log is full of URLs and paths with no spaces in them, and a
-    // single one of those is enough to push the whole page sideways.
-    <div className="flex flex-col gap-2 border-b border-neutral-200 py-4 break-words">
-      <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-neutral-900">
-        {exchange.prompt}
-      </p>
-      {exchange.steps.map((step, n) => (
-        // Index as key: steps have no identity of their own and the list never reorders — it is
-        // a fixed record of something that already happened.
-        <p key={n} className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-600">
-          {step.kind === 'text' ? step.text : `${step.name} ${step.detail}`.trim()}
-        </p>
-      ))}
     </div>
   );
 }
