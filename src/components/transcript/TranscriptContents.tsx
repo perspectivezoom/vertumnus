@@ -11,27 +11,48 @@ import { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import type { Transcript } from '@/data/transcript/schema';
+import { type Selection, View } from '@/src/components/transcript/selection';
 
 /** How many exchanges a run of commits accounts for — what every count here is counted in. */
 type Weigh = (commits: readonly string[]) => number;
 
-export function TranscriptContents({ data }: { data: Transcript }) {
-  const weigh = weigher(data);
+/** What each index needs to draw itself and report a choice. */
+interface Pane {
+  data: Transcript;
+  weigh: Weigh;
+  selection: Selection;
+  onSelect: (next: Selection) => void;
+}
+
+export function TranscriptContents({
+  data,
+  selection,
+  onSelect,
+}: {
+  data: Transcript;
+  selection: Selection;
+  onSelect: (next: Selection) => void;
+}) {
+  const pane = { data, weigh: weigher(data), selection, onSelect };
   return (
     // Clear of the scrollbar this pane grows when a chapter is opened, which would otherwise
     // sit on top of the counts.
     <nav className="flex flex-col pr-3">
-      <Chapters data={data} weigh={weigh} />
-      <Threads data={data} weigh={weigh} />
-      <Collections data={data} />
+      <Chapters {...pane} />
+      <Threads {...pane} />
+      <Collections {...pane} />
     </nav>
   );
 }
 
 // ── The three indexes ───────────────────────────────────────────────────────────────────────
 
-function Chapters({ data, weigh }: { data: Transcript; weigh: Weigh }) {
-  const [open, setOpen] = useState<string | null>(null);
+function Chapters({ data, weigh, selection, onSelect }: Pane) {
+  // Opens to whichever chapter the selection is in, so arriving by link shows where you are.
+  const containing = data.chapters.find((c) =>
+    selection.view === View.Topic ? c.topics.includes(selection.id) : c.id === selection.id,
+  );
+  const [open, setOpen] = useState<string | null>(containing?.id ?? null);
   return (
     <Group title="Chapters" note="Strictly chronological roughly grouped by topic.">
       {data.chapters.map((chapter) => {
@@ -42,14 +63,23 @@ function Chapters({ data, weigh }: { data: Transcript; weigh: Weigh }) {
               title={chapter.title}
               count={weigh(commitsOf(data, chapter.id))}
               expanded={expanded}
+              active={selection.view === View.Chapter && selection.id === chapter.id}
               onToggle={() => setOpen(expanded ? null : chapter.id)}
+              onSelect={() => onSelect({ view: View.Chapter, id: chapter.id })}
             />
             {expanded && (
               <div className="ml-[1.15rem] flex flex-col border-l border-neutral-200 pl-1">
                 {chapter.topics.map((id) => {
                   const topic = data.topics.find((t) => t.id === id);
                   return topic ? (
-                    <Entry key={id} title={topic.title} count={weigh(topic.commits)} muted />
+                    <Entry
+                      key={id}
+                      title={topic.title}
+                      count={weigh(topic.commits)}
+                      muted
+                      active={selection.view === View.Topic && selection.id === id}
+                      onSelect={() => onSelect({ view: View.Topic, id })}
+                    />
                   ) : null;
                 })}
               </div>
@@ -61,21 +91,33 @@ function Chapters({ data, weigh }: { data: Transcript; weigh: Weigh }) {
   );
 }
 
-function Threads({ data, weigh }: { data: Transcript; weigh: Weigh }) {
+function Threads({ data, weigh, selection, onSelect }: Pane) {
   return (
     <Group title="Threads" note="Work performed at multiple times across chapters.">
       {data.threads.map((thread) => (
-        <Entry key={thread.id} title={thread.title} count={weigh(thread.commits)} />
+        <Entry
+          key={thread.id}
+          title={thread.title}
+          count={weigh(thread.commits)}
+          active={selection.view === View.Thread && selection.id === thread.id}
+          onSelect={() => onSelect({ view: View.Thread, id: thread.id })}
+        />
       ))}
     </Group>
   );
 }
 
-function Collections({ data }: { data: Transcript }) {
+function Collections({ data, selection, onSelect }: Pane) {
   return (
     <Group title="Collections" note="Interesting topics to highlight.">
       {Object.entries(data.collections).map(([id, collection]) => (
-        <Entry key={id} title={collection.title} count={collection.entries.length} />
+        <Entry
+          key={id}
+          title={collection.title}
+          count={collection.entries.length}
+          active={selection.view === View.Collection && selection.id === id}
+          onSelect={() => onSelect({ view: View.Collection, id })}
+        />
       ))}
     </Group>
   );
@@ -103,41 +145,79 @@ function Group({
   );
 }
 
-/** A named thing and how much of the session it accounts for. */
-function Entry({ title, count, muted }: { title: string; count: number; muted?: boolean }) {
-  return (
-    <p className={`${ROW} ${muted ? 'text-neutral-500' : 'text-neutral-700'}`}>
-      <span>{title}</span>
-      <Count n={count} />
-    </p>
-  );
-}
-
-/** An entry that opens to reveal what it contains. */
-function Expander({
+/** A named thing, how much of the session it accounts for, and a way to go there. */
+function Entry({
   title,
   count,
-  expanded,
-  onToggle,
+  muted,
+  active,
+  onSelect,
 }: {
   title: string;
   count: number;
-  expanded: boolean;
-  onToggle: () => void;
+  muted?: boolean;
+  active: boolean;
+  onSelect: () => void;
 }) {
-  const Chevron = expanded ? ChevronDown : ChevronRight;
   return (
-    <button type="button" aria-expanded={expanded} onClick={onToggle} className={`${ROW} w-full`}>
-      <span className="flex items-baseline gap-1 text-neutral-700">
-        <Chevron className="h-3.5 w-3.5 shrink-0 self-center text-neutral-400" />
-        {title}
-      </span>
+    <button type="button" onClick={onSelect} className={row(active, muted)}>
+      <span>{title}</span>
       <Count n={count} />
     </button>
   );
 }
 
-const ROW = 'flex items-baseline justify-between gap-2 rounded px-2 py-1 text-left text-sm';
+/**
+ * An entry that also opens to reveal what it contains.
+ *
+ * Two controls, not one: the chevron opens the chapter and the label selects it. Collapsing them
+ * would mean either that you cannot look inside without navigating away, or that you cannot read
+ * a chapter whole without its topics unfolding underneath you.
+ */
+function Expander({
+  title,
+  count,
+  expanded,
+  active,
+  onToggle,
+  onSelect,
+}: {
+  title: string;
+  count: number;
+  expanded: boolean;
+  active: boolean;
+  onToggle: () => void;
+  onSelect: () => void;
+}) {
+  const Chevron = expanded ? ChevronDown : ChevronRight;
+  return (
+    <span className={`${row(active)} w-full`}>
+      <button
+        type="button"
+        aria-expanded={expanded}
+        aria-label={`${expanded ? 'Collapse' : 'Expand'} ${title}`}
+        onClick={onToggle}
+        className="-m-1 shrink-0 self-center p-1 text-neutral-400 hover:text-neutral-700"
+      >
+        <Chevron className="h-3.5 w-3.5" />
+      </button>
+      <button type="button" onClick={onSelect} className="flex-1 text-left">
+        {title}
+      </button>
+      <Count n={count} />
+    </span>
+  );
+}
+
+const ROW = 'flex items-baseline gap-2 rounded px-2 py-1 text-left text-sm';
+
+/** Every row in the pane, tinted by whether it is the one being read. */
+function row(active: boolean, muted = false): string {
+  const tone = active
+    ? 'bg-green-50 text-green-900'
+    : `${muted ? 'text-neutral-500' : 'text-neutral-700'} hover:bg-neutral-100`;
+  return `${ROW} w-full justify-between ${tone}`;
+}
 
 function Count({ n }: { n: number }) {
   return <span className="text-[11px] text-neutral-400 tabular-nums">{n}</span>;

@@ -13,10 +13,14 @@ import { TranscriptMarkdown } from '@/src/components/transcript/TranscriptMarkdo
 
 /** Shared so a tool row can indent to exactly where the text in a bubble starts. */
 const INSET = 'border px-4';
-const BUBBLE = `${INSET} max-w-[85%] rounded-lg py-3 font-mono text-[13px] leading-relaxed break-words`;
 
 /** Between bubbles, and between turns, so the boundary between two turns is invisible. */
 export const TURN_GAP = 'gap-3';
+
+/** How wide anything in the conversation gets, so the column has one right edge. */
+export const TURN_WIDTH = 'max-w-[85%]';
+
+const BUBBLE = `${INSET} ${TURN_WIDTH} rounded-lg py-3 font-mono text-[13px] leading-relaxed break-words`;
 
 export function TranscriptTurn({ exchange }: { exchange: Exchange }) {
   return (
@@ -64,7 +68,7 @@ function ToolCall({ name, detail }: { name: string; detail: string }) {
   return (
     // A bubble's inset with the border made transparent, so the text starts where theirs does.
     <p
-      className={`${INSET} flex max-w-[85%] items-baseline gap-2 self-start border-transparent font-mono text-xs text-neutral-400`}
+      className={`${INSET} ${TURN_WIDTH} flex items-baseline gap-2 self-start border-transparent font-mono text-xs text-neutral-400`}
     >
       <span className="shrink-0 font-medium text-neutral-500">{name}</span>
       {detail && <span className="truncate">{detail}</span>}
