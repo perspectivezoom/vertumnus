@@ -5,6 +5,7 @@
  * — this is the section existing and the data arriving, so that everything after it has something
  * real to be built against rather than a fixture.
  */
+import { TranscriptContents } from '@/src/components/transcript/TranscriptContents';
 import { TranscriptTurn, TURN_GAP } from '@/src/components/transcript/TranscriptTurn';
 import { type State, useTranscript } from '@/src/components/transcript/useTranscript';
 
@@ -24,10 +25,12 @@ export function Transcript() {
 
       {/* Stacked below `lg`, where two columns would leave neither readable. */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        {/* Empty until the contents land. Scrolls in its own right, since the index will outrun
-            the window — and `items-start` above is what stops it being stretched to the
-            conversation's height, which would defeat the stickiness. */}
-        <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:w-72 lg:overflow-y-auto" />
+        {/* Scrolls in its own right, since the index outruns the window — and `items-start`
+            above is what stops it being stretched to the conversation's height, which would
+            defeat the stickiness. */}
+        <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:w-72 lg:overflow-y-auto">
+          <TranscriptContents data={data} />
+        </aside>
 
         {/* `min-w-0` because a flex item's minimum is its content: one unbroken line of log
             output would otherwise widen this column until the page scrolled. */}
