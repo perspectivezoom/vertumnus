@@ -11,6 +11,7 @@ export interface ShippedDependency {
 export const SHIPPED: readonly ShippedDependency[] = [
   { name: 'd3-shape', version: '3.2.0', license: 'ISC' },
   { name: 'lucide-react', version: '1.25.0', license: 'ISC' },
+  { name: 'markdown-to-jsx', version: '9.10.2', license: 'MIT' },
   { name: 'motion', version: '12.42.2', license: 'MIT' },
   { name: 'react', version: '19.2.7', license: 'MIT' },
   { name: 'react-dom', version: '19.2.7', license: 'MIT' },

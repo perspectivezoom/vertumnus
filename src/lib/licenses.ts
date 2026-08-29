@@ -62,6 +62,7 @@ const PURPOSE: Record<string, string> = {
   zod: 'Checking region data and URL options',
   motion: 'The controls panel opening and closing',
   'lucide-react': 'Icons',
+  'markdown-to-jsx': 'Rendering the session transcript',
 };
 
 const ORDER = Object.keys(PURPOSE);

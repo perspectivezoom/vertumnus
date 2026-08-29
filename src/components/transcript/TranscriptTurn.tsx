@@ -9,6 +9,7 @@
  * of verbs in place of a sequence of work.
  */
 import type { Exchange, Step } from '@/data/transcript/schema';
+import { TranscriptMarkdown } from '@/src/components/transcript/TranscriptMarkdown';
 
 /** Shared so a tool row can indent to exactly where the text in a bubble starts. */
 const INSET = 'border px-4';
@@ -40,13 +41,15 @@ function Prompt({ text }: { text: string }) {
   );
 }
 
-/** What Claude wrote back. */
+/** What Claude wrote back, in the Markdown it was written in. */
 function Reply({ text }: { text: string }) {
   return (
+    // No `whitespace-pre-wrap` here, unlike the prompt: the renderer owns the line breaks, and
+    // preserving the source's own would double every blank line between paragraphs.
     <div
-      className={`${BUBBLE} self-start rounded-bl-sm border border-neutral-200 bg-white whitespace-pre-wrap text-neutral-700`}
+      className={`${BUBBLE} self-start rounded-bl-sm border border-neutral-200 bg-white text-neutral-700`}
     >
-      {text}
+      <TranscriptMarkdown text={text} />
     </div>
   );
 }
