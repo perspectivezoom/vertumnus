@@ -14,7 +14,8 @@ import { ID_LENGTH, shortId } from '@/src/components/transcript/selection';
 describe('cited exchange ids', () => {
   test('are distinct at the length a URL carries', async () => {
     const { exchanges } = await Bun.file('data/transcript/__generated__/transcript.json').json();
-    const short = new Set(exchanges.map((e: { id: string }) => shortId(e.id)));
-    expect(short.size).toBe(exchanges.length);
+    const short = exchanges.map((e: { id: string }) => shortId(e.id));
+    expect(new Set(short).size).toBe(exchanges.length);
+    expect(short.every((id: string) => id.length === ID_LENGTH)).toBe(true);
   });
 });
