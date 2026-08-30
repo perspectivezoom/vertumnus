@@ -1,10 +1,15 @@
 /**
- * The table of contents: what this session was, at a glance and then in detail.
+ * The sidebar: a search box, and the table of contents under it.
  *
- * Three indexes over the same exchanges. Collections come first because they are the way in for
- * someone who knows nothing about the project: hand-picked, and saying so, where everything below
- * is derived. Chapters run in order, so reading them top to bottom is reading the project in
- * order. Threads gather work picked up and put down across months, which chapters cannot hold.
+ * Two jobs, and the split below follows them. {@link TranscriptSidebar} decides where the contents
+ * are — which is two different places, since above `lg` they are simply the column, and below it
+ * there is no column to be. Stacked, the three indexes are some 900px of navigation standing
+ * between the top of the page and the first exchange, nearly two screens on the narrowest phone
+ * we support, so they fold into a card whose lid disappears at the same breakpoint the layout
+ * gains its second column. {@link SidebarContent} is what is in them, and knows none of that.
+ *
+ * Search stays outside the fold: one row, and the thing most likely to be wanted on a small
+ * screen.
  */
 import { useState } from 'react';
 
@@ -13,18 +18,7 @@ import { ChevronDown, ChevronRight, Search } from 'lucide-react';
 import type { Transcript } from '@/data/transcript/schema';
 import { type Selection, View } from '@/src/components/transcript/selection';
 
-/** How many exchanges a run of commits accounts for — what every count here is counted in. */
-type Weigh = (commits: readonly string[]) => number;
-
-/** What each index needs to draw itself and report a choice. */
-interface Pane {
-  data: Transcript;
-  weigh: Weigh;
-  selection: Selection | null;
-  onSelect: (next: Selection) => void;
-}
-
-export function TranscriptContents({
+export function TranscriptSidebar({
   data,
   selection,
   onSelect,
@@ -36,7 +30,8 @@ export function TranscriptContents({
   onSelect: (next: Selection) => void;
   onSearch: (query: string) => void;
 }) {
-  const pane = { data, weigh: weigher(data), selection, onSelect };
+  // Only consulted below `lg`, where the indexes are folded away; above it they are the column.
+  const [open, setOpen] = useState(false);
   return (
     // Clear of the scrollbar this pane grows when a chapter is opened, which would otherwise
     // sit on top of the counts.
@@ -46,10 +41,61 @@ export function TranscriptContents({
         total={data.exchanges.length}
         onSearch={onSearch}
       />
+      <div className="mt-3 rounded-md border border-neutral-300 bg-white lg:mt-0 lg:rounded-none lg:border-0 lg:bg-transparent">
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((was) => !was)}
+          // `items-center`, not the `items-baseline` every row in the contents uses: a chevron is
+          // an icon with no baseline to sit on, and lines up against the text's instead.
+          className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm text-neutral-700 lg:hidden ${
+            open ? 'border-b border-neutral-200' : ''
+          }`}
+        >
+          Table of contents
+          <ChevronDown className={`h-4 w-4 text-neutral-400 ${open ? 'rotate-180' : ''}`} />
+        </button>
+        <div className={`flex-col px-2 pb-2 ${open ? 'flex' : 'hidden'} lg:flex lg:px-0 lg:pb-0`}>
+          <SidebarContent
+            data={data}
+            selection={selection}
+            // Choosing something is done with the contents, so on a phone they get out of the way.
+            onSelect={(next) => {
+              setOpen(false);
+              onSelect(next);
+            }}
+          />
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+/**
+ * The three indexes: what this session was, at a glance and then in detail.
+ *
+ * Collections come first because they are the way in for someone who knows nothing about the
+ * project: hand-picked, and saying so, where everything below is derived. Chapters run in order,
+ * so reading them top to bottom is reading the project in order. Threads gather work picked up and
+ * put down across months, which chapters cannot hold.
+ */
+function SidebarContent({
+  data,
+  selection,
+  onSelect,
+}: {
+  data: Transcript;
+  selection: Selection | null;
+  onSelect: (next: Selection) => void;
+}) {
+  // Built once here rather than per index, since all three count in the same unit.
+  const pane = { data, weigh: weigher(data), selection, onSelect };
+  return (
+    <>
       <Collections {...pane} />
       <Chapters {...pane} />
       <Threads {...pane} />
-    </nav>
+    </>
   );
 }
 
@@ -78,6 +124,17 @@ function Find({
 }
 
 // ── The three indexes ───────────────────────────────────────────────────────────────────────
+
+/** How many exchanges a run of commits accounts for — what every count here is counted in. */
+type Weigh = (commits: readonly string[]) => number;
+
+/** What each index needs to draw itself and report a choice. */
+interface Pane {
+  data: Transcript;
+  weigh: Weigh;
+  selection: Selection | null;
+  onSelect: (next: Selection) => void;
+}
 
 function Chapters({ data, weigh, selection, onSelect }: Pane) {
   // Opens to whichever chapter the selection is in, so arriving by link shows where you are.

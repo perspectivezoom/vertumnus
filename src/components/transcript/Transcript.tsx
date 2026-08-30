@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 
 import type { Transcript as Session } from '@/data/transcript/schema';
-import { TranscriptContents } from '@/src/components/transcript/TranscriptContents';
+import { TranscriptSidebar } from '@/src/components/transcript/TranscriptSidebar';
 import { TranscriptTurn, TURN_GAP, TURN_WIDTH } from '@/src/components/transcript/TranscriptTurn';
 import { type Chosen, shortId, useSelection, View } from '@/src/components/transcript/selection';
 import { present } from '@/src/lib/invariant';
@@ -31,9 +31,14 @@ function Panes({ data }: { data: Session }) {
   const chosen = useSelection(data);
 
   return (
-    <div className="flex flex-col gap-6 px-6">
+    // Below `lg` this is one stacked column rather than two, so the same breakpoint takes the
+    // gutters and the masthead down: 48px of margin is an eighth of the narrowest phone, and a
+    // landscape viewport is 375px tall in total.
+    <div className="flex flex-col gap-4 px-4 lg:gap-6 lg:px-6">
       <header className="flex max-w-[65ch] flex-col gap-2">
-        <h1 className="font-poster text-3xl font-bold text-neutral-900">AI transcript</h1>
+        <h1 className="font-poster text-2xl font-bold text-neutral-900 lg:text-3xl">
+          AI transcript
+        </h1>
         <p className="text-[15px] leading-relaxed text-neutral-600">
           Every prompt and reply that built this project, {data.exchanges.length} in all.
         </p>
@@ -45,7 +50,7 @@ function Panes({ data }: { data: Session }) {
             above is what stops it being stretched to the conversation's height, which would
             defeat the stickiness. */}
         <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:w-72 lg:overflow-y-auto">
-          <TranscriptContents
+          <TranscriptSidebar
             data={data}
             selection={chosen.status === 'ok' ? chosen.selection : null}
             onSelect={chosen.select}
