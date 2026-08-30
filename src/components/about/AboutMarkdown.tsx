@@ -17,14 +17,23 @@ import {
   ExternalLink,
   HEADING,
   LINK_CLASS,
+  REPO,
   SECTION_TITLE,
   SUBHEADING,
   repoDir,
   repoFile,
 } from '@/src/components/about/Prose';
 
-export function AboutMarkdown({ children }: { children: string }) {
-  return <Markdown options={OPTIONS}>{children}</Markdown>;
+export function AboutMarkdown({
+  children,
+  overrides,
+}: {
+  children: string;
+  /** Tags this page adds to the ones every page has — see {@link OPTIONS}. */
+  overrides?: Record<string, { component: React.ComponentType }>;
+}) {
+  const options = { ...OPTIONS, overrides: { ...OPTIONS.overrides, ...overrides } };
+  return <Markdown options={options}>{children}</Markdown>;
 }
 
 /**
@@ -37,8 +46,9 @@ export function AboutMarkdown({ children }: { children: string }) {
 function Anchor({ href = '', children }: { href?: string; children?: React.ReactNode }) {
   if (href.startsWith(REPO_SCHEME)) {
     const path = href.slice(REPO_SCHEME.length);
-    // A trailing slash means a directory, the way it does everywhere else.
-    const url = path.endsWith('/') ? repoDir(path.slice(0, -1)) : repoFile(path);
+    // A trailing slash means a directory, the way it does everywhere else; nothing at all means
+    // the repository itself.
+    const url = !path ? REPO : path.endsWith('/') ? repoDir(path.slice(0, -1)) : repoFile(path);
     return <ExternalLink href={url}>{children}</ExternalLink>;
   }
   if (/^[a-z]+:/.test(href)) return <ExternalLink href={href}>{children}</ExternalLink>;
@@ -64,9 +74,11 @@ const OPTIONS = {
   // rhythm between them comes from one `gap` rather than a margin on each.
   wrapper: Body,
   forceWrapper: true,
-  // Off, as in the transcript, though for a duller reason: nothing here needs raw HTML, and a
-  // page that never parses it cannot be the page that regrets parsing it.
-  disableParsingRawHTML: true,
+  // On, where the transcript deliberately has it off. That page renders model output and must
+  // treat every tag as untrusted text; these pages are written by hand and compiled into the
+  // bundle, and a section needs to be able to say `<Dependencies />` and mean it. The two
+  // settings must not be merged into one shared renderer — they differ because the content does.
+  disableParsingRawHTML: false,
   overrides: {
     h1: { props: { className: SECTION_TITLE } },
     h2: { props: { className: HEADING } },

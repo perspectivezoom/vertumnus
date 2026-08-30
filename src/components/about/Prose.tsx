@@ -19,15 +19,15 @@ export function Article({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** How the three heading levels look, shared by the components below and by Markdown. */
+/**
+ * How the three heading levels look.
+ *
+ * Class names rather than components because every section is Markdown, which renders its own
+ * heading elements and only wants to be told how they should look.
+ */
 export const SECTION_TITLE = 'font-poster text-3xl font-bold text-neutral-900';
 export const HEADING = 'pt-6 text-xl font-semibold text-neutral-900';
 export const SUBHEADING = 'pt-2 text-base font-semibold text-neutral-800';
-
-/** A section's title. */
-export function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h1 className={SECTION_TITLE}>{children}</h1>;
-}
 
 /** A run of prose, at the size and rhythm the sections are written in. */
 export function Body({ children }: { children: React.ReactNode }) {
@@ -36,22 +36,6 @@ export function Body({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   );
-}
-
-/** A subheading within a section — a region, or a topic that spans them. */
-export function Heading({ children }: { children: React.ReactNode }) {
-  return <h2 className={HEADING}>{children}</h2>;
-}
-
-/**
- * A heading below {@link Heading}, for a topic within one of them.
- *
- * Two regions describe the same things — where the data came from, how a season is drawn out of
- * it, what to distrust — about entirely different sources. Nesting those under the region keeps
- * a reader from having to hold "which source was this paragraph about" in their head.
- */
-export function Subheading({ children }: { children: React.ReactNode }) {
-  return <h3 className={SUBHEADING}>{children}</h3>;
 }
 
 /**
