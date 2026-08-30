@@ -158,7 +158,7 @@ export const THREADS: Thread[] = [
     title: 'Publishing the transcript',
     blurb:
       'Committing this conversation to the repository, and repeatedly cutting it down as it grew. Housekeeping rather than a chapter of the story, which is why it appears here and nowhere else.',
-    commits: ['cf9e7d1', '376b232', 'db2b3d3', '4623970', '8b6ec4e', '406eddf'],
+    commits: ['cf9e7d1', '376b232', 'db2b3d3', '4623970', '8b6ec4e', '406eddf', '26fb3a8'],
   },
 ];
 
@@ -375,6 +375,55 @@ export const TOPICS: Topic[] = [
     title: 'Performance and small screens',
     commits: ['620812b', '6bd998d'],
   },
+  {
+    id: 'curation',
+    title: 'Reading the session back',
+    blurb:
+      'Cutting the log into chapters and topics, so the conversation could be navigated rather than scrolled.',
+    commits: ['6c536b9'],
+  },
+  {
+    id: 'code-splitting',
+    title: 'Splitting the bundle',
+    blurb:
+      'Putting the written sections behind their own chunks, so a browser over a 1.4 MB transcript costs the poster nothing.',
+    commits: ['8f3086c'],
+  },
+  {
+    id: 'browser-start',
+    title: 'A page, and the data behind it',
+    blurb:
+      'The section itself, the derived file it reads, and the decision to treat that file as a cache rather than a build step.',
+    commits: ['26fb3a8', '5ba81af', '97b1c91'],
+  },
+  {
+    id: 'browser-reading',
+    title: 'Two panes, and a conversation',
+    blurb:
+      'The layout, then the transcript set as a chat in the monospace it was typed in, with the replies rendered as the Markdown they were written in.',
+    commits: ['bac1319', '53503c8', '8adc867'],
+  },
+  {
+    id: 'browser-contents',
+    title: 'Finding your way around',
+    blurb:
+      'The table of contents, choosing what the right pane shows, and moving every blurb into the file that owns the curation.',
+    commits: ['8c0cea6', 'ddd7a43', '2bcab79'],
+  },
+  {
+    id: 'browser-citing',
+    title: 'Citing a prompt, and collapsing the rest',
+    blurb:
+      'Timestamps that copy a link to one exchange, and controls for how much of each turn to draw.',
+    commits: ['5874325', '9c9629e'],
+  },
+  {
+    id: 'browser-search',
+    title: 'Search, and URLs that fail loudly',
+    blurb:
+      'Search as another way in rather than a parameter beside them, links that say so when they name nothing, and opening a single collapsed reply.',
+    commits: ['7d8ce41', 'a2be6c9', '4cb1e74', '9f26535'],
+  },
 ];
 
 export const CHAPTERS: Chapter[] = [
@@ -434,5 +483,20 @@ export const CHAPTERS: Chapter[] = [
     blurb:
       'A region with no shipment data, built from a state harvest chart — then performance and small screens.',
     topics: ['ny-data', 'ny-plates', 'ny-provenance', 'perf-mobile'],
+  },
+  {
+    id: 'browser',
+    title: 'The transcript browser',
+    blurb:
+      'Publishing this conversation as something readable: chapters over the log, a chat to read it in, and links into any part of it.',
+    topics: [
+      'curation',
+      'code-splitting',
+      'browser-start',
+      'browser-reading',
+      'browser-contents',
+      'browser-citing',
+      'browser-search',
+    ],
   },
 ];
