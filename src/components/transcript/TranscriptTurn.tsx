@@ -8,6 +8,10 @@
  * against 558 prompts, so collapsing them into a footnote would leave a wall of text and a list
  * of verbs in place of a sequence of work.
  */
+import { useState } from 'react';
+
+import { ChevronDown } from 'lucide-react';
+
 import type { Exchange, Step } from '@/data/transcript/schema';
 import { Density, type Densities, shortId } from '@/src/components/transcript/selection';
 import { TranscriptMarkdown } from '@/src/components/transcript/TranscriptMarkdown';
@@ -22,6 +26,9 @@ export const TURN_GAP = 'gap-3';
 export const TURN_WIDTH = 'max-w-[85%]';
 
 const BUBBLE = `${INSET} ${TURN_WIDTH} rounded-lg py-3 font-mono text-[13px] leading-relaxed break-words`;
+
+/** What one turn shows when the reader has singled it out, whatever the page is set to. */
+const WHOLE: Densities = { prompts: Density.Full, responses: Density.Full };
 
 export function TranscriptTurn({
   exchange,
@@ -42,6 +49,15 @@ export function TranscriptTurn({
   onOpen: () => void;
   onCite: () => void;
 }) {
+  // Kept here rather than above or in the URL: it says "that one, though" about this exchange
+  // and means nothing to anything else. Changing the density deliberately leaves it alone.
+  const [expanded, setExpanded] = useState(false);
+  const onToggle = () => setExpanded((was) => !was);
+
+  // At full density the bubbles stay plain text: nothing should invite a click that does nothing.
+  const collapsed = densities.prompts !== Density.Full || densities.responses !== Density.Full;
+  const shown = expanded ? WHOLE : densities;
+  const more = collapsed && (moreThanGist(exchange.steps) || exchange.prompt.length > FITS);
   return (
     // `scroll-mt` so an exchange arrived at by link stops clear of the top of the window rather
     // than flush against it, with no sign of what came before.
@@ -63,22 +79,24 @@ export function TranscriptTurn({
       {/* Each half reads its own density and all nine combinations resolve. Some are of no use
           — hiding the prompts leaves replies to nothing — but a rule with an exception in it is
           harder to hold than one without, and the control simply declines to offer those. */}
-      {densities.prompts !== Density.Hidden && (
+      {shown.prompts !== Density.Hidden && (
         <Prompt
           text={exchange.prompt}
           at={exchange.ts}
-          short={densities.prompts === Density.Short}
+          short={shown.prompts === Density.Short}
           highlight={highlight}
+          onToggle={more ? onToggle : null}
+          expanded={expanded}
           onCite={onCite}
         />
       )}
-      {densities.responses === Density.Full &&
+      {shown.responses === Density.Full &&
         exchange.steps.map((step, n) => (
           // Index as key: steps never reorder, being a record of something that already happened.
           <StepOf key={n} step={step} />
         ))}
-      {densities.responses === Density.Short && (
-        <Gist steps={exchange.steps} highlight={highlight} />
+      {shown.responses === Density.Short && (
+        <Gist steps={exchange.steps} highlight={highlight} onToggle={more ? onToggle : null} />
       )}
     </div>
   );
@@ -90,23 +108,41 @@ function Prompt({
   at,
   short,
   highlight,
+  expanded,
+  onToggle,
   onCite,
 }: {
   text: string;
   at: string;
   short: boolean;
   highlight: string;
+  expanded: boolean;
+  /** Null where the page is showing everything and there is nothing to open. */
+  onToggle: (() => void) | null;
   onCite: () => void;
 }) {
+  // Clamped rather than truncated, so the whole prompt stays in the page and a browser's own
+  // find still reaches it.
+  const body = (
+    // `line-clamp` sets its own display, so `block` only applies when not clamping: together
+    // they cancel and the text runs full length with no sign it was meant not to.
+    <span className={`whitespace-pre-wrap ${short ? 'line-clamp-2' : 'block'}`}>
+      <Marked text={text} query={highlight} />
+    </span>
+  );
   return (
     <div
-      className={`${BUBBLE} flex flex-col gap-1 self-end rounded-br-sm border-green-200 bg-green-50/70`}
+      className={`${BUBBLE} flex flex-col gap-1 self-end rounded-br-sm border-green-200 bg-green-50/70 text-neutral-900`}
     >
-      {/* Clamped rather than truncated: the whole prompt stays in the page, so a browser's own
-          find still reaches it and nothing is lost by reading at this density. */}
-      <p className={`whitespace-pre-wrap text-neutral-900 ${short ? 'line-clamp-2' : ''}`}>
-        <Marked text={text} query={highlight} />
-      </p>
+      {/* The text is the control, not a chevron beside it — and a sibling of the timestamp rather
+          than its parent, since one button inside another is neither clickable reliably. */}
+      {onToggle ? (
+        <button type="button" aria-expanded={expanded} onClick={onToggle} className="text-left">
+          {body}
+        </button>
+      ) : (
+        body
+      )}
       <Stamp at={at} onCite={onCite} />
     </div>
   );
@@ -119,30 +155,67 @@ function Prompt({
  * is here for, and parsing every reply to show three lines of it would be the expensive half of
  * the work for the cheap half of the result.
  */
-function Gist({ steps, highlight }: { steps: readonly Step[]; highlight: string }) {
+function Gist({
+  steps,
+  highlight,
+  onToggle,
+}: {
+  steps: readonly Step[];
+  highlight: string;
+  /** Null when the whole reply already fits, so nothing offers to reveal what is already there. */
+  onToggle: (() => void) | null;
+}) {
   const texts = steps.filter((step) => step.kind === 'text');
   // The step that matched, not the first: a hit is usually paragraphs in, and opening on an
   // unrelated sentence would look like a miss.
   const needle = highlight.trim().toLowerCase();
-  const said =
-    (needle && texts.find((step) => step.text.toLowerCase().includes(needle))) ?? texts[0];
+  const matched = needle
+    ? texts.find((step) => step.text.toLowerCase().includes(needle))
+    : undefined;
+  const said = matched ?? texts[0];
   const tools = steps.filter((step) => step.kind === 'tool').length;
   if (!said && !tools) return null;
-  return (
-    <div
-      className={`${BUBBLE} flex flex-col gap-1 self-start rounded-bl-sm border-neutral-200 bg-white text-neutral-700`}
-    >
+
+  const body = (
+    <>
       {said && (
-        <p className="line-clamp-3 whitespace-pre-wrap">
-          <Marked text={around(said.text, needle)} query={highlight} />
-        </p>
+        // The fade is the signal that the text is cut, so it has to match the bubble beneath it.
+        <span className="relative block">
+          <span className="line-clamp-3 whitespace-pre-wrap">
+            <Marked text={around(said.text, needle)} query={highlight} />
+          </span>
+          {onToggle && (
+            <span className="pointer-events-none absolute inset-x-0 bottom-0 h-5 bg-gradient-to-t from-white to-transparent" />
+          )}
+        </span>
       )}
-      {tools > 0 && (
-        <p className="text-xs text-neutral-400">
-          {tools} tool call{tools === 1 ? '' : 's'}
-        </p>
+      {onToggle ? (
+        <span className="flex items-center gap-1 text-xs text-neutral-500 group-hover:text-green-700">
+          <ChevronDown className="h-3.5 w-3.5" />
+          Show the rest{tools > 0 && ` · ${tools} tool call${tools === 1 ? '' : 's'}`}
+        </span>
+      ) : (
+        tools > 0 && (
+          <span className="text-xs text-neutral-400">
+            {tools} tool call{tools === 1 ? '' : 's'}
+          </span>
+        )
       )}
-    </div>
+    </>
+  );
+
+  const look = `${BUBBLE} flex flex-col gap-1 self-start rounded-bl-sm border-neutral-200 bg-white text-left text-neutral-700`;
+  return onToggle ? (
+    <button
+      type="button"
+      aria-expanded={false}
+      onClick={onToggle}
+      className={`${look} group hover:border-green-300 hover:bg-green-50/20`}
+    >
+      {body}
+    </button>
+  ) : (
+    <div className={look}>{body}</div>
   );
 }
 
@@ -211,6 +284,30 @@ function ToolCall({ name, detail }: { name: string; detail: string }) {
 
 /** How much of the surrounding text a collapsed reply carries, either side of the match. */
 const CONTEXT = 160;
+
+/**
+ * Roughly what fits in the clamp before anything is hidden.
+ *
+ * Deliberately a low estimate: offering to open onto the same text is a smaller fault than
+ * hiding a control that would have revealed more.
+ */
+const FITS = 240;
+
+/**
+ * Whether opening this turn would show anything its gist does not.
+ *
+ * The fourth reason is the one that is not a fact about the steps: a short paragraph with a code
+ * fence in it looks nothing like the same paragraph as plain text.
+ */
+function moreThanGist(steps: readonly Step[]): boolean {
+  const texts = steps.filter((step) => step.kind === 'text');
+  if (texts.length > 1) return true;
+  if (steps.some((step) => step.kind === 'tool')) return true;
+  const only = texts[0];
+  return only ? only.text.length > FITS || MARKDOWN.test(only.text) : false;
+}
+
+const MARKDOWN = /```|^\s*[-*]\s|^\s*\d+\.\s|\*\*|`[^`]+`|^#{1,6}\s|\|/m;
 
 /** The passage around the match, so three clamped lines are the three that matter. */
 function around(text: string, needle: string): string {
