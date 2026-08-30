@@ -68,6 +68,13 @@ export interface Highlight {
   note: string;
 }
 
+/** A named set of highlights, keyed by the id it is linked to by. */
+export interface Collection {
+  title: string;
+  blurb: string;
+  entries: Highlight[];
+}
+
 /**
  * How each index introduces itself in the table of contents.
  *
@@ -158,23 +165,76 @@ export const THREADS: Thread[] = [
     title: 'Publishing the transcript',
     blurb:
       'Committing this conversation to the repository, and repeatedly cutting it down as it grew. Housekeeping rather than a chapter of the story, which is why it appears here and nowhere else.',
-    commits: ['cf9e7d1', '376b232', 'db2b3d3', '4623970', '8b6ec4e', '406eddf', '26fb3a8'],
+    commits: [
+      'cf9e7d1',
+      '376b232',
+      'db2b3d3',
+      '4623970',
+      '8b6ec4e',
+      '406eddf',
+      '26fb3a8',
+      '811d770',
+      'cfa5b78',
+    ],
   },
 ];
 
-export const COLLECTIONS = {
+/**
+ * Hand-picked, except where a blurb says otherwise.
+ *
+ * The count beside each one is printed on a public page, so it is only worth anything because a
+ * person chose every entry. Where a collection is instead defined by a rule, the blurb states the
+ * rule, and the reader can check it.
+ */
+export const COLLECTIONS: Record<string, Collection> = {
   discovery: {
     title: 'Where Claude found something',
     blurb: 'Exchanges where the model turned up something neither of us knew going in.',
-    entries: [] as Highlight[],
+    entries: [],
   },
   pushback: {
     title: 'Where I pushed back',
     blurb:
-      'Exchanges where Claude implemented something poorly, or assumed something it should have asked about, and I said so.',
-    entries: [] as Highlight[],
+      'Exchanges where Claude took the wrong direction, asserted something untrue, or assumed what it should have asked — and I said so.',
+    entries: [],
   },
-} as const;
+  praise: {
+    title: 'Where Claude got it right',
+    blurb:
+      'Work I said was good, found by the prompt that followed it. Each entry links to the work rather than to the compliment.',
+    entries: [],
+  },
+  verbosity: {
+    title: 'Where I asked for less',
+    blurb:
+      'Requests to cut the comments down, running from the first chapter to the last. The one correction that never stopped being necessary.',
+    entries: [],
+  },
+  measured: {
+    title: 'Where a guess became a measurement',
+    blurb:
+      'Exchanges where a claim one of us was confident about got tested, and the answer came back different.',
+    entries: [],
+  },
+  sources: {
+    title: "What the sources wouldn't say",
+    blurb:
+      'Exchanges where the data would not support what the poster wanted to claim. The standing rule against invented sources was written here.',
+    entries: [],
+  },
+  abandoned: {
+    title: 'What we tried first',
+    blurb:
+      'Approaches built far enough to judge, then dropped: Astro, Playwright, Biome, jsonc, the streamgraph, imitation watercolour, and a browser written all at once.',
+    entries: [],
+  },
+  mmm: {
+    title: 'Prompts that begin with "Mmm,"',
+    blurb:
+      'Selected by that rule alone rather than by hand, and comprehensive. It turns out to mark a particular thing: a position already arrived at, with some reluctance about it.',
+    entries: [],
+  },
+};
 
 /**
  * FIRST DRAFT, proposed by Claude from the commit subjects — rewrite freely.

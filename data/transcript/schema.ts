@@ -11,7 +11,7 @@
  */
 import { z } from 'zod';
 
-import type { Chapter, Highlight, Thread, Topic } from '@/data/transcript/curation';
+import type { Chapter, Collection, Highlight, Thread, Topic } from '@/data/transcript/curation';
 
 /**
  * One thing Claude did: said something, or reached for a tool.
@@ -74,7 +74,7 @@ const ChapterSchema: z.ZodType<Chapter> = z.object({
   topics: z.array(z.string()),
 });
 
-export const CollectionSchema = z.object({
+export const CollectionSchema: z.ZodType<Collection> = z.object({
   title: z.string(),
   blurb: z.string(),
   entries: z.array(HighlightSchema),
@@ -102,5 +102,4 @@ export const TranscriptSchema = z.object({
 export type Step = z.infer<typeof StepSchema>;
 export type Exchange = z.infer<typeof ExchangeSchema>;
 export type Commit = z.infer<typeof CommitSchema>;
-export type Collection = z.infer<typeof CollectionSchema>;
 export type Transcript = z.infer<typeof TranscriptSchema>;
