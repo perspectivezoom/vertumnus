@@ -1,10 +1,10 @@
 /**
  * The table of contents: what this session was, at a glance and then in detail.
  *
- * Three indexes over the same 558 exchanges. Chapters run in order, so reading the list top to
- * bottom is reading the project in order. Threads gather work that was picked up and put down
- * across months, which a chronological chapter cannot hold. Collections are hand-picked, and say
- * so — everything else here is derived, and a reader should know which is which.
+ * Three indexes over the same exchanges. Collections come first because they are the way in for
+ * someone who knows nothing about the project: hand-picked, and saying so, where everything below
+ * is derived. Chapters run in order, so reading them top to bottom is reading the project in
+ * order. Threads gather work picked up and put down across months, which chapters cannot hold.
  */
 import { useState } from 'react';
 
@@ -46,9 +46,9 @@ export function TranscriptContents({
         total={data.exchanges.length}
         onSearch={onSearch}
       />
+      <Collections {...pane} />
       <Chapters {...pane} />
       <Threads {...pane} />
-      <Collections {...pane} />
     </nav>
   );
 }

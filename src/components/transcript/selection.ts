@@ -167,7 +167,7 @@ export interface Reading {
 /**
  * What to change about the reading. Omitting a field leaves it alone; `null` clears it.
  *
- * The two differ for the view: clearing lets the default answer, where naming the opening chapter
+ * The two differ for the view: clearing lets the default answer, where naming the opening view
  * writes an opinion into the URL that the reader never expressed.
  */
 export type Changes = Partial<{
@@ -238,11 +238,11 @@ export function useSelection(data: Transcript): Chosen {
 }
 
 /**
- * The reading with nothing in the URL at all: the opening chapter, nothing cited, everything
+ * The reading with nothing in the URL at all: the opening collection, nothing cited, everything
  * drawn in full.
  *
  * A function rather than a constant because one of the three depends on the transcript — where
- * it begins is whichever chapter the curation put first.
+ * it begins is whichever collection the curation put first.
  */
 function defaults(data: Transcript): Reading {
   return {
@@ -373,15 +373,19 @@ export function parseSelection(raw: string | null): Selection | null {
 export const toParam = (selection: Selection): string => `${selection.view}:${selection.id}`;
 
 /**
- * Where a reader lands having chosen nothing: the beginning.
+ * Where a reader lands having chosen nothing: the first collection.
  *
- * Total rather than nullable. A transcript with no chapters at all would give an id matching
- * nothing and an empty pane, which is the right outcome for a curation the build already
- * complained about — and it saves every caller a branch for a case that cannot occur.
+ * Not the first chapter. Someone arriving knowing nothing gets picked exchanges about the project
+ * rather than the day the repository was empty — and which collection that is belongs to the
+ * curation, so this reads the order instead of naming one.
+ *
+ * Total rather than nullable. A transcript with no collections would give an id matching nothing
+ * and an empty pane, which is the right outcome for a curation the build already complained
+ * about — and it saves every caller a branch for a case that cannot occur.
  */
 export const opening = (data: Transcript): Selection => ({
-  view: View.Chapter,
-  id: data.chapters[0]?.id ?? '',
+  view: View.Collection,
+  id: Object.keys(data.collections)[0] ?? '',
 });
 
 // ── Resolving it against the data ───────────────────────────────────────────────────────────
