@@ -12,7 +12,7 @@ Vertumnus builds off of other people’s work, a mixture of either public domain
 
 SF Bay Area crop seasonality is derived from [USDA Agricultural Marketing Service](https://www.ams.usda.gov/market-news/fruits-vegetables) Market News shipment reports.
 
-The watercolours are from the [USDA Pomological Watercolor Collection](https://search.nal.usda.gov/discovery/collectionDiscovery?vid=01NAL_INST:MAIN&collectionId=81279629860007426), held by the National Agricultural Library. They are cropped, scaled and re-encoded here, but not retouched. More detail on their usage can be found in the [sources page](/about/sources).
+The watercolours are from the [USDA Pomological Watercolor Collection](https://search.nal.usda.gov/discovery/collectionDiscovery?vid=01NAL_INST:MAIN&collectionId=81279629860007426), held by the National Agricultural Library. They are cropped, scaled and re-encoded here, but not retouched. More detail on their usage can be found in the [sources page](/about/sources#the-usda-pomological-watercolor-collection).
 
 Both of those are works of the United States federal government and in the public domain — no permission is needed to use them, and none is claimed here. They are credited because the project cites what it is built from, not because any licence demands it.
 

@@ -65,6 +65,6 @@ Each plate is chosen for locality. For example, every plate on the SF Bay Area p
 
 Finding local plates was only possible due to a third party site, [pomological.art](https://pomological.art/), making its collection browsable by where each specimen was grown. The original source archive is indexed by accession number and little else, so there is no way to ask it for fruit grown near a particular place.
 
-The scans are cream paper with a black scan border, so each is cropped in past that border, scaled down and re-encoded, then faded at its edges where it meets the page. Nothing is retouched. The originals are public domain; terms are on the [licenses page](/about/licenses).
+The scans are cream paper with a black scan border, so each is cropped in past that border, scaled down and re-encoded, then faded at its edges where it meets the page. Nothing is retouched. The originals are public domain; terms are on the [licenses page](/about/licenses#data-and-artwork).
 
 Where they sit on the poster is deterministically chosen. The chart is measured for whatever space the crops leave empty, and plates are heuristically fitted into the largest gaps available.

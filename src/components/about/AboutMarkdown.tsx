@@ -9,8 +9,10 @@
  * What it will not do is let the writer choose a component. A link's behaviour follows from its
  * href — see {@link Anchor} — so prose stays prose, and there is one way to write a link.
  */
+import { useEffect } from 'react';
+
 import Markdown from 'markdown-to-jsx';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 import {
   Body,
@@ -32,8 +34,37 @@ export function AboutMarkdown({
   /** Tags this page adds to the ones every page has — see {@link OPTIONS}. */
   overrides?: Record<string, { component: React.ComponentType }>;
 }) {
+  // A link into a section arrives before the section exists: the router navigates, and only then
+  // does the page holding the heading render. The browser has stopped looking for the fragment by
+  // then, so the scroll waits on the content rather than on the hash. Measured without this: a
+  // pasted link and a link from another section both land at the top of the page.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
+  }, [hash, children]);
+
   const options = { ...OPTIONS, overrides: { ...OPTIONS.overrides, ...overrides } };
   return <Markdown options={options}>{children}</Markdown>;
+}
+
+/** A heading that offers its own anchor, kept out of the way until the heading is hovered. */
+function linkable(Tag: 'h1' | 'h2' | 'h3', className: string) {
+  return function Linkable({ id, children }: { id?: string; children?: React.ReactNode }) {
+    return (
+      <Tag id={id} className={`group scroll-mt-6 ${className}`}>
+        {children}
+        {id && (
+          <a
+            href={`#${id}`}
+            aria-label="Link to this section"
+            className="ml-2 font-normal text-neutral-300 opacity-0 group-hover:opacity-100 hover:text-green-700 focus:opacity-100"
+          >
+            #
+          </a>
+        )}
+      </Tag>
+    );
+  };
 }
 
 /**
@@ -80,9 +111,9 @@ const OPTIONS = {
   // settings must not be merged into one shared renderer — they differ because the content does.
   disableParsingRawHTML: false,
   overrides: {
-    h1: { props: { className: SECTION_TITLE } },
-    h2: { props: { className: HEADING } },
-    h3: { props: { className: SUBHEADING } },
+    h1: { component: linkable('h1', SECTION_TITLE) },
+    h2: { component: linkable('h2', HEADING) },
+    h3: { component: linkable('h3', SUBHEADING) },
     a: { component: Anchor },
     ul: { props: { className: 'flex list-disc flex-col gap-3 pl-5' } },
     ol: { props: { className: 'flex list-decimal flex-col gap-3 pl-5' } },
