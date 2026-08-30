@@ -12,6 +12,7 @@ import { useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 
 import type { Exchange, Transcript } from '@/data/transcript/schema';
+import { present } from '@/src/lib/invariant';
 
 /**
  * The ways in. Chapters and topics are the table of contents; the rest cut across it.
@@ -91,23 +92,46 @@ export interface Heading {
   blurb?: string | undefined;
 }
 
-export interface Chosen {
-  selection: Selection;
-  heading: Heading;
-  /** The exchanges the selection covers, in the order that selection presents them. */
-  exchanges: Exchange[];
-  /** The full id of the exchange a link pointed at, if it pointed at one. */
-  focused: string | null;
+/** What can be done regardless of whether the URL named something that exists. */
+interface Actions {
   select: (next: Selection) => void;
   /** Point the URL at one exchange, and put that URL on the clipboard. */
   cite: (id: string) => void;
-  densities: Densities;
   setDensity: (next: Partial<Densities>) => void;
   /** Run a query, and collapse the replies so the hits fit on a screen. */
   search: (query: string) => void;
   /** Leave for an exchange's own topic — how a search hit is followed back into the record. */
   open: (id: string) => void;
 }
+
+/**
+ * What the URL asked for: either a reading, or why there isn't one.
+ *
+ * A union rather than a reading with holes in it, so everything downstream may assume its data is
+ * good. Naming a chapter that does not exist otherwise renders a pane titled with the mistake and
+ * holding nothing, which reads as an empty section rather than a broken link.
+ *
+ * The actions are on both arms: arriving at a bad URL still needs a way out of it.
+ */
+export type Chosen = Actions &
+  (
+    | {
+        status: 'ok';
+        selection: Selection;
+        heading: Heading;
+        /** The exchanges the selection covers, in the order that selection presents them. */
+        exchanges: Exchange[];
+        /** The full id of the exchange a link pointed at, if it pointed at one. */
+        focused: string | null;
+        densities: Densities;
+      }
+    | { status: 'error'; message: string; densities: Densities }
+  );
+
+/** The same split, before the derived parts are worked out. */
+type Resolution =
+  | { status: 'ok'; reading: Reading }
+  | { status: 'error'; message: string; densities: Densities };
 
 /** How much of each half of a turn to draw. Always chosen together, so carried together. */
 export interface Densities {
@@ -151,23 +175,20 @@ export type Changes = Partial<{
 }>;
 
 export function useSelection(data: Transcript): Chosen {
-  const [reading, write] = useReading(data);
-  const { selection, cited, densities } = reading;
+  const [resolution, write] = useReading(data);
   const base = defaults(data).densities;
+  const densities =
+    resolution.status === 'ok' ? resolution.reading.densities : resolution.densities;
+  const selection = resolution.status === 'ok' ? resolution.reading.selection : null;
 
   // Filtering runs over all 558 exchanges, so it is memoised on the selection's contents rather
   // than its identity — the parsed selection is a fresh object on every render.
   const exchanges = useMemo(
-    () => exchangesOf(data, selection),
-    [data, selection.view, selection.id],
+    () => (selection ? exchangesOf(data, selection) : []),
+    [data, selection?.view, selection?.id],
   );
 
-  return {
-    selection,
-    heading: headingOf(data, selection),
-    exchanges,
-    focused: cited,
-    densities,
+  const actions: Actions = {
     setDensity: (next) => void write({ densities: { ...densities, ...next } }),
     // Choosing a view clears the citation under it, but not how the reader was reading.
     select: (next) => void write({ selection: next, cited: null }),
@@ -193,12 +214,24 @@ export function useSelection(data: Transcript): Chosen {
       // The view is written explicitly even though it has not changed: it may have been implicit,
       // and a pasted link should reopen the surroundings the citer was in rather than resolve to
       // the exchange's own topic and lose a thread or collection they had chosen.
-      const next = write({ selection, cited: id });
+      const next = write(selection ? { selection, cited: id } : { cited: id });
       const url = new URL(window.location.href);
       url.search = next.toString();
       void navigator.clipboard?.writeText(url.toString());
     },
   };
+
+  return resolution.status === 'error'
+    ? { ...actions, status: 'error', message: resolution.message, densities }
+    : {
+        ...actions,
+        status: 'ok',
+        selection: resolution.reading.selection,
+        heading: headingOf(data, resolution.reading.selection),
+        exchanges,
+        focused: resolution.reading.cited,
+        densities,
+      };
 }
 
 /**
@@ -227,27 +260,31 @@ function defaults(data: Transcript): Reading {
  * `write` returns the parameters it set, because citing needs the resulting URL and not only the
  * navigation to it.
  */
-function useReading(data: Transcript): [Reading, (changes: Changes) => URLSearchParams] {
+function useReading(data: Transcript): [Resolution, (changes: Changes) => URLSearchParams] {
   const [params, setParams] = useSearchParams();
   const base = defaults(data);
 
+  const densities = {
+    prompts: density(params.get(PROMPTS)) ?? base.densities.prompts,
+    responses: density(params.get(RESPONSES)) ?? base.densities.responses,
+  };
+
   const short = params.get(PROMPT);
-  const cited = (short && data.exchanges.find((e) => shortId(e.id) === short)?.id) || base.cited;
+  const cited = short ? (data.exchanges.find((e) => shortId(e.id) === short)?.id ?? null) : null;
 
   // The one parameter whose fallback is a resolution rather than a default: a citation with no
   // view of its own opens the topic it belongs to, so a link lands somewhere rather than on an
   // exchange with no surroundings.
-  const selection =
-    parseSelection(params.get(VIEW)) ?? (cited ? homeOf(data, cited) : null) ?? base.selection;
+  const named = parseSelection(params.get(VIEW));
+  const selection = named ?? (cited ? homeOf(data, cited) : null) ?? base.selection;
 
-  const reading: Reading = {
-    selection,
-    cited,
-    densities: {
-      prompts: density(params.get(PROMPTS)) ?? base.densities.prompts,
-      responses: density(params.get(RESPONSES)) ?? base.densities.responses,
-    },
-  };
+  const wrong =
+    (short && !cited && `No prompt in this transcript has the id “${short}”.`) ||
+    (named && missing(data, named));
+
+  const resolution: Resolution = wrong
+    ? { status: 'error', message: wrong, densities }
+    : { status: 'ok', reading: { selection, cited, densities } };
 
   const write = (changes: Changes) => {
     const next = merge(params, {
@@ -266,7 +303,30 @@ function useReading(data: Transcript): [Reading, (changes: Changes) => URLSearch
     return next;
   };
 
-  return [reading, write];
+  return [resolution, write];
+}
+
+/**
+ * Why a selection names nothing, or null if it names something.
+ *
+ * A switch because each kind is a different list — and because search must not be checked at all.
+ * Its id is a query someone typed, so matching nothing is an answer; the others name curation,
+ * where matching nothing means the URL is wrong.
+ */
+function missing(data: Transcript, selection: Selection): string | null {
+  const absent = (kind: string) => `This transcript has no ${kind} called “${selection.id}”.`;
+  switch (selection.view) {
+    case View.Chapter:
+      return data.chapters.some((c) => c.id === selection.id) ? null : absent('chapter');
+    case View.Topic:
+      return data.topics.some((t) => t.id === selection.id) ? null : absent('topic');
+    case View.Thread:
+      return data.threads.some((t) => t.id === selection.id) ? null : absent('thread');
+    case View.Collection:
+      return selection.id in data.collections ? null : absent('collection');
+    case View.Search:
+      return null;
+  }
 }
 
 /** A value to write, or null to leave it out because it is what absence already means. */
@@ -332,40 +392,66 @@ export function commitsOf(data: Transcript, selection: Selection): string[] {
     case View.Search:
       return [];
     case View.Chapter: {
-      const chapter = data.chapters.find((c) => c.id === selection.id);
-      return chapter?.topics.flatMap((id) => topicCommits(data, id)) ?? [];
+      const chapter = present(
+        data.chapters.find((c) => c.id === selection.id),
+        `No chapter called ${selection.id}, which resolution allows.`,
+      );
+      return chapter.topics.flatMap((id) => topicCommits(data, id));
     }
     case View.Topic:
       return topicCommits(data, selection.id);
     case View.Thread:
-      return data.threads.find((t) => t.id === selection.id)?.commits ?? [];
+      return present(
+        data.threads.find((t) => t.id === selection.id),
+        `No thread called ${selection.id}, which resolution allows.`,
+      ).commits;
     case View.Collection:
       return [];
   }
 }
 
+/** A chapter names only topics the generator emitted, so this lookup cannot come up empty. */
 const topicCommits = (data: Transcript, id: string): string[] =>
-  data.topics.find((t) => t.id === id)?.commits ?? [];
+  present(
+    data.topics.find((t) => t.id === id),
+    `No topic called ${id}, named by a chapter.`,
+  ).commits;
 
+/**
+ * What to call a selection, and what to say under it.
+ *
+ * Asserted rather than defended: {@link missing} has already refused any id that names nothing,
+ * and this is the code that check exists to simplify.
+ */
 export function headingOf(data: Transcript, selection: Selection): Heading {
+  const named = (kind: string) => `No ${kind} called ${selection.id}, which resolution allows.`;
   switch (selection.view) {
     case View.Search:
       return { title: `Search: ${selection.id}` };
     case View.Chapter: {
-      const chapter = data.chapters.find((c) => c.id === selection.id);
-      return { title: chapter?.title ?? selection.id, blurb: chapter?.blurb };
+      const chapter = present(
+        data.chapters.find((c) => c.id === selection.id),
+        named('chapter'),
+      );
+      return { title: chapter.title, blurb: chapter.blurb };
     }
     case View.Topic: {
-      const topic = data.topics.find((t) => t.id === selection.id);
-      return { title: topic?.title ?? selection.id, blurb: topic?.blurb };
+      const topic = present(
+        data.topics.find((t) => t.id === selection.id),
+        named('topic'),
+      );
+      return { title: topic.title, blurb: topic.blurb };
     }
     case View.Thread: {
-      const thread = data.threads.find((t) => t.id === selection.id);
-      return { title: thread?.title ?? selection.id, blurb: thread?.blurb };
+      const thread = present(
+        data.threads.find((t) => t.id === selection.id),
+        named('thread'),
+      );
+      return { title: thread.title, blurb: thread.blurb };
     }
     case View.Collection: {
-      const collection = data.collections[selection.id];
-      return { title: collection?.title ?? selection.id, blurb: collection?.blurb };
+      const collection = present(data.collections[selection.id], named('collection'));
+      return { title: collection.title, blurb: collection.blurb };
     }
   }
 }
@@ -375,7 +461,10 @@ export function exchangesOf(data: Transcript, selection: Selection): Exchange[] 
   if (selection.view === View.Collection) {
     // A collection keeps the order it was written in rather than the order things happened: the
     // sequence is the curator's argument, not a chronology.
-    const entries = data.collections[selection.id]?.entries ?? [];
+    const entries = present(
+      data.collections[selection.id],
+      `No collection called ${selection.id}, which resolution allows.`,
+    ).entries;
     const byId = new Map(data.exchanges.map((e) => [e.id, e]));
     return entries.map((entry) => byId.get(entry.exchange)).filter((e) => e !== undefined);
   }

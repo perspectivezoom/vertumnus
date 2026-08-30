@@ -20,7 +20,7 @@ type Weigh = (commits: readonly string[]) => number;
 interface Pane {
   data: Transcript;
   weigh: Weigh;
-  selection: Selection;
+  selection: Selection | null;
   onSelect: (next: Selection) => void;
 }
 
@@ -31,7 +31,8 @@ export function TranscriptContents({
   onSearch,
 }: {
   data: Transcript;
-  selection: Selection;
+  /** Null when the URL named something that does not exist: nothing here is current. */
+  selection: Selection | null;
   onSelect: (next: Selection) => void;
   onSearch: (query: string) => void;
 }) {
@@ -41,7 +42,7 @@ export function TranscriptContents({
     // sit on top of the counts.
     <nav className="flex flex-col pr-3">
       <Find
-        query={selection.view === View.Search ? selection.id : ''}
+        query={selection?.view === View.Search ? selection.id : ''}
         total={data.exchanges.length}
         onSearch={onSearch}
       />
@@ -81,7 +82,7 @@ function Find({
 function Chapters({ data, weigh, selection, onSelect }: Pane) {
   // Opens to whichever chapter the selection is in, so arriving by link shows where you are.
   const containing = data.chapters.find((c) =>
-    selection.view === View.Topic ? c.topics.includes(selection.id) : c.id === selection.id,
+    selection?.view === View.Topic ? c.topics.includes(selection.id) : c.id === selection?.id,
   );
   const [open, setOpen] = useState<string | null>(containing?.id ?? null);
   return (
@@ -94,7 +95,7 @@ function Chapters({ data, weigh, selection, onSelect }: Pane) {
               title={chapter.title}
               count={weigh(commitsOf(data, chapter.id))}
               expanded={expanded}
-              active={selection.view === View.Chapter && selection.id === chapter.id}
+              active={selection?.view === View.Chapter && selection.id === chapter.id}
               onToggle={() => setOpen(expanded ? null : chapter.id)}
               onSelect={() => onSelect({ view: View.Chapter, id: chapter.id })}
             />
@@ -108,7 +109,7 @@ function Chapters({ data, weigh, selection, onSelect }: Pane) {
                       title={topic.title}
                       count={weigh(topic.commits)}
                       muted
-                      active={selection.view === View.Topic && selection.id === id}
+                      active={selection?.view === View.Topic && selection.id === id}
                       onSelect={() => onSelect({ view: View.Topic, id })}
                     />
                   ) : null;
@@ -130,7 +131,7 @@ function Threads({ data, weigh, selection, onSelect }: Pane) {
           key={thread.id}
           title={thread.title}
           count={weigh(thread.commits)}
-          active={selection.view === View.Thread && selection.id === thread.id}
+          active={selection?.view === View.Thread && selection.id === thread.id}
           onSelect={() => onSelect({ view: View.Thread, id: thread.id })}
         />
       ))}
@@ -146,7 +147,7 @@ function Collections({ data, selection, onSelect }: Pane) {
           key={id}
           title={collection.title}
           count={collection.entries.length}
-          active={selection.view === View.Collection && selection.id === id}
+          active={selection?.view === View.Collection && selection.id === id}
           onSelect={() => onSelect({ view: View.Collection, id })}
         />
       ))}
