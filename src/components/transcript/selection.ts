@@ -144,8 +144,10 @@ export interface Densities {
 /**
  * How much of an exchange id a citation carries.
  *
- * The ids are UUIDs and a link in prose is meant to be readable. Six characters already separate
- * all 558; eight leaves room to grow without ever having to reissue a link someone published.
+ * The ids are UUIDs and a link in prose is meant to be readable, so a citation carries a prefix
+ * rather than the whole thing — long enough that no two exchanges share one, with margin left
+ * over as the transcript grows. That two exchanges never do is checked by a test, since the day
+ * it stops being true is the day a published link starts pointing at the wrong exchange.
  */
 export const ID_LENGTH = 8;
 
@@ -182,7 +184,7 @@ export function useSelection(data: Transcript): Chosen {
     resolution.status === 'ok' ? resolution.reading.densities : resolution.densities;
   const selection = resolution.status === 'ok' ? resolution.reading.selection : null;
 
-  // Filtering runs over all 558 exchanges, so it is memoised on the selection's contents rather
+  // Filtering runs over every exchange, so it is memoised on the selection's contents rather
   // than its identity — the parsed selection is a fresh object on every render.
   const exchanges = useMemo(
     () => (selection ? exchangesOf(data, selection) : []),

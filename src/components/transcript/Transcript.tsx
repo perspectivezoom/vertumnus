@@ -144,7 +144,7 @@ function Broken({ message }: { message: string }) {
       <h2 className="text-lg font-semibold text-neutral-900">Nothing to show</h2>
       <p className="text-sm leading-relaxed text-neutral-600">{message}</p>
       <p className="text-sm text-neutral-500">
-        The link may be out of date. Pick a chapter on the left to start reading.
+        The link may be out of date. Pick something from the table of contents to start reading.
       </p>
     </div>
   );

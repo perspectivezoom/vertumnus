@@ -4,9 +4,9 @@
  * Two voices set apart rather than one column of prose, so either side can be skimmed without
  * reading the other. Monospace because it was typed at a terminal, and should read as one.
  *
- * Between Claude's turns sit the tools it reached for, where it reached for them — 2,877 calls
- * against 558 prompts, so collapsing them into a footnote would leave a wall of text and a list
- * of verbs in place of a sequence of work.
+ * Between Claude's turns sit the tools it reached for, where it reached for them. There are
+ * several per prompt, so collapsing them into a footnote would leave a wall of text and a list of
+ * verbs in place of a sequence of work.
  */
 import { useState } from 'react';
 
