@@ -86,7 +86,7 @@ function merge(params: URLSearchParams, changes: Record<string, string | null>):
   return next;
 }
 
-export interface Heading {
+interface Heading {
   title: string;
   /** Every kind carries one except a topic, where it is optional. */
   blurb?: string | undefined;
@@ -159,7 +159,7 @@ export const shortId = (id: string): string => id.slice(0, ID_LENGTH);
  * Downstream never sees a missing parameter or an unparsed string, which is why this module is
  * the only one that touches the query string at all.
  */
-export interface Reading {
+interface Reading {
   selection: Selection;
   /** Full id of the cited exchange — the URL carries only the first {@link ID_LENGTH}. */
   cited: string | null;
@@ -172,7 +172,7 @@ export interface Reading {
  * The two differ for the view: clearing lets the default answer, where naming the opening view
  * writes an opinion into the URL that the reader never expressed.
  */
-export type Changes = Partial<{
+type Changes = Partial<{
   selection: Selection | null;
   cited: string | null;
   densities: Densities;
@@ -368,7 +368,7 @@ const unless = (value: Density, fallback: Density): string | null =>
  * Substring matching over 1.5 MB measures in single-digit milliseconds, so an index would be
  * machinery in front of something already imperceptible.
  */
-export function matching(data: Transcript, query: string): Exchange[] {
+function matching(data: Transcript, query: string): Exchange[] {
   const needle = query.trim().toLowerCase();
   if (!needle) return [];
   return data.exchanges.filter(
@@ -389,14 +389,14 @@ function homeOf(data: Transcript, id: string): Selection | null {
 // ── Reading a selection out of the URL, and back into it ────────────────────────────────────
 
 /** `?view=topic:banner` — one parameter, rather than four that must never be set at once. */
-export function parseSelection(raw: string | null): Selection | null {
+function parseSelection(raw: string | null): Selection | null {
   const [view, ...rest] = (raw ?? '').split(':');
   const id = rest.join(':');
   if (!id) return null;
   return (Object.values(View) as string[]).includes(view ?? '') ? { view: view as View, id } : null;
 }
 
-export const toParam = (selection: Selection): string => `${selection.view}:${selection.id}`;
+const toParam = (selection: Selection): string => `${selection.view}:${selection.id}`;
 
 /**
  * Where a reader lands having chosen nothing: the first collection.
@@ -409,7 +409,7 @@ export const toParam = (selection: Selection): string => `${selection.view}:${se
  * and an empty pane, which is the right outcome for a curation the build already complained
  * about — and it saves every caller a branch for a case that cannot occur.
  */
-export const opening = (data: Transcript): Selection => ({
+const opening = (data: Transcript): Selection => ({
   view: View.Collection,
   id: Object.keys(data.collections)[0] ?? '',
 });
@@ -420,7 +420,7 @@ export const opening = (data: Transcript): Selection => ({
  * The commits a selection covers — none for the two that are not runs of history: a collection
  * cites exchanges directly, and a search matches them wherever they fell.
  */
-export function commitsOf(data: Transcript, selection: Selection): string[] {
+function commitsOf(data: Transcript, selection: Selection): string[] {
   switch (selection.view) {
     case View.Search:
       return [];
@@ -456,7 +456,7 @@ const topicCommits = (data: Transcript, id: string): string[] =>
  * Asserted rather than defended: {@link missing} has already refused any id that names nothing,
  * and this is the code that check exists to simplify.
  */
-export function headingOf(data: Transcript, selection: Selection): Heading {
+function headingOf(data: Transcript, selection: Selection): Heading {
   const named = (kind: string) => `No ${kind} called ${selection.id}, which resolution allows.`;
   switch (selection.view) {
     case View.Search:
@@ -489,7 +489,7 @@ export function headingOf(data: Transcript, selection: Selection): Heading {
   }
 }
 
-export function exchangesOf(data: Transcript, selection: Selection): Exchange[] {
+function exchangesOf(data: Transcript, selection: Selection): Exchange[] {
   if (selection.view === View.Search) return matching(data, selection.id);
   if (selection.view === View.Collection) {
     // A collection keeps the order it was written in rather than the order things happened: the
@@ -512,7 +512,7 @@ export function exchangesOf(data: Transcript, selection: Selection): Exchange[] 
  * themselves demonstrate. A collection asserts why this one is worth your time, and that is not
  * visible from the exchange — so it is the only view where something has to be said out loud.
  */
-export function notesOf(data: Transcript, selection: Selection): ReadonlyMap<string, string> {
+function notesOf(data: Transcript, selection: Selection): ReadonlyMap<string, string> {
   if (selection.view !== View.Collection) return new Map();
   const collection = present(
     data.collections[selection.id],
