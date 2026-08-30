@@ -16,7 +16,8 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
-    "ci": "bun run check && bun run lint && oxfmt --check && bun test"
+    "ci": "bun run check && bun run lint && oxfmt --check && bun test",
+    "favicon": "bun scripts/favicon.ts"
   },
   "dependencies": {
     "d3-shape": "3.2.0",

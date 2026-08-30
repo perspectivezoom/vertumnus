@@ -48,7 +48,7 @@ export function AboutShell() {
             to="/"
             className="font-poster text-lg font-semibold text-green-900 hover:text-green-700"
           >
-            Vertumnus
+            vertumnus
           </Link>
           <nav className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
             {SECTIONS.map((section) => (

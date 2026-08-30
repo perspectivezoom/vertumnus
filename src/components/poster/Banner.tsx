@@ -121,7 +121,7 @@ function Intro() {
   return (
     <div className="flex flex-col gap-3 sm:flex-1">
       {/* Stacked, the floating buttons are over this row; in columns they clear it. */}
-      <h2 className="pr-24 text-lg font-semibold text-neutral-900 sm:pr-0">Vertumnus</h2>
+      <h2 className="font-poster pr-24 text-lg font-semibold text-green-900 sm:pr-0">vertumnus</h2>
       <p className="text-sm leading-relaxed text-neutral-600">
         Printable posters of what&rsquo;s in season at farmers&rsquo; markets. Data is specific to
         your region, with week-level granularity.
