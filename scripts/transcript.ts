@@ -31,25 +31,49 @@ const OUT = 'data/transcript/__generated__/transcript.json';
 
 // ── Reading the log ─────────────────────────────────────────────────────────────────────────
 
-/** The text a human typed, or null for the log's own bookkeeping entries. */
-function promptText(entry: Record<string, unknown>): string | null {
-  if (entry.type !== 'user' || entry.isSidechain || entry.isMeta) return null;
+/**
+ * Whatever text sits on a user entry, whichever shape the log used for it.
+ *
+ * Both occur, and which one appears is not about what was said: a typed prompt is usually a bare
+ * string, while the harness's own entries arrive as content blocks. Reading only the first shape
+ * is how the interruption marker went unnoticed for so long.
+ */
+function userText(entry: Record<string, unknown>): string {
+  if (entry.type !== 'user' || entry.isSidechain) return '';
   const message = entry.message as { content?: unknown } | undefined;
   const content = message?.content;
-  const text =
-    typeof content === 'string'
-      ? content
-      : Array.isArray(content)
-        ? content
-            .filter((b): b is { type: string; text: string } => b?.type === 'text')
-            .map((b) => b.text)
-            .join('')
-        : '';
-  if (!text) return null;
-  // Interruptions and slash commands are the harness speaking in the user's place.
-  if (text.startsWith('[Request interrupted')) return null;
-  if (text.startsWith('<command-name>') || text.startsWith('<local-command')) return null;
-  return text;
+  if (typeof content === 'string') return content;
+  if (!Array.isArray(content)) return '';
+  return content
+    .filter((b): b is { type: string; text: string } => b?.type === 'text')
+    .map((b) => b.text)
+    .join('');
+}
+
+const INTERRUPTED = '[Request interrupted';
+
+/**
+ * The harness speaking in the reader's place, rather than the reader.
+ *
+ * Slash commands arrive wrapped when the harness expands them and bare when it does not, so both
+ * spellings are refused. The continuation summary is written by the model to itself across a
+ * compaction, and is the one entry here that nobody typed at all.
+ */
+function isHarness(text: string): boolean {
+  return (
+    text.startsWith(INTERRUPTED) ||
+    text.startsWith('<command-name>') ||
+    text.startsWith('<local-command') ||
+    /^\/[a-z-]+$/.test(text.trim()) ||
+    text.startsWith('This session is being continued from a previous conversation')
+  );
+}
+
+/** The text a human typed, or null for the log's own bookkeeping entries. */
+function promptText(entry: Record<string, unknown>): string | null {
+  if (entry.isMeta) return null;
+  const text = userText(entry);
+  return text && !isHarness(text) ? text : null;
 }
 
 /**
@@ -107,12 +131,7 @@ let pendingInterrupt = false;
 for (const line of lines) {
   const entry = JSON.parse(line) as Record<string, unknown>;
 
-  if (entry.type === 'user' && !entry.isSidechain) {
-    const message = entry.message as { content?: unknown } | undefined;
-    const raw = message?.content;
-    const asText = typeof raw === 'string' ? raw : '';
-    if (asText.startsWith('[Request interrupted')) pendingInterrupt = true;
-  }
+  if (userText(entry).startsWith(INTERRUPTED)) pendingInterrupt = true;
 
   const prompt = promptText(entry);
   if (prompt !== null) {
