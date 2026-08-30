@@ -1,13 +1,8 @@
 /**
  * A written section, authored as Markdown and rendered with this site's own prose components.
  *
- * Deliberately not shared with the transcript's renderer, which reads the same library with the
- * opposite intent: that one is displaying model output, so it renders headings as paragraphs and
- * treats everything as untrusted. These pages are written by hand, so a heading is a heading and
- * the file is allowed to say what it means.
- *
- * What it will not do is let the writer choose a component. A link's behaviour follows from its
- * href — see {@link Anchor} — so prose stays prose, and there is one way to write a link.
+ * It will not let the writer choose a component: a link's behaviour follows from its href — see
+ * {@link Anchor} — so prose stays prose, and there is one way to write a link.
  */
 import { useEffect } from 'react';
 
@@ -34,10 +29,9 @@ export function AboutMarkdown({
   /** Tags this page adds to the ones every page has — see {@link OPTIONS}. */
   overrides?: Record<string, { component: React.ComponentType }>;
 }) {
-  // A link into a section arrives before the section exists: the router navigates, and only then
-  // does the page holding the heading render. The browser has stopped looking for the fragment by
-  // then, so the scroll waits on the content rather than on the hash. Measured without this: a
-  // pasted link and a link from another section both land at the top of the page.
+  // A link into a section arrives before the section exists — the router navigates, then the page
+  // renders — so the browser has given up on the fragment by the time the heading is there.
+  // Without this, both a pasted link and a link from another section land at the top of the page.
   const { hash } = useLocation();
   useEffect(() => {
     if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();

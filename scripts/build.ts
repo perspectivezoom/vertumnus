@@ -20,7 +20,7 @@ const result = await Bun.build({
   publicPath: BASE,
   // Emit a chunk per dynamic import rather than one bundle. The poster is what people arrive
   // for; the written sections and the session browser are a different visit, and the browser in
-  // particular carries a Markdown renderer and reaches for a 1.4 MB transcript. Without this the
+  // particular carries a Markdown renderer and fetches a transcript measured in megabytes. Without this the
   // routes are eagerly imported and all of that rides along with the poster. See src/App.tsx,
   // which is where the boundaries are actually drawn — this flag only lets them exist.
   splitting: true,

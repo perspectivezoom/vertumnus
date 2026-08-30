@@ -1,17 +1,18 @@
 /**
  * Derive the session browser's data from the published transcript and the git history.
  *
- * `docs/session.jsonl` is 30 MB of log, most of it accounting — token usage, file snapshots, and
- * a second copy of every tool result. What a reader wants is the conversation, which is 1.4 MB of
- * it. This pulls that out and joins it to the commits, so a prompt can be found by what it led to.
+ * `docs/session.jsonl` is tens of megabytes of log, most of it accounting — token usage, file
+ * snapshots, and a second copy of every tool result. What a reader wants is the conversation, a
+ * small fraction of it. This pulls that out and joins it to the commits, so a prompt can be found
+ * by what it led to.
  *
  * The join is time: prompts belong to the next commit made after them. That works because the
- * history and the session cover the same 39 days and every commit has prompts behind it — it is
+ * history and the session cover the same span and every commit has prompts behind it — it is
  * a property of how this project was built, checked on every run rather than assumed.
  *
  * A cache, refreshed deliberately, the way the MARS data is — not a build step. It reads the git
  * log, so committing its own output would make it stale again immediately; chasing that would put
- * a 1.7 MB churn in every commit to no one's benefit. Run it with `bun run session`, which
+ * a megabyte of churn in every commit to no one's benefit. Run it with `bun run session`, which
  * refreshes the log it reads: the two inputs then go stale together and the snapshot stays
  * coherent, describing an earlier point in the project rather than a torn one.
  *

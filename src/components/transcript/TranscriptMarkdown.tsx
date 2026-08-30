@@ -6,8 +6,8 @@
  * is a bug nobody notices because the page still looks fine. It produces React elements, so no
  * markup string is ever built and there is nothing to inject.
  *
- * Only a reader who opens the transcript ever loads it — that route is lazy, so this and its
- * ~28 KB stay out of the poster's bundle entirely (see src/App.tsx).
+ * The written sections use it too, and every one of those routes is lazy, so its ~28 KB stays
+ * out of the poster's bundle (see src/App.tsx).
  *
  * Everything inherits the monospace and size of the bubble it sits in, so the styling here is
  * only what distinguishes one block from another. Code is the notable case: in a body that is
@@ -30,8 +30,8 @@ const options = {
   disableParsingRawHTML: true,
   overrides: {
     // Rendered as paragraphs, not headings. A reply is a remark inside a page, not a document of
-    // its own, and 74 of them open with `##` — as real headings those would land in the outline
-    // above the page's, leaving a reader navigating by heading with a hundred false landmarks.
+    // its own, and many open with `##` — as real headings those would land in the outline above
+    // the page's, leaving a reader navigating by heading among a hundred false landmarks.
     h1: { component: 'p', props: { className: HEADING } },
     h2: { component: 'p', props: { className: HEADING } },
     h3: { component: 'p', props: { className: HEADING } },

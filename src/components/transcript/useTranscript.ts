@@ -1,14 +1,14 @@
 /**
  * Fetching the transcript, once, for whoever asks first.
  *
- * A 1.4 MB file that never changes between deploys, so it is cached in a module-level promise
+ * Megabytes of JSON that never change between deploys, so it is cached in a module-level promise
  * rather than in state: navigating within the section, or away and back, must not refetch it. The
  * browser's own HTTP cache would mostly handle a repeat, but not two components mounting at once.
  */
 import { useEffect, useState } from 'react';
 
-// Imported as a file, so what arrives here is the URL the bundler emitted it at rather than
-// 1.4 MB of parsed object. Letting the bundler own it is also what makes this work in dev, where
+// Imported as a file, so what arrives here is the URL the bundler emitted it at rather than the
+// whole parsed transcript. Letting the bundler own it is also what makes this work in dev, where
 // there is no dist directory and a hand-built path would 404 into the SPA's HTML fallback.
 import emitted from '@/data/transcript/__generated__/transcript.json' with { type: 'file' };
 import { type Transcript, TranscriptSchema } from '@/data/transcript/schema';
@@ -23,7 +23,7 @@ async function fetchTranscript(): Promise<Transcript> {
   if (!response.ok) throw new Error(`${response.status} fetching the transcript`);
   // Parsed rather than asserted. This is the one place the generator's output and the reader's
   // expectations meet across a network, and the check costs single-digit milliseconds against a
-  // download of half a megabyte. A bad file fails here, with a message, instead of surfacing as
+  // download orders of magnitude slower. A bad file fails here, with a message, instead of surfacing as
   // an undefined halfway through a render.
   return TranscriptSchema.parse(await response.json());
 }

@@ -887,7 +887,7 @@ export const TOPICS: Topic[] = [
     id: 'code-splitting',
     title: 'Splitting the bundle',
     blurb:
-      'Putting the written sections behind their own chunks, so a browser over a 1.4 MB transcript costs the poster nothing.',
+      'Putting the written sections behind their own chunks, so a browser over a multi-megabyte transcript costs the poster nothing.',
     commits: ['8f3086c'],
   },
   {

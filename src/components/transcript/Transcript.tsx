@@ -153,8 +153,8 @@ function Broken({ message }: { message: string }) {
 /**
  * What there is to show while the transcript is still on its way, or never arrived.
  *
- * Down here rather than above the section: half a megabyte over a network has to be accounted
- * for, but it is the least interesting thing this file does.
+ * Down here rather than above the section: megabytes over a network have to be accounted for,
+ * but it is the least interesting thing this file does.
  */
 function Status({ state }: { state: Exclude<State, { status: 'ready' }> }) {
   if (state.status === 'loading') {

@@ -40,10 +40,10 @@ export interface Selection {
 /**
  * The query parameters, spelled out.
  *
- * These URLs exist to be pasted into prose, so they are read far more often than typed —
- * `?view=chapter:controls&prompt=2110f39e` explains itself where `?v=…&e=…` does not. `prompt`
- * rather than `exchange` because the id it carries is the prompt's own, and the timestamp that
- * yields the link sits on the prompt.
+ * These URLs are pasted into prose, so they are read far more often than typed:
+ * `?view=chapter:controls&prompt=2110f39e` explains itself. `prompt` rather than `exchange`
+ * because the id it carries is the prompt's own, and the timestamp that yields the link sits on
+ * the prompt.
  */
 const VIEW = 'view';
 const PROMPT = 'prompt';
@@ -54,9 +54,9 @@ const RESPONSES = 'responses';
  * How much of a turn to draw.
  *
  * A property of the reading rather than of any one view: a chapter collapsed to its prompts is
- * the same request as a list of search results, and answering it twice would mean two components
- * that drift. Either half takes any of the three, including combinations the control does not
- * offer — a uniform rule is easier to hold than one carrying an exception.
+ * the same request as a list of search results. Either half takes any of the three, including
+ * combinations the control does not offer — a uniform rule is easier to hold than one carrying
+ * an exception.
  */
 export const Density = {
   Full: 'full',
@@ -73,8 +73,8 @@ const density = (raw: string | null): Density | null =>
 /**
  * Change some parameters and leave the rest alone.
  *
- * There are four now and they are independent — density outlives a change of chapter, and a
- * citation should not reset it. `setParams` replaces the whole query string, so anything not
+ * They are independent — density outlives a change of chapter, and a citation should not reset
+ * it. `setParams` replaces the whole query string, so anything not
  * named here would be dropped.
  */
 function merge(params: URLSearchParams, changes: Record<string, string | null>): URLSearchParams {
@@ -88,7 +88,7 @@ function merge(params: URLSearchParams, changes: Record<string, string | null>):
 
 interface Heading {
   title: string;
-  /** Every kind carries one except a topic, where it is optional. */
+  /** Every kind carries one except a search, which has only its query to show. */
   blurb?: string | undefined;
 }
 
@@ -108,8 +108,8 @@ interface Actions {
  * What the URL asked for: either a reading, or why there isn't one.
  *
  * A union rather than a reading with holes in it, so everything downstream may assume its data is
- * good. Naming a chapter that does not exist otherwise renders a pane titled with the mistake and
- * holding nothing, which reads as an empty section rather than a broken link.
+ * good — and a URL naming something that no longer exists says so, rather than rendering an empty
+ * pane titled with the mistake.
  *
  * The actions are on both arms: arriving at a bad URL still needs a way out of it.
  */
@@ -198,8 +198,8 @@ export function useSelection(data: Transcript): Chosen {
     search: (query) =>
       void write(
         query
-          ? // Collapsed, because a hundred hits shown whole is the log again with gaps in it.
-            // Short rather than hidden: most queries match something Claude said.
+          ? // Collapsed even where the reader had expanded things: a page of hits shown whole is
+            // the log again with gaps in it.
             {
               selection: { view: View.Search, id: query },
               cited: null,
@@ -261,9 +261,9 @@ const EVERYTHING: Densities = { prompts: Density.Full, responses: Density.Full }
  * How much of a turn a view opens at, before the reader says otherwise.
  *
  * A collection or a page of search results is a set gathered from across the project, and the set
- * is the point: nine replies at full length put eight of them below the fold, so the reader meets
- * one item and no sign of the rest. A chapter or a thread is meant to be read in sequence, and
- * opens whole. Either way this is only a starting point — the control still offers all nine.
+ * is the point: at full length the first entry fills the screen and the reader meets no sign of
+ * the rest. A chapter or a thread is read in sequence, and opens whole. A starting point either
+ * way — the control still offers every combination.
  */
 function opensAt(selection: Selection): Densities {
   const gathered = selection.view === View.Collection || selection.view === View.Search;

@@ -3,8 +3,8 @@
  *
  * The chart is a diagonal band — crops are ordered by peak, so early months of late crops and
  * late months of early crops are structurally empty. Where exactly those gaps fall depends on
- * which crops a region carries, and will depend on what a reader picks once the produce picker
- * exists, so the placement has to be measured rather than chosen once by eye.
+ * which crops a region carries and on what a reader picks in the produce picker, so the
+ * placement has to be measured rather than chosen once by eye.
  */
 
 /** A coarse grid over the chart box; 1 where something is drawn. */

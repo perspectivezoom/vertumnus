@@ -1,15 +1,10 @@
 /**
  * The sidebar: a search box, and the table of contents under it.
  *
- * Two jobs, and the split below follows them. {@link TranscriptSidebar} decides where the contents
- * are — which is two different places, since above `lg` they are simply the column, and below it
- * there is no column to be. Stacked, the three indexes are some 900px of navigation standing
- * between the top of the page and the first exchange, nearly two screens on the narrowest phone
- * we support, so they fold into a card whose lid disappears at the same breakpoint the layout
- * gains its second column. {@link SidebarContent} is what is in them, and knows none of that.
- *
- * Search stays outside the fold: one row, and the thing most likely to be wanted on a small
- * screen.
+ * {@link TranscriptSidebar} decides where the contents are, {@link SidebarContent} what is in
+ * them. Two places, because below `lg` there is no column to be one: stacked, the indexes stand
+ * between the top of the page and the first exchange, so they fold behind a control that
+ * disappears at the breakpoint the layout gains its second column. Search stays outside the fold.
  */
 import { useState } from 'react';
 
@@ -30,7 +25,6 @@ export function TranscriptSidebar({
   onSelect: (next: Selection) => void;
   onSearch: (query: string) => void;
 }) {
-  // Only consulted below `lg`, where the indexes are folded away; above it they are the column.
   const [open, setOpen] = useState(false);
   return (
     // Clear of the scrollbar this pane grows when a chapter is opened, which would otherwise
@@ -46,8 +40,7 @@ export function TranscriptSidebar({
           type="button"
           aria-expanded={open}
           onClick={() => setOpen((was) => !was)}
-          // `items-center`, not the `items-baseline` every row in the contents uses: a chevron is
-          // an icon with no baseline to sit on, and lines up against the text's instead.
+          // `items-center`, not the `items-baseline` the rows use: an icon has no baseline.
           className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm text-neutral-700 lg:hidden ${
             open ? 'border-b border-neutral-200' : ''
           }`}
@@ -74,10 +67,8 @@ export function TranscriptSidebar({
 /**
  * The three indexes: what this session was, at a glance and then in detail.
  *
- * Collections come first because they are the way in for someone who knows nothing about the
- * project: hand-picked, and saying so, where everything below is derived. Chapters run in order,
- * so reading them top to bottom is reading the project in order. Threads gather work picked up and
- * put down across months, which chapters cannot hold.
+ * Collections first, as the way in for someone who knows nothing about the project — hand-picked,
+ * where everything below is derived. Then chapters in order, then the threads that cross them.
  */
 function SidebarContent({
   data,
@@ -88,7 +79,6 @@ function SidebarContent({
   selection: Selection | null;
   onSelect: (next: Selection) => void;
 }) {
-  // Built once here rather than per index, since all three count in the same unit.
   const pane = { data, weigh: weigher(data), selection, onSelect };
   return (
     <>
@@ -99,7 +89,6 @@ function SidebarContent({
   );
 }
 
-/** The search box, which selects a view like every other control in this pane. */
 function Find({
   query,
   total,
@@ -234,7 +223,6 @@ function Group({
   );
 }
 
-/** A named thing, how much of the session it accounts for, and a way to go there. */
 function Entry({
   title,
   count,
@@ -259,9 +247,8 @@ function Entry({
 /**
  * An entry that also opens to reveal what it contains.
  *
- * Two controls, not one: the chevron opens the chapter and the label selects it. Collapsing them
- * would mean either that you cannot look inside without navigating away, or that you cannot read
- * a chapter whole without its topics unfolding underneath you.
+ * Two controls, not one: collapsing them would mean either that you cannot look inside without
+ * navigating away, or that you cannot read a chapter whole without its topics unfolding under you.
  */
 function Expander({
   title,

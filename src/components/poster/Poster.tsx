@@ -99,8 +99,8 @@ export function Poster() {
 // ── Header ────────────────────────────────────────────────────────────────────────────────
 
 // On a wall the poster announces what it is before where it applies, so the region sits above
-// as a tracked overline rather than heading the block. No year: these are typical seasons
-// across six of them, not a forecast. The colloquial phrasing only holds up in the display
+// as a tracked overline rather than heading the block. No year: these are typical seasons, not
+// a forecast. The colloquial phrasing only holds up in the display
 // face — the workhorse sets these same words as prose.
 const HEADLINE = 'What’s in season at the farmers’ market'; // typographic apostrophes
 const HEADLINE_SIZE = 33;
