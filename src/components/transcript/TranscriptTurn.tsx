@@ -36,6 +36,7 @@ export function TranscriptTurn({
   densities,
   highlight = '',
   place = null,
+  note = null,
   onOpen,
   onCite,
 }: {
@@ -46,6 +47,8 @@ export function TranscriptTurn({
   highlight?: string;
   /** Where this sits in the curation, shown when the surrounding view does not say. */
   place?: string | null;
+  /** Why a collection singled this one out, in the curator's voice rather than either speaker's. */
+  note?: string | null;
   onOpen: () => void;
   onCite: () => void;
 }) {
@@ -82,6 +85,7 @@ export function TranscriptTurn({
       {shown.prompts !== Density.Hidden && (
         <Prompt
           text={exchange.prompt}
+          note={note}
           at={exchange.ts}
           short={shown.prompts === Density.Short}
           highlight={highlight}
@@ -102,9 +106,10 @@ export function TranscriptTurn({
   );
 }
 
-/** What the human typed, and when. */
+/** What the human typed, and when — with the curator's reason for it, where there is one. */
 function Prompt({
   text,
+  note,
   at,
   short,
   highlight,
@@ -113,6 +118,10 @@ function Prompt({
   onCite,
 }: {
   text: string;
+  /** Why a collection singled this exchange out. Inside the bubble for the same reason the
+      timestamp is: it belongs to this prompt, and anything loose above it reads as a footnote
+      to the reply before. */
+  note: string | null;
   at: string;
   short: boolean;
   highlight: string;
@@ -134,6 +143,10 @@ function Prompt({
     <div
       className={`${BUBBLE} flex flex-col gap-1 self-end rounded-br-sm border-green-200 bg-green-50/70 text-neutral-900`}
     >
+      {/* Set in the body face and a size down, so it reads as someone talking about the prompt
+          rather than as part of what was typed. Never clamped: it is the reason the exchange is
+          on the page at all, and a collapsed one would hide the only thing that explains it. */}
+      {note && <p className="font-sans text-xs leading-relaxed text-neutral-500">{note}</p>}
       {/* The text is the control, not a chevron beside it — and a sibling of the timestamp rather
           than its parent, since one button inside another is neither clickable reliably. */}
       {onToggle ? (

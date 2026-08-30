@@ -121,6 +121,8 @@ export type Chosen = Actions &
         heading: Heading;
         /** The exchanges the selection covers, in the order that selection presents them. */
         exchanges: Exchange[];
+        /** Why each exchange was singled out, where a curator said. Empty for every other view. */
+        notes: ReadonlyMap<string, string>;
         /** The full id of the exchange a link pointed at, if it pointed at one. */
         focused: string | null;
         densities: Densities;
@@ -229,6 +231,7 @@ export function useSelection(data: Transcript): Chosen {
         selection: resolution.reading.selection,
         heading: headingOf(data, resolution.reading.selection),
         exchanges,
+        notes: notesOf(data, resolution.reading.selection),
         focused: resolution.reading.cited,
         densities,
       };
@@ -470,4 +473,20 @@ export function exchangesOf(data: Transcript, selection: Selection): Exchange[] 
   }
   const wanted = new Set(commitsOf(data, selection));
   return data.exchanges.filter((e) => wanted.has(e.commit));
+}
+
+/**
+ * The curator's claim about each exchange, for the one view that makes claims.
+ *
+ * Every other index says only that these exchanges belong together, which the exchanges
+ * themselves demonstrate. A collection asserts why this one is worth your time, and that is not
+ * visible from the exchange — so it is the only view where something has to be said out loud.
+ */
+export function notesOf(data: Transcript, selection: Selection): ReadonlyMap<string, string> {
+  if (selection.view !== View.Collection) return new Map();
+  const collection = present(
+    data.collections[selection.id],
+    `No collection called ${selection.id}, which resolution allows.`,
+  );
+  return new Map(collection.entries.map((entry) => [entry.exchange, entry.note]));
 }

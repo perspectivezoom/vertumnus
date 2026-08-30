@@ -75,7 +75,8 @@ function Conversation({
   data: Session;
   chosen: Extract<Chosen, { status: 'ok' }>;
 }) {
-  const { selection, heading, exchanges, focused, densities, setDensity, cite, open } = chosen;
+  const { selection, heading, exchanges, notes, focused, densities, setDensity, cite, open } =
+    chosen;
   const searching = selection.view === View.Search;
 
   // Scrolls after the exchanges are on the page, which is why it is an effect and not part of
@@ -106,6 +107,7 @@ function Conversation({
           densities={densities}
           highlight={searching ? selection.id : ''}
           place={searching ? placeOf(data, exchange) : null}
+          note={notes.get(exchange.id) ?? null}
           onOpen={() => open(exchange.id)}
           onCite={() => cite(exchange.id)}
         />
