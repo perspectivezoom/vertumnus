@@ -1,4 +1,6 @@
-import { Article, Body, SectionTitle } from '@/src/components/about/Prose';
+import { AboutMarkdown } from '@/src/components/about/AboutMarkdown';
+import source from '@/src/components/about/Ai.md' with { type: 'text' };
+import { Article } from '@/src/components/about/Prose';
 
 /**
  * How the project was built alongside a model, and the record of it.
@@ -9,13 +11,7 @@ import { Article, Body, SectionTitle } from '@/src/components/about/Prose';
 export function Ai() {
   return (
     <Article>
-      <SectionTitle>AI usage</SectionTitle>
-      <Body>
-        <p className="text-neutral-400 italic">
-          To come: commentary on building this with a model. The conversation itself is in the AI
-          transcript section.
-        </p>
-      </Body>
+      <AboutMarkdown>{source}</AboutMarkdown>
     </Article>
   );
 }
