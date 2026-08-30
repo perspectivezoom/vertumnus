@@ -20,7 +20,7 @@ export const SECTIONS = [
   {
     path: 'transcript',
     label: 'AI transcript',
-    blurb: 'The ~500 prompt AI conversation that built this project, in full.',
+    blurb: 'The ~700 prompt AI conversation that built this project, in full.',
   },
   {
     path: 'licenses',

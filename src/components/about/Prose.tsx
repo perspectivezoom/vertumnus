@@ -19,9 +19,14 @@ export function Article({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** How the three heading levels look, shared by the components below and by Markdown. */
+export const SECTION_TITLE = 'font-poster text-3xl font-bold text-neutral-900';
+export const HEADING = 'pt-6 text-xl font-semibold text-neutral-900';
+export const SUBHEADING = 'pt-2 text-base font-semibold text-neutral-800';
+
 /** A section's title. */
 export function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h1 className="font-poster text-3xl font-bold text-neutral-900">{children}</h1>;
+  return <h1 className={SECTION_TITLE}>{children}</h1>;
 }
 
 /** A run of prose, at the size and rhythm the sections are written in. */
@@ -35,7 +40,7 @@ export function Body({ children }: { children: React.ReactNode }) {
 
 /** A subheading within a section — a region, or a topic that spans them. */
 export function Heading({ children }: { children: React.ReactNode }) {
-  return <h2 className="pt-6 text-xl font-semibold text-neutral-900">{children}</h2>;
+  return <h2 className={HEADING}>{children}</h2>;
 }
 
 /**
@@ -46,7 +51,7 @@ export function Heading({ children }: { children: React.ReactNode }) {
  * a reader from having to hold "which source was this paragraph about" in their head.
  */
 export function Subheading({ children }: { children: React.ReactNode }) {
-  return <h3 className="pt-2 text-base font-semibold text-neutral-800">{children}</h3>;
+  return <h3 className={SUBHEADING}>{children}</h3>;
 }
 
 /**

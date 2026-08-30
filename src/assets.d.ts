@@ -17,3 +17,17 @@ declare module '*.txt' {
   const contents: string;
   export default contents;
 }
+
+/**
+ * A written section resolves to its Markdown source — but only when imported
+ * `with { type: 'text' }`.
+ *
+ * Bun's default loader for `.md` renders it to HTML, which is not what any of these imports want:
+ * the sections go through this site's own prose components, and HTML arrives too late for that.
+ * Forgetting the attribute is not subtle — the renderer escapes the tags and the page prints its
+ * own markup as text — but it is easy to do, which is why it is written down here.
+ */
+declare module '*.md' {
+  const source: string;
+  export default source;
+}
