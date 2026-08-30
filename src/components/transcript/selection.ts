@@ -178,7 +178,6 @@ export type Changes = Partial<{
 
 export function useSelection(data: Transcript): Chosen {
   const [resolution, write] = useReading(data);
-  const base = defaults(data).densities;
   const densities =
     resolution.status === 'ok' ? resolution.reading.densities : resolution.densities;
   const selection = resolution.status === 'ok' ? resolution.reading.selection : null;
@@ -211,7 +210,11 @@ export function useSelection(data: Transcript): Chosen {
     // Expanded, unlike leaving a search: following a hit is asking to read the thing, and a
     // collapsed reply is the one state in which that cannot be done.
     open: (id) =>
-      void write({ selection: homeOf(data, id) ?? opening(data), cited: id, densities: base }),
+      void write({
+        selection: homeOf(data, id) ?? opening(data),
+        cited: id,
+        densities: EVERYTHING,
+      }),
     cite: (id) => {
       // The view is written explicitly even though it has not changed: it may have been implicit,
       // and a pasted link should reopen the surroundings the citer was in rather than resolve to
@@ -238,18 +241,31 @@ export function useSelection(data: Transcript): Chosen {
 }
 
 /**
- * The reading with nothing in the URL at all: the opening collection, nothing cited, everything
- * drawn in full.
+ * The reading with nothing in the URL at all: the opening collection, nothing cited, drawn at
+ * whatever that view opens at.
  *
- * A function rather than a constant because one of the three depends on the transcript — where
- * it begins is whichever collection the curation put first.
+ * A function rather than a constant because two of the three depend on the transcript — where it
+ * begins is whichever collection the curation put first, and how much it shows follows from that.
  */
 function defaults(data: Transcript): Reading {
-  return {
-    selection: opening(data),
-    cited: null,
-    densities: { prompts: Density.Full, responses: Density.Full },
-  };
+  const selection = opening(data);
+  return { selection, cited: null, densities: opensAt(selection) };
+}
+
+/** Both halves whole — what every view opens at unless it is a list rather than a reading. */
+const EVERYTHING: Densities = { prompts: Density.Full, responses: Density.Full };
+
+/**
+ * How much of a turn a view opens at, before the reader says otherwise.
+ *
+ * A collection or a page of search results is a set gathered from across the project, and the set
+ * is the point: nine replies at full length put eight of them below the fold, so the reader meets
+ * one item and no sign of the rest. A chapter or a thread is meant to be read in sequence, and
+ * opens whole. Either way this is only a starting point — the control still offers all nine.
+ */
+function opensAt(selection: Selection): Densities {
+  const gathered = selection.view === View.Collection || selection.view === View.Search;
+  return gathered ? { ...EVERYTHING, responses: Density.Short } : EVERYTHING;
 }
 
 /**
@@ -267,11 +283,6 @@ function useReading(data: Transcript): [Resolution, (changes: Changes) => URLSea
   const [params, setParams] = useSearchParams();
   const base = defaults(data);
 
-  const densities = {
-    prompts: density(params.get(PROMPTS)) ?? base.densities.prompts,
-    responses: density(params.get(RESPONSES)) ?? base.densities.responses,
-  };
-
   const short = params.get(PROMPT);
   const cited = short ? (data.exchanges.find((e) => shortId(e.id) === short)?.id ?? null) : null;
 
@@ -280,6 +291,14 @@ function useReading(data: Transcript): [Resolution, (changes: Changes) => URLSea
   // exchange with no surroundings.
   const named = parseSelection(params.get(VIEW));
   const selection = named ?? (cited ? homeOf(data, cited) : null) ?? base.selection;
+
+  // Read after the selection, not beside it: what counts as the default depends on which view
+  // this turned out to be.
+  const opens = opensAt(selection);
+  const densities = {
+    prompts: density(params.get(PROMPTS)) ?? opens.prompts,
+    responses: density(params.get(RESPONSES)) ?? opens.responses,
+  };
 
   const wrong =
     (short && !cited && `No prompt in this transcript has the id “${short}”.`) ||
@@ -290,14 +309,19 @@ function useReading(data: Transcript): [Resolution, (changes: Changes) => URLSea
     : { status: 'ok', reading: { selection, cited, densities } };
 
   const write = (changes: Changes) => {
+    // A density is omitted when it equals the default — and the default belongs to the view being
+    // written, which this same call may be changing. Reading it from the outgoing view would
+    // write a parameter that says nothing, or drop one that says something.
+    const going = 'selection' in changes ? (changes.selection ?? base.selection) : selection;
+    const there = opensAt(going);
     const next = merge(params, {
       ...('selection' in changes && {
         [VIEW]: changes.selection ? toParam(changes.selection) : null,
       }),
       ...('cited' in changes && { [PROMPT]: changes.cited ? shortId(changes.cited) : null }),
       ...(changes.densities && {
-        [PROMPTS]: unless(changes.densities.prompts, base.densities.prompts),
-        [RESPONSES]: unless(changes.densities.responses, base.densities.responses),
+        [PROMPTS]: unless(changes.densities.prompts, there.prompts),
+        [RESPONSES]: unless(changes.densities.responses, there.responses),
       }),
     });
     // Replaced rather than pushed: a history entry per click would bury wherever the reader
