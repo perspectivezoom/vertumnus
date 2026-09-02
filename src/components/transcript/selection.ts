@@ -184,11 +184,15 @@ export function useSelection(data: Transcript): Chosen {
     resolution.status === 'ok' ? resolution.reading.densities : resolution.densities;
   const selection = resolution.status === 'ok' ? resolution.reading.selection : null;
 
-  // Filtering runs over every exchange, so it is memoised on the selection's contents rather
-  // than its identity — the parsed selection is a fresh object on every render.
+  // Filtering runs over every exchange, so it is memoised — but the parsed selection is a fresh
+  // object on every render, so memoising on it would never hit. The view and the id are all a
+  // selection is, so the memo takes those and rebuilds it, and its dependencies are then exactly
+  // what it reads.
+  const view = selection?.view;
+  const id = selection?.id;
   const exchanges = useMemo(
-    () => (selection ? exchangesOf(data, selection) : []),
-    [data, selection?.view, selection?.id],
+    () => (view === undefined || id === undefined ? [] : exchangesOf(data, { view, id })),
+    [data, view, id],
   );
 
   const actions: Actions = {

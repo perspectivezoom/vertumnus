@@ -171,7 +171,7 @@ window.OUT=null;
  }
  window.OUT=JSON.stringify(boxes);
 })();
-<\/script></body></html>`;
+</script></body></html>`;
   const boxes = JSON.parse(await inBrowser(page, CACHE_DIR)) as Record<string, Box>;
   return new Map(Object.entries(boxes));
 }
@@ -202,7 +202,7 @@ window.OUT=null;
  }
  window.OUT=JSON.stringify(out);
 })();
-<\/script></body></html>`;
+</script></body></html>`;
   const urls = JSON.parse(await inBrowser(page, WORK_DIR)) as Record<string, string>;
   return new Map(
     Object.entries(urls).map(([a, url]) => [
