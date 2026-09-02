@@ -10,7 +10,13 @@ import { useEffect } from 'react';
 import type { Transcript as Session } from '@/data/transcript/schema';
 import { TranscriptSidebar } from '@/src/components/transcript/TranscriptSidebar';
 import { TranscriptTurn, TURN_GAP, TURN_WIDTH } from '@/src/components/transcript/TranscriptTurn';
-import { type Chosen, shortId, useSelection, View } from '@/src/components/transcript/selection';
+import {
+  type Chosen,
+  type Selection,
+  shortId,
+  useSelection,
+  View,
+} from '@/src/components/transcript/selection';
 import { present } from '@/src/lib/invariant';
 import { TranscriptDensity } from '@/src/components/transcript/TranscriptDensity';
 import { type State, useTranscript } from '@/src/components/transcript/useTranscript';
@@ -81,8 +87,18 @@ function Conversation({
   data: Session;
   chosen: Extract<Chosen, { status: 'ok' }>;
 }) {
-  const { selection, heading, exchanges, notes, focused, densities, setDensity, cite, open } =
-    chosen;
+  const {
+    selection,
+    heading,
+    exchanges,
+    notes,
+    focused,
+    densities,
+    setDensity,
+    cite,
+    open,
+    select,
+  } = chosen;
   const searching = selection.view === View.Search;
 
   // Scrolls after the exchanges are on the page, which is why it is an effect and not part of
@@ -118,8 +134,118 @@ function Conversation({
           onCite={() => cite(exchange.id)}
         />
       ))}
+      <Ending data={data} selection={selection} onSelect={select} />
     </>
   );
+}
+
+/**
+ * What sits at the bottom of a section.
+ *
+ * Chapters run in order, so the useful thing at the end of one is the next one — the transcript
+ * can be read straight through without going back up to the contents. Every other view gathers
+ * exchanges from across the project and has no next, so it only says that it has ended.
+ */
+function Ending({
+  data,
+  selection,
+  onSelect,
+}: {
+  data: Session;
+  selection: Selection;
+  onSelect: (next: Selection) => void;
+}) {
+  switch (selection.view) {
+    case View.Chapter:
+      return <Onward neighbours={chapterNeighbours(data, selection.id)} onSelect={onSelect} />;
+    case View.Topic:
+      return <Onward neighbours={topicNeighbours(data, selection.id)} onSelect={onSelect} />;
+    case View.Search:
+      return <Close>End of results</Close>;
+    // A collection or a thread gathers exchanges from across the project; there is nothing after
+    // it to go to, and any view added later will want this rather than a way on.
+    default:
+      return <Close>End of section</Close>;
+  }
+}
+
+const END = `mt-4 flex ${TURN_WIDTH} border-t border-neutral-200 pt-4 text-sm`;
+
+/** A section with nothing after it: centred, since there is no direction to point in. */
+function Close({ children }: { children: React.ReactNode }) {
+  return <p className={`${END} justify-center text-neutral-400`}>{children}</p>;
+}
+
+/** The way on, for the two views that run in order. */
+function Onward({
+  neighbours,
+  onSelect,
+}: {
+  neighbours: Neighbours;
+  onSelect: (next: Selection) => void;
+}) {
+  const { previous, next } = neighbours;
+  // Back to the top: the reader is at the foot of one section and wants the head of the next.
+  const go = (to: Selection) => {
+    onSelect(to);
+    window.scrollTo({ top: 0 });
+  };
+  const WAY = 'max-w-[45%] text-green-700 hover:text-green-900 hover:underline';
+  return (
+    <nav className={`${END} items-start justify-between gap-6`}>
+      {previous ? (
+        <button type="button" onClick={() => go(previous.selection)} className={`${WAY} text-left`}>
+          ← {previous.label}
+        </button>
+      ) : (
+        <span />
+      )}
+      {next && (
+        <button type="button" onClick={() => go(next.selection)} className={`${WAY} text-right`}>
+          {next.label} →
+        </button>
+      )}
+    </nav>
+  );
+}
+
+/** Somewhere to go, and what to call it — not a {@link Step}, which is a piece of a reply. */
+interface Neighbour {
+  selection: Selection;
+  label: string;
+}
+
+interface Neighbours {
+  previous: Neighbour | null;
+  next: Neighbour | null;
+}
+
+function chapterNeighbours(data: Session, id: string): Neighbours {
+  const at = data.chapters.findIndex((c) => c.id === id);
+  const step = (n: number): Neighbour | null => {
+    const chapter = data.chapters[n];
+    return chapter
+      ? { selection: { view: View.Chapter, id: chapter.id }, label: chapter.title }
+      : null;
+  };
+  return { previous: step(at - 1), next: step(at + 1) };
+}
+
+/**
+ * Topics walk the whole sequence rather than stopping at their chapter's edge, which is why each
+ * is labelled with the chapter it belongs to: reading past the last topic of one chapter is
+ * reading into the next, and the label is what says so.
+ */
+function topicNeighbours(data: Session, id: string): Neighbours {
+  const order = data.chapters.flatMap((c) => c.topics);
+  const at = order.indexOf(id);
+  const step = (n: number): Neighbour | null => {
+    const topic = order[n];
+    return topic
+      ? { selection: { view: View.Topic, id: topic }, label: placeOfTopic(data, topic) }
+      : null;
+  };
+  return { previous: step(at - 1), next: step(at + 1) };
 }
 
 /**
@@ -130,10 +256,18 @@ function Conversation({
  */
 function placeOf(data: Session, exchange: { commit: string }): string {
   const topic = data.topics.find((t) => t.commits.includes(exchange.commit));
-  if (!topic) return 'Not yet filed';
+  return topic ? placeOfTopic(data, topic.id) : 'Not yet filed';
+}
+
+/** A topic named by where it sits: its chapter, then itself. */
+function placeOfTopic(data: Session, id: string): string {
+  const topic = present(
+    data.topics.find((t) => t.id === id),
+    `No topic called ${id}, which the contents named.`,
+  );
   const chapter = present(
-    data.chapters.find((c) => c.topics.includes(topic.id)),
-    `Topic ${topic.id} is in no chapter, which the generator does not allow.`,
+    data.chapters.find((c) => c.topics.includes(id)),
+    `Topic ${id} is in no chapter, which the generator does not allow.`,
   );
   return `${chapter.title} › ${topic.title}`;
 }
