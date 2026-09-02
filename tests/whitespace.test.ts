@@ -1,6 +1,13 @@
 import { describe, expect, test } from 'bun:test';
 
-import { type Box, findVoids, occupancyOf, settleSeeds, toUnits } from '@/src/lib/whitespace';
+import {
+  type Box,
+  findVoids,
+  occupancyOf,
+  SEED_DEPTHS,
+  settleSeeds,
+  toUnits,
+} from '@/src/lib/whitespace';
 
 const SIZE = { width: 1000, height: 1000 };
 const OPTS = { aspect: 0.65, maxHeight: 40, minHeight: 8 };
@@ -65,12 +72,15 @@ describe('findVoids', () => {
     expect(left).toHaveLength(1);
   });
 
-  test('finds both gaps in a tall open column, rather than stacking on one', () => {
-    // Two plates genuinely fit down an open side, and both should be found.
+  test('finds one plate per seed down a tall open column, rather than stacking on one', () => {
+    // Nothing is drawn on the left, so every seed has room and each should be found where it was
+    // placed. Counted against the seeds rather than a number, which would go stale when they move.
     const occ = occupancyOf([{ x: 500, y: 0, w: 500, h: 1000 }], SIZE, 100);
     const left = findVoids(occ, OPTS).filter((b) => b.x < occ.cols / 2);
-    expect(left).toHaveLength(2);
-    expect(overlaps(left[0]!, left[1]!)).toBe(false);
+    expect(left).toHaveLength(SEED_DEPTHS.length);
+    for (const [i, box] of left.entries()) {
+      for (const other of left.slice(i + 1)) expect(overlaps(box, other)).toBe(false);
+    }
   });
 
   test('separates two gaps in the same half', () => {
@@ -112,10 +122,10 @@ describe('findVoids', () => {
     for (const box of boxes) expect(overlaps(box, band)).toBe(false);
   });
 
-  test('centres art in the run of clear space, not on the point it grew from', () => {
-    // The gap runs from y=0 to y=700 on the left. A box grown from the most open point stops as
-    // soon as one side is blocked, so it keeps that point's bias; the eye reads the lopsided
-    // result as a misplacement rather than as a gap that happened to be uneven.
+  test('centres art on the row it was seeded on, not in the middle of its gap', () => {
+    // The gap runs from y=0 to y=700 on the left and the seed sits high in it. Re-centring on the
+    // gap would drift the plate to y=350 and leave the top of the poster bare — which is what
+    // every plate used to do, and why the seeds had to be tuned below the band they filled.
     const occ = occupancyOf(
       [
         { x: 500, y: 0, w: 500, h: 1000 },
@@ -126,11 +136,11 @@ describe('findVoids', () => {
     );
     // One seed, so exactly one box is placed and nothing else competes for the space.
     const half = { x: 0, y: 0, w: 50, h: occ.rows };
-    const [box] = settleSeeds(occ, [[2, 20]], half, OPTS).map((b) => toUnits(b, occ, SIZE));
+    const row = 20;
+    const [box] = settleSeeds(occ, [[2, row]], half, OPTS).map((b) => toUnits(b, occ, SIZE));
     expect(box).toBeDefined();
-    const above = box!.y;
-    const below = 700 - (box!.y + box!.h);
-    expect(Math.abs(above - below)).toBeLessThan(SIZE.height * 0.05);
+    const centre = box!.y + box!.h / 2;
+    expect(Math.abs(centre - (row / occ.rows) * SIZE.height)).toBeLessThan(SIZE.height * 0.05);
   });
 
   test('a blank chart yields placements on both sides', () => {

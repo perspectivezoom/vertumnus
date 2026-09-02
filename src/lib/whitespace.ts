@@ -32,7 +32,8 @@ export interface VoidOptions {
 }
 
 const SEED_INSET = 2; // cells in from the outer edge, so a seed starts in the margin's own space
-const SEED_DEPTHS = [0.25, 0.75]; // where down each side the seeds start
+/** Where down each side the plates are centred. */
+export const SEED_DEPTHS = [0.2, 0.5, 0.8];
 
 /**
  * Where to put art on this chart, in grid cells.
@@ -49,8 +50,8 @@ export function findVoids(occ: Occupancy, opts: VoidOptions): Box[] {
   ];
 
   return halves.flatMap((half, side) => {
-    // Against the outer edge, where the art will sit, at two depths so a side split into an
-    // upper and a lower gap is found as two. Landing on a ribbon is fine; claim steps off it.
+    // Against the outer edge, where the art will sit, at several depths so a side split into
+    // separate gaps is found as several. Landing on a ribbon is fine; claim steps off it.
     const edge = side === 0 ? half.x + SEED_INSET : half.x + half.w - 1 - SEED_INSET;
     const seeds = SEED_DEPTHS.map((depth): [number, number] => [
       edge,
@@ -78,11 +79,13 @@ export function settleSeeds(
       for (let x = box.x; x < box.x + box.w; x++) working.cells[y * working.cols + x] = value;
     }
   };
-  const footholds: Box[] = [];
+  // The row each foothold came from, carried along: it is where the plate will be centred, and a
+  // seed that finds no open ground drops out, so position cannot be recovered by index later.
+  const footholds: { foot: Box; row: number }[] = [];
   for (const seed of seeds) {
     const foot = claim(working, seed, bounds);
     if (!foot) continue;
-    footholds.push(foot);
+    footholds.push({ foot, row: seed[1] });
     mark(foot, 1);
   }
 
@@ -91,9 +94,9 @@ export function settleSeeds(
   // placement is kept only if it stacks clear of the ones before it: boxes sharing rows would
   // read as a row of pictures, and the gap is better spent on one larger plate.
   const kept: Box[] = [];
-  for (const foot of footholds) {
+  for (const { foot, row } of footholds) {
     mark(foot, 0);
-    const box = settle(working, foot, bounds, opts);
+    const box = settle(working, foot, bounds, opts, row);
     const sharesRows = kept.some((k) => box.y < k.y + k.h && k.y < box.y + box.h);
     if (box.h < opts.minHeight || sharesRows) continue;
     mark(box, 1);
@@ -157,20 +160,21 @@ function freeAround(occ: Occupancy, box: Box, bounds: Box): Box {
 const SETTLE_PASSES = 6;
 
 /**
- * Walk a box to the middle of its gap and grow it there, until it stops moving.
+ * Grow a box in its gap at the row it was seeded on, until it stops moving.
+ *
+ * Only the column settles. Letting the row settle too centred each plate on the midpoint between
+ * its neighbours' footholds instead of on its seed, which pulled every plate toward the middle of
+ * the side and left the top and bottom of the poster bare.
  *
  * Growing puts it somewhere new, so it repeats. Growing once and never re-examining left New
  * York's apple at 23×35 cells in a corner of a gap with room for 33×49. Each pass lands in space
  * at least as open, so the box never shrinks and this reaches a fixed point.
  */
-function settle(occ: Occupancy, box: Box, bounds: Box, opts: VoidOptions): Box {
+function settle(occ: Occupancy, box: Box, bounds: Box, opts: VoidOptions, row: number): Box {
   let current = box;
   for (let pass = 0; pass < SETTLE_PASSES; pass++) {
     const room = freeAround(occ, current, bounds);
-    const centre: [number, number] = [
-      room.x + Math.floor(room.w / 2),
-      room.y + Math.floor(room.h / 2),
-    ];
+    const centre: [number, number] = [room.x + Math.floor(room.w / 2), row];
     const grown = growAspect(occ, centre, bounds, opts);
     if (!grown) return current;
     if (grown.x === current.x && grown.y === current.y && grown.h === current.h) return grown;
