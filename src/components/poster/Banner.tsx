@@ -123,18 +123,17 @@ function Intro() {
     <div className="flex flex-col gap-3 sm:flex-1">
       {/* Stacked, the floating buttons are over this row; in columns they clear it. */}
       <h2 className="font-poster pr-24 text-lg font-semibold text-green-900 sm:pr-0">vertumnus</h2>
-      <p className="text-sm leading-relaxed text-neutral-600">
+      <p className="text-xs leading-relaxed text-neutral-600">
         Printable posters of what&rsquo;s in season at your local farmers&rsquo; market. Produce
-        data is specific to your region, with week-level granularity. Learn more about the
-        methodology and rationale <BannerLink href="/about">on the /about page</BannerLink>.
+        data is specific to your region, with week-level granularity. Learn more{' '}
+        <BannerLink href="/about">on the /about page</BannerLink>.
       </p>
-      <p className="text-sm leading-relaxed text-neutral-600">
+      <p className="text-xs leading-relaxed text-neutral-600">
         vertumnus was wildly overengineered in a single 700 prompt Claude Opus 5 session over a 40
-        day period. Read about its usage and insights at{' '}
-        <BannerLink href="/about/ai">/about/ai</BannerLink>, or browse all prompts at{' '}
-        <BannerLink href="/about/transcript">/about/transcript</BannerLink>.
+        day period. Read more at <BannerLink href="/about/ai">/about/ai</BannerLink>, or browse all
+        prompts at <BannerLink href="/about/transcript">/about/transcript</BannerLink>.
       </p>
-      <p className="text-sm leading-relaxed text-neutral-600">
+      <p className="text-xs leading-relaxed text-neutral-600">
         <HiringMessage />
       </p>
     </div>

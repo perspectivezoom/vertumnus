@@ -66,9 +66,8 @@ export function HiringMessage() {
   return (
     <>
       As of September 2026, the project author is looking for new opportunities. Those interested
-      can visit{' '}
-      <ExternalLink href="https://www.linkedin.com/in/perspectivezoom">LinkedIn</ExternalLink> or
-      email hn@perspectivezoom.com.
+      should reach out on{' '}
+      <ExternalLink href="https://www.linkedin.com/in/perspectivezoom">LinkedIn</ExternalLink>.
     </>
   );
 }
