@@ -331,6 +331,14 @@ export const COLLECTIONS: Record<string, Collection> = {
       'Every request to cut the comments down, from the first chapter to the last. Comprehensive, and the one correction that never stopped being necessary.',
     entries: [
       {
+        exchange: '578d7de2-a462-4593-b273-649f19b45861',
+        note: 'Calling the comprehensive pass: not one file this time, every comment in the project.',
+      },
+      {
+        exchange: '5bba69c4-fb90-48ca-9945-4e9803fd2ff3',
+        note: 'Corrections were not the point. "I don\'t think there\'s enough evaluation on the condensing / elimination of comments."',
+      },
+      {
         exchange: 'ca222943-4916-46d5-ba33-888cf702b78e',
         note: '"Again, please make a comment condense / elimination pass." The last chapter, and the same instruction as the first.',
       },
@@ -514,6 +522,10 @@ export const COLLECTIONS: Record<string, Collection> = {
     blurb:
       'Selected by that rule alone rather than by hand, and comprehensive. It turns out to mark a particular thing: a position already arrived at, with some reluctance about it.',
     entries: [
+      {
+        exchange: '1cf0fbc6-7793-4447-81f3-7b753558091f',
+        note: 'On a comment that fixated on how Markdown generates ids, for what is a standard mapping.',
+      },
       {
         exchange: 'c232af71-fa7e-4389-b666-a22015003d0a',
         note: 'On being told display: contents was the clever answer.',
@@ -968,6 +980,20 @@ export const TOPICS: Topic[] = [
       'A pass over every comment for what had quietly stopped being true, and then the pages written without a model.',
     commits: ['0421a75', '5e0af21'],
   },
+  {
+    id: 'transcript-finish',
+    title: 'Chapters recut, and a way onward',
+    blurb:
+      'Six chapters over the whole session, each opening on a prompt that names it, and a footer that carries a reader from one to the next.',
+    commits: ['7e16d5f', 'fba44f9'],
+  },
+  {
+    id: 'plate-balance',
+    title: 'Rebalancing the plates',
+    blurb:
+      'Five watercolours instead of four, placed where they were asked for rather than drifting to the middle of the page.',
+    commits: ['4c1aa2f'],
+  },
 ];
 
 export const CHAPTERS: Chapter[] = [
@@ -1052,6 +1078,6 @@ export const CHAPTERS: Chapter[] = [
     title: 'Polish and publishing',
     blurb:
       'The written sections moved to Markdown so they could be written as prose, a wordmark and an icon, and the last of the scaffolding cleared out.',
-    topics: ['written-markdown', 'identity', 'handwritten'],
+    topics: ['written-markdown', 'identity', 'handwritten', 'transcript-finish', 'plate-balance'],
   },
 ];
