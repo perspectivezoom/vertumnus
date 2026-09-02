@@ -1,6 +1,6 @@
 import { AboutMarkdown } from '@/src/components/about/AboutMarkdown';
 import source from '@/src/components/about/Ai.md' with { type: 'text' };
-import { Article, Notice } from '@/src/components/about/Prose';
+import { Article, HiringNotice, Notice } from '@/src/components/about/Prose';
 
 /**
  * How the project was built alongside a model, and the record of it.
@@ -15,6 +15,7 @@ export function Ai() {
         <p>The copy on this page was handwritten from scratch.</p>
       </Notice>
       <AboutMarkdown>{source}</AboutMarkdown>
+      <HiringNotice />
     </Article>
   );
 }
