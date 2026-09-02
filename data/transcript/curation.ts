@@ -175,6 +175,7 @@ export const THREADS: Thread[] = [
       '26fb3a8',
       '811d770',
       'cfa5b78',
+      'bceb575',
     ],
   },
 ];
@@ -732,13 +733,14 @@ export const TOPICS: Topic[] = [
     id: 'routing',
     blurb: 'A second region stubbed out, and URLs that can name which one you are looking at.',
     title: 'Regions and routing',
-    commits: ['bc5d243', 'afe4b18', 'b8b143c', 'b331ed3'],
+    commits: ['bc5d243', 'afe4b18', 'b8b143c'],
   },
   {
     id: 'mars-first',
-    blurb: 'Finding that USDA Market News publishes shipment data at all.',
+    blurb:
+      'A month-granular source is not enough, and USDA Market News turns out to publish weekly shipment volume.',
     title: 'Finding USDA MARS',
-    commits: ['d7ad261'],
+    commits: ['b331ed3', 'd7ad261'],
   },
   {
     id: 'svg-poster',
@@ -925,71 +927,113 @@ export const TOPICS: Topic[] = [
       'Search as another way in rather than a parameter beside them, links that say so when they name nothing, and opening a single collapsed reply.',
     commits: ['7d8ce41', 'a2be6c9', '4cb1e74', '9f26535'],
   },
+  {
+    id: 'collections',
+    title: 'Collections, and what they claim',
+    blurb:
+      'Eight hand-picked sets over the session, each entry carrying a note that says why it is worth reading.',
+    commits: ['df4f2f4', '38964bd', '5d1747d'],
+  },
+  {
+    id: 'browser-defaults',
+    title: 'What the browser opens on',
+    blurb: 'A collection as the landing view, and how much of a turn a view shows before you ask.',
+    commits: ['b5eceee', '7c9c2ab'],
+  },
+  {
+    id: 'browser-polish',
+    title: 'Phones, and a tidy-up',
+    blurb:
+      'Folding the contents away on a small screen, then cutting figures that had stopped being true and exports nothing used.',
+    commits: ['414d14d', 'c8ec501', '3aa364f'],
+  },
+  {
+    id: 'written-markdown',
+    title: 'The written sections in Markdown',
+    blurb:
+      'Moving the prose out of JSX so it can be written as prose: links that resolve by where they point, and headings anything can link to.',
+    commits: ['01aa10a', '130514b', 'ee0449a', '5afbc54', 'e49370a'],
+  },
+  {
+    id: 'identity',
+    title: 'A wordmark, an icon, and the last of the scaffold',
+    blurb:
+      'Setting the name one way everywhere, drawing the tab icon from it, and clearing out what the original install left behind.',
+    commits: ['4ec1713', '04b406e'],
+  },
+  {
+    id: 'handwritten',
+    title: 'Comments cut back, and copy written by hand',
+    blurb:
+      'A pass over every comment for what had quietly stopped being true, and then the pages written without a model.',
+    commits: ['0421a75', '5e0af21'],
+  },
 ];
 
 export const CHAPTERS: Chapter[] = [
   {
-    id: 'start',
-    title: 'Getting started',
-    blurb: 'A blank directory, a first region of hand-written seasons, and a schema to hold them.',
-    topics: ['scaffold', 'first-data'],
-  },
-  {
-    id: 'toolchain-chart',
-    title: 'A toolchain and a chart',
-    blurb: 'Replacing most of the initial stack, and getting the first shapes onto a page.',
-    topics: ['toolchain', 'streamgraph', 'ribbons'],
-  },
-  {
-    id: 'controls',
-    title: 'Controls',
-    blurb: 'The banner, the paper picker, and the routing that lets a URL name a region.',
-    topics: ['banner', 'paper-size', 'routing'],
-  },
-  {
-    id: 'real-data',
-    title: 'Real data',
+    id: 'prototype',
+    title: 'Prototyping with faked data',
     blurb:
-      'Finding USDA shipment volume, moving the poster to SVG, and settling on movement reports.',
-    topics: ['mars-first', 'svg-poster', 'mars-terminal', 'mars-movement', 'ridgeline'],
+      'A blank directory to a chart that draws, on hand-written seasons for one region, while the stack underneath was still being argued about.',
+    topics: [
+      'scaffold',
+      'first-data',
+      'toolchain',
+      'streamgraph',
+      'ribbons',
+      'banner',
+      'paper-size',
+      'routing',
+    ],
   },
   {
-    id: 'seasons-first',
-    title: 'What a season is',
-    blurb: 'A first answer to which weeks count as peak, and the labels to read it by.',
-    topics: ['peak-voting', 'chart-labels'],
-  },
-  {
-    id: 'local-design',
-    title: 'Local data, and a look',
+    id: 'sfdata',
+    title: 'Finding good San Francisco data',
     blurb:
-      'Narrowing statewide volume to districts a vendor drives in from, then typography and colour.',
-    topics: ['district-filter', 'playfair', 'poster-furniture', 'colors'],
+      'Hunting for produce data at week resolution, finding USDA shipment volume, and working out which of those weeks a season is.',
+    topics: [
+      'mars-first',
+      'svg-poster',
+      'mars-terminal',
+      'mars-movement',
+      'ridgeline',
+      'peak-voting',
+      'chart-labels',
+      'district-filter',
+    ],
   },
   {
-    id: 'plates-provenance',
-    title: 'Watercolours and provenance',
-    blurb: 'Filling the empty space with USDA plates, and writing down where all of it came from.',
-    topics: ['whitespace', 'crop-picker', 'about-scaffold', 'licenses', 'sources-page'],
-  },
-  {
-    id: 'print-seasons',
-    title: 'Print, and second thoughts',
-    blurb: 'Making the paper output right, then reopening the season algorithm and not liking it.',
-    topics: ['print', 'crop-defaults', 'season-smoothing'],
+    id: 'watercolours',
+    title: 'Designing with the USDA Pomological Watercolor Collection',
+    blurb:
+      'Making it a poster rather than a chart: type, colour, and fruit painted for the USDA a century ago, fitted into the space the crops leave empty. The written sections and a second look at the season algorithm follow on the end.',
+    topics: [
+      'playfair',
+      'poster-furniture',
+      'colors',
+      'whitespace',
+      'crop-picker',
+      'about-scaffold',
+      'licenses',
+      'sources-page',
+      'print',
+      'crop-defaults',
+      'season-smoothing',
+    ],
   },
   {
     id: 'newyork',
-    title: 'New York, and polish',
+    title: 'Generalizing the poster with New York data',
     blurb:
-      'A region with no shipment data, built from a state harvest chart — then performance and small screens.',
+      'A second region with no shipment data behind it, built from a state harvest chart instead — and everything that had quietly assumed one region.',
     topics: ['ny-data', 'ny-plates', 'ny-provenance', 'perf-mobile'],
   },
   {
-    id: 'browser',
-    title: 'The transcript browser',
+    id: 'transcript',
+    title: 'Building out the AI session transcript',
     blurb:
-      'Publishing this conversation as something readable: chapters over the log, a chat to read it in, and links into any part of it.',
+      'Publishing this conversation as something readable: chapters over the log, a chat to read it in, links into any part of it, and collections picked by hand.',
     topics: [
       'curation',
       'code-splitting',
@@ -998,6 +1042,16 @@ export const CHAPTERS: Chapter[] = [
       'browser-contents',
       'browser-citing',
       'browser-search',
+      'collections',
+      'browser-defaults',
+      'browser-polish',
     ],
+  },
+  {
+    id: 'publishing',
+    title: 'Polish and publishing',
+    blurb:
+      'The written sections moved to Markdown so they could be written as prose, a wordmark and an icon, and the last of the scaffolding cleared out.',
+    topics: ['written-markdown', 'identity', 'handwritten'],
   },
 ];
