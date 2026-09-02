@@ -8,6 +8,15 @@ import tailwind from 'bun-plugin-tailwind';
 // the same value to the client router (see src/App.tsx).
 const BASE = '/';
 
+/**
+ * The domain the site answers on, emitted into the build as a `CNAME` file.
+ *
+ * Pages takes the custom domain from the published artifact as well as from the repository
+ * settings, and a deploy that omits it can drop the domain back to the default. Cheap insurance,
+ * and it keeps the fact in the repository rather than only in a settings page nobody diffs.
+ */
+const DOMAIN = 'vertumnus.fyi';
+
 // Chunk and asset names carry a content hash, so a rebuild writes new files beside the old ones
 // rather than over them. Left alone the directory only grows, and every stale chunk from every
 // past build gets published. Start from nothing so dist is exactly this build's output.
@@ -88,6 +97,8 @@ const preloads = preloadable(distFile(entrySrc))
   .map((chunk) => `<link rel="modulepreload" href="${BASE}${chunk}">`)
   .join('');
 await Bun.write('dist/index.html', html.replace('</head>', `${preloads}</head>`));
+
+await Bun.write('dist/CNAME', `${DOMAIN}\n`);
 
 // SPA fallback: GitHub Pages serves 404.html for any unmatched path (including nested
 // routes like /about/licenses), which boots the app and lets the client router take over.
