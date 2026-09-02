@@ -29,8 +29,13 @@ const ELIDED = '<image elided>';
  *
  * Named rather than pattern-matched: a secret is defined by being one, not by looking like one,
  * and a regex for "things resembling a key" would both miss these and mangle innocent text.
+ *
+ * A rotated key stays on this list. The log is a record of what was typed, so the retired value
+ * is in it forever, and scrubbing only the current one would quietly publish the old one the
+ * next time this runs — the guard below would see nothing to catch, because it looks for the
+ * value it was given. Both must be in the environment or this refuses to run.
  */
-const SECRETS = ['MARS_API_KEY'];
+const SECRETS = ['MARS_API_KEY', 'MARS_API_KEY_RETIRED'];
 
 const OUT = 'docs/session.jsonl';
 
