@@ -15,12 +15,13 @@ export const SECTIONS = [
   {
     path: 'ai',
     label: 'AI usage',
-    blurb: 'Write up on how AI was used in this project.',
+    blurb: 'Write up on how AI was used in this project, and thoughts on coding with AI in 2026.',
   },
   {
     path: 'transcript',
     label: 'AI transcript',
-    blurb: 'The ~700 prompt AI conversation that built this project, in full.',
+    blurb:
+      'The ~700 prompt AI conversation that built this project. Searchable, and grouped by chronological chapters and work items.',
   },
   {
     path: 'licenses',

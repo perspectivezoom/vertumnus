@@ -4,8 +4,6 @@ Vertumnus attempts to accurately capture local seasonality of produce. I (and Cl
 
 Due to the locality, each region has different data sources. In SF, we are relying on specific USDA shipping data, whereas in NY we are relying on a published NY agriculture harvest chart. Both of them have shortcomings in terms of fidelity, in addition to the inherent gaps of the subject matter.
 
-Really, this entire project is somewhat questionable in terms of intended audience: Regular farmers’ market attendees will simply build up this instinct over time. This is only useful for the intermittent attendees and newcomers. But, y’know, I happen to be one of those.
-
 ## San Francisco Bay Area
 
 While the initial vision was to have bespoke sources for each crop (and the project is still set up to accommodate sources per crop), as a first approximation, the first attempt to chart SF produce looks at [USDA Market News](https://www.ams.usda.gov/market-news/fruits-vegetables) crop movement reports from local regions. This data source has its flaws both in terms of granularity and as an accurate proxy, but it’s the best approximation that I’ve encountered so far.

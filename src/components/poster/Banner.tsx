@@ -123,21 +123,24 @@ function Intro() {
       {/* Stacked, the floating buttons are over this row; in columns they clear it. */}
       <h2 className="font-poster pr-24 text-lg font-semibold text-green-900 sm:pr-0">vertumnus</h2>
       <p className="text-sm leading-relaxed text-neutral-600">
-        Printable posters of what&rsquo;s in season at farmers&rsquo; markets. Data is specific to
-        your region, with week-level granularity.
+        Printable posters of what&rsquo;s in season at your local farmers&rsquo; market. Produce
+        data is specific to your region, with week-level granularity. Learn more about the
+        methodology and rationale <BannerLink href="/about">on the /about page</BannerLink>.
       </p>
       <p className="text-sm leading-relaxed text-neutral-600">
-        Etymology: Vertumnus is the{' '}
-        <a
-          className="text-green-700 underline underline-offset-2 hover:text-green-900"
-          href="https://en.wikipedia.org/wiki/Vertumnus"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Roman god of seasons, change and plant growth
-        </a>
-        .
+        vertumnus was wildly overengineered in a single 700 prompt Claude Opus 5 session over a 40
+        day period. Read about its usage and insights at{' '}
+        <BannerLink href="/about/ai">/about/ai</BannerLink>, or browse all prompts at{' '}
+        <BannerLink href="/about/transcript">/about/transcript</BannerLink>.
       </p>
     </div>
+  );
+}
+
+function BannerLink({ children, href }: { children: React.ReactNode; href: string }) {
+  return (
+    <a className="text-green-700 underline underline-offset-2 hover:text-green-900" href={href}>
+      {children}
+    </a>
   );
 }

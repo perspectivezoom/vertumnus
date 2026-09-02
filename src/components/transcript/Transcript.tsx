@@ -40,7 +40,8 @@ function Panes({ data }: { data: Session }) {
           AI transcript
         </h1>
         <p className="text-[15px] leading-relaxed text-neutral-600">
-          Every prompt and reply that built this project, {data.exchanges.length} in all.
+          Every prompt and reply that built this project. {data.exchanges.length} Claude Opus 5
+          prompts.
         </p>
       </header>
 
