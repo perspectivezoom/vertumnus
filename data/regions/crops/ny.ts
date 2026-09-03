@@ -104,4 +104,9 @@ const crops: Crop[] = [
   { ...from('Turnips', '#a8798f'), default: false },
 ];
 
-export const ny: RegionSources = { id: 'ny', name: 'New York State', crops };
+export const ny: RegionSources = {
+  id: 'ny',
+  name: 'New York State',
+  pageTitle: 'new york state',
+  crops,
+};

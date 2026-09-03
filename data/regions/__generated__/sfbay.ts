@@ -3,6 +3,7 @@
 export default {
   id: 'sfbay',
   name: 'San Francisco Bay Area',
+  pageTitle: 'san francisco bay area',
   schemaVersion: 1,
   items: [
     {

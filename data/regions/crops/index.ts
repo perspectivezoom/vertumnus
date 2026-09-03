@@ -25,6 +25,7 @@ export type Crop = MarsCrop | NyHarvestCrop | ManualCrop;
 export interface RegionSources {
   id: string; // becomes __generated__/<id>.ts, and the URL path
   name: string; // poster title
+  pageTitle: string; // browser tab, bookmarks and search results — set the way it should read
   crops: Crop[]; // every crop the region shows — derived and hand-authored alike
 }
 

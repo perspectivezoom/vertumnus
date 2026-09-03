@@ -2,6 +2,7 @@ import { Ribbons } from '@/src/components/poster/Ribbons';
 import type { Region } from '@/data/regions/schema';
 import { selectCrops } from '@/src/lib/crops';
 import { useQueryParams, useRegion } from '@/src/lib/params';
+import { useTitle } from '@/src/lib/title';
 import { type Plate, platesFor } from '@/src/lib/plates';
 
 /**
@@ -49,6 +50,7 @@ function PageSize({ width, height, unit }: { width: number; height: number; unit
  */
 export function Poster() {
   const region = useRegion();
+  useTitle(region.pageTitle);
   const { w, h, unit, crops } = useQueryParams();
   const posterH = (POSTER_W * h) / w;
 

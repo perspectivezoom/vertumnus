@@ -86,7 +86,7 @@ function serializeProduce(produce: Produce): string {
  * the test that checks the committed files compares against exactly this.
  */
 export async function renderRegionFile(
-  region: { id: string; name: string },
+  region: { id: string; name: string; pageTitle: string },
   produce: Produce[],
 ): Promise<string> {
   const items = [...produce].sort((a, b) => peakMidpoint(a.spans) - peakMidpoint(b.spans));
@@ -96,6 +96,7 @@ export async function renderRegionFile(
     'export default {',
     `id: ${quote(region.id)},`,
     `name: ${quote(region.name)},`,
+    `pageTitle: ${quote(region.pageTitle)},`,
     'schemaVersion: 1,',
     'items: [',
     items.map(serializeProduce).join('\n'),

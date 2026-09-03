@@ -110,4 +110,9 @@ const crops: Crop[] = [
  * San Francisco Bay Area. Every crop the poster shows is listed above — derived and
  * hand-authored alike — and data/regions/__generated__/sfbay.ts is built from it.
  */
-export const sfbay: RegionSources = { id: 'sfbay', name: 'San Francisco Bay Area', crops };
+export const sfbay: RegionSources = {
+  id: 'sfbay',
+  name: 'San Francisco Bay Area',
+  pageTitle: 'san francisco bay area',
+  crops,
+};

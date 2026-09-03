@@ -20,8 +20,10 @@ import {
 import { present } from '@/src/lib/invariant';
 import { TranscriptDensity } from '@/src/components/transcript/TranscriptDensity';
 import { type State, useTranscript } from '@/src/components/transcript/useTranscript';
+import { useTitle } from '@/src/lib/title';
 
 export function Transcript() {
+  useTitle('ai transcript');
   const state = useTranscript();
   return state.status === 'ready' ? <Panes data={state.data} /> : <Status state={state} />;
 }

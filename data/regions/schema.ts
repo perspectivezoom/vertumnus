@@ -34,6 +34,7 @@ export const RegionSchema = z
   .object({
     id: z.string().regex(/^[a-z]+$/), // slug; lowercase a-z only for now, matches file name and URL
     name: z.string().min(1),
+    pageTitle: z.string().min(1),
     schemaVersion: z.literal(1),
     items: z.array(ProduceSchema),
   })

@@ -4,6 +4,7 @@ import { SECTIONS } from '@/src/components/about/AboutShell';
 import source from '@/src/components/about/AboutIndex.md' with { type: 'text' };
 import { AboutMarkdown } from '@/src/components/about/AboutMarkdown';
 import { Article, Notice, LINK_CLASS, HiringNotice } from '@/src/components/about/Prose';
+import { useTitle } from '@/src/lib/title';
 
 /**
  * The landing section: what the poster is, then a way into each of the others.
@@ -12,6 +13,7 @@ import { Article, Notice, LINK_CLASS, HiringNotice } from '@/src/components/abou
  * that exist rather than written down twice.
  */
 export function AboutIndex() {
+  useTitle('about');
   return (
     <Article>
       <Notice label="AI usage">

@@ -5,7 +5,11 @@ import { Link, NavLink, Outlet } from 'react-router';
  * how it was made, what it is built on.
  */
 export const SECTIONS = [
-  { path: '', label: 'About', blurb: 'Vertumnus overview and section summaries.' },
+  {
+    path: '',
+    label: 'About',
+    blurb: 'Vertumnus overview and section summaries.',
+  },
   {
     path: 'sources',
     label: 'Sources',

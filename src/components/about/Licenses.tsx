@@ -4,6 +4,7 @@ import { AboutMarkdown } from '@/src/components/about/AboutMarkdown';
 import source from '@/src/components/about/Licenses.md' with { type: 'text' };
 import { Article, ExternalLink, LINK_CLASS, Notice } from '@/src/components/about/Prose';
 import { DEPENDENCIES, TYPEFACES } from '@/src/lib/licenses';
+import { useTitle } from '@/src/lib/title';
 
 /**
  * What this project is built from, and on what terms.
@@ -13,6 +14,7 @@ import { DEPENDENCIES, TYPEFACES } from '@/src/lib/licenses';
  * and this file supplies them.
  */
 export function Licenses() {
+  useTitle('licenses');
   return (
     <Article>
       <Notice label="AI usage">

@@ -3,8 +3,10 @@ import { Link } from 'react-router';
 import { AboutMarkdown } from '@/src/components/about/AboutMarkdown';
 import { Article, LINK_CLASS, Notice } from '@/src/components/about/Prose';
 import source from '@/src/components/about/Sources.md' with { type: 'text' };
+import { useTitle } from '@/src/lib/title';
 
 export function Sources() {
+  useTitle('sources');
   return (
     <Article>
       <Notice label="AI usage">

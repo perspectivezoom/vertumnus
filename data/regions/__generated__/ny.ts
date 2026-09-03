@@ -3,6 +3,7 @@
 export default {
   id: 'ny',
   name: 'New York State',
+  pageTitle: 'new york state',
   schemaVersion: 1,
   items: [
     {
