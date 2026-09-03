@@ -198,7 +198,7 @@ export function useSelection(data: Transcript): Chosen {
   const actions: Actions = {
     setDensity: (next) => void write({ densities: { ...densities, ...next } }),
     // Choosing a view clears the citation under it, but not how the reader was reading.
-    select: (next) => void write({ selection: next, cited: null }),
+    select: (next) => void write({ selection: next, cited: null }, { push: true }),
     search: (query) =>
       void write(
         query
@@ -216,11 +216,10 @@ export function useSelection(data: Transcript): Chosen {
     // Expanded, unlike leaving a search: following a hit is asking to read the thing, and a
     // collapsed reply is the one state in which that cannot be done.
     open: (id) =>
-      void write({
-        selection: homeOf(data, id) ?? opening(data),
-        cited: id,
-        densities: EVERYTHING,
-      }),
+      void write(
+        { selection: homeOf(data, id) ?? opening(data), cited: id, densities: EVERYTHING },
+        { push: true },
+      ),
     cite: (id) => {
       // The view is written explicitly even though it has not changed: it may have been implicit,
       // and a pasted link should reopen the surroundings the citer was in rather than resolve to
@@ -285,7 +284,9 @@ function opensAt(selection: Selection): Densities {
  * `write` returns the parameters it set, because citing needs the resulting URL and not only the
  * navigation to it.
  */
-function useReading(data: Transcript): [Resolution, (changes: Changes) => URLSearchParams] {
+function useReading(
+  data: Transcript,
+): [Resolution, (changes: Changes, options?: { push?: boolean }) => URLSearchParams] {
   const [params, setParams] = useSearchParams();
   const base = defaults(data);
 
@@ -314,7 +315,7 @@ function useReading(data: Transcript): [Resolution, (changes: Changes) => URLSea
     ? { status: 'error', message: wrong, densities }
     : { status: 'ok', reading: { selection, cited, densities } };
 
-  const write = (changes: Changes) => {
+  const write = (changes: Changes, { push = false } = {}) => {
     // A density is omitted when it equals the default — and the default belongs to the view being
     // written, which this same call may be changing. Reading it from the outgoing view would
     // write a parameter that says nothing, or drop one that says something.
@@ -330,9 +331,10 @@ function useReading(data: Transcript): [Resolution, (changes: Changes) => URLSea
         [RESPONSES]: unless(changes.densities.responses, there.responses),
       }),
     });
-    // Replaced rather than pushed: a history entry per click would bury wherever the reader
-    // came in from.
-    setParams(next, { replace: true });
+    // Choosing a section is somewhere to come back from, so it goes on the history; everything
+    // else — a density, a citation, a keystroke of search — replaces, since a reader pressing
+    // back wants the section they were reading, not the last thing they adjusted about it.
+    setParams(next, { replace: !push });
     return next;
   };
 
