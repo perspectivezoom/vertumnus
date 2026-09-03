@@ -133,6 +133,17 @@ function Chapters({ data, weigh, selection, onSelect }: Pane) {
     selection?.view === View.Topic ? c.topics.includes(selection.id) : c.id === selection?.id,
   );
   const [open, setOpen] = useState<string | null>(containing?.id ?? null);
+  // Again on every move, so clicking a search result or a citation unfolds the chapter it lands
+  // in. Keyed on the whole selection rather than on the chapter, so collapsing a chapter by hand
+  // sticks until the next navigation, and a move within one chapter still reopens it. The view is
+  // part of the key because an id alone is not unique across views — searching `ridgeline` and
+  // then opening the topic of that name is a move.
+  const key = selection && `${selection.view}:${selection.id}`;
+  const [seen, setSeen] = useState(key);
+  if (key && key !== seen) {
+    setSeen(key);
+    if (containing) setOpen(containing.id);
+  }
   return (
     <Group {...data.groups.chapters}>
       {data.chapters.map((chapter) => {
