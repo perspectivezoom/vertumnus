@@ -70,11 +70,12 @@ export function TranscriptTurn({
         focused ? 'bg-green-100/40 ring-1 ring-green-300' : ''
       }`}
     >
+      {/* Right, with the prompt it heads: left it reads as a footnote to the reply above it. */}
       {place && (
         <button
           type="button"
           onClick={onOpen}
-          className="self-start px-1 text-[11px] text-neutral-400 hover:text-green-700 hover:underline"
+          className={`${TURN_WIDTH} self-end px-1 text-right text-[11px] text-neutral-400 hover:text-green-700 hover:underline`}
         >
           {place}
         </button>
