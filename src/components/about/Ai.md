@@ -82,3 +82,5 @@ I have never professionally coded in assembly, nor in C++. There are developers 
 Really, it would be hypocritical of me to assume that typescript, like assembly before it, would not get commodified. And, just how assembly programmers of old must have felt when looking at compiler outputted assembly, I will find criticism with AI generated typescript. But, the funny thing is, I don't know how valid these criticisms are, because my underlying assumption is that typescript code should be _human readable_. And considering how often humans look at assembly, I don't think that assumption will stay true in the long term. In the long run, it's reasonable to think that typescript's primary audience will become other AI agents, not humans.
 
 What that looks like exactly, I don't know, but also, I hope I won't care, because (hopefully) I'll have moved up one layer of abstraction.
+
+_Published September 2, 2026_

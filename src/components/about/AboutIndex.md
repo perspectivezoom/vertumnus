@@ -51,3 +51,5 @@ The USDA Market News data also seems to be suspiciously light with vegetable dat
 ## A snapshot in time
 
 I fully expect this project to be obsolete in a few years' time, if not already. At some point, AI should be good enough to make a customized poster with exactly the data you want, in exactly the art style you want, without hallucinating data. Consider this project a bit of a time capsule, capturing a moment in between, before everything changed yet again.
+
+_Published September 2, 2026_
