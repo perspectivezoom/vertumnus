@@ -6,7 +6,7 @@
  * between the top of the page and the first exchange, so they fold behind a control that
  * disappears at the breakpoint the layout gains its second column. Search stays outside the fold.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { ChevronDown, ChevronRight, Search } from 'lucide-react';
 
@@ -89,6 +89,7 @@ function SidebarContent({
   );
 }
 
+/** The search box. Typing reaches the URL a moment later — see {@link useDebounce}. */
 function Find({
   query,
   total,
@@ -98,13 +99,14 @@ function Find({
   total: number;
   onSearch: (query: string) => void;
 }) {
+  const [typed, type] = useDebounce(query, onSearch);
   return (
     <label className="relative mt-1 flex items-center">
       <Search className="pointer-events-none absolute left-2 h-4 w-4 text-neutral-400" />
       <input
         type="search"
-        value={query}
-        onChange={(event) => onSearch(event.target.value)}
+        value={typed}
+        onChange={(event) => type(event.target.value)}
         placeholder={`Search ${total} exchanges`}
         className="w-full rounded-md border border-neutral-300 bg-white py-1.5 pr-2 pl-8 text-sm placeholder:text-neutral-400 focus:border-green-600 focus:outline-none"
       />
@@ -310,4 +312,42 @@ function weigher(data: Transcript): Weigh {
 function commitsOf(data: Transcript, chapter: string): string[] {
   const found = data.chapters.find((c) => c.id === chapter);
   return found?.topics.flatMap((t) => data.topics.find((x) => x.id === t)?.commits ?? []) ?? [];
+}
+
+/** Long enough to finish a word, short enough that results feel like they follow the typing. */
+const SETTLE = 200;
+
+/**
+ * A field that keeps what was typed, and reports it once the typing stops.
+ *
+ * Bound straight to `value` an input swallows characters, since a write is asynchronous and the
+ * field re-renders from a value a keystroke behind. `sent` is what lets `value` still win when it
+ * changes for another reason: an echo of our own report is ignored, anything else adopted.
+ */
+function useDebounce(
+  value: string,
+  onSettle: (next: string) => void,
+): [string, (next: string) => void] {
+  const [typed, setTyped] = useState(value);
+  const sent = useRef(value);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    if (value !== sent.current) setTyped(value);
+  }, [value]);
+
+  // So a pending report cannot land after the field is gone.
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  return [
+    typed,
+    (next: string) => {
+      setTyped(next);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
+        sent.current = next;
+        onSettle(next);
+      }, SETTLE);
+    },
+  ];
 }
