@@ -1,4 +1,4 @@
-# Reflections on AI usage for vertumnus
+# A snapshot in time: Reflections on AI usage for vertumnus
 
 [vertumnus](/) was created in a single 700 prompt Claude Opus 5 session over a 40 day period. A complete transcript of the session, including search, chronological chapters, and notable cross-chapter topics, can be found at [/about/transcript](/about/transcript). This page is a handwritten account describing and reflecting the usage of AI in 2026.
 
