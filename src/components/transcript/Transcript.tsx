@@ -252,10 +252,10 @@ function topicNeighbours(data: Session, id: string): Neighbours {
 }
 
 /**
- * Where an exchange sits, as far as the curation knows: chapter, then topic.
+ * Where an exchange sits, as far as the curation knows.
  *
- * A missing topic is ordinary — the tail of recent commits is filed by hand. A topic in no
- * chapter is not: the generator refuses to emit one, so finding it here means the data is wrong.
+ * Everything committed has a chapter and a topic; only the tail newer than the last curated
+ * commit is unfiled, and it files itself on the next refresh.
  */
 function placeOf(data: Session, exchange: { commit: string }): string {
   const topic = data.topics.find((t) => t.commits.includes(exchange.commit));

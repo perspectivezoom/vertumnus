@@ -44,8 +44,8 @@ export interface Chapter {
  * work, which is checkable against the commits themselves. Compare {@link Highlight}, which makes
  * a claim about what an exchange *meant*.
  *
- * Threads may overlap topics freely. A commit that appears only here and in no topic is work with
- * no place in the narrative — upkeep — and is deliberately kept out of the chapters.
+ * Threads may overlap topics freely, and every commit is also filed under a topic: a thread is a
+ * second way through the same history, not a place to put work that has none.
  */
 export interface Thread {
   id: string;
@@ -164,7 +164,7 @@ export const THREADS: Thread[] = [
     id: 'upkeep',
     title: 'Publishing the transcript',
     blurb:
-      'Committing this conversation to the repository, and repeatedly cutting it down as it grew. Housekeeping rather than a chapter of the story, which is why it appears here and nowhere else.',
+      'Committing this conversation to the repository, and repeatedly cutting it down as it grew. Housekeeping rather than a chapter of the story, so each one sits at the end of whatever topic it interrupted; this thread is where they read as the one recurring chore they are.',
     commits: [
       'cf9e7d1',
       '376b232',
@@ -743,210 +743,197 @@ export const COLLECTIONS: Record<string, Collection> = {
 export const TOPICS: Topic[] = [
   {
     id: 'scaffold',
-    blurb: 'An Astro install with React bolted on, before any of it had been questioned.',
     title: 'Standing up the project',
+    blurb: 'An Astro install with React bolted on, before any of it had been questioned.',
     commits: ['7e433f4', '93be98b', '81e8420'],
   },
   {
     id: 'first-data',
-    blurb: 'Hand-written Bay Area seasons, a schema to hold them, and tests to keep them honest.',
     title: 'First data and a schema',
+    blurb: 'Hand-written Bay Area seasons, a schema to hold them, and tests to keep them honest.',
     commits: ['f2be5df', '51f489d', '3647c38'],
   },
   {
     id: 'toolchain',
+    title: 'Settling the toolchain',
     blurb:
       'Biome, then oxlint; Astro, then bun native; TypeScript 6, then 7 — most of the initial stack replaced inside a day.',
-    title: 'Settling the toolchain',
-    commits: ['38e2125', 'cd0be06', '74ad57f', 'f923725', '8066ed7', '358fdb7'],
-  },
-  {
-    id: 'streamgraph',
-    blurb: 'The first attempt at drawing a year of produce, as stacked bands.',
-    title: 'First pass: a streamgraph',
-    commits: ['d75fc5f'],
+    commits: ['38e2125', 'cd0be06', '74ad57f', 'f923725', '8066ed7', 'cf9e7d1', '358fdb7'],
   },
   {
     id: 'ribbons',
+    title: 'The first shapes on the page',
     blurb:
-      'Turning the bands into ribbons that could carry a label, and cleaning up twice on the way.',
-    title: 'Ribbons take shape',
-    commits: ['8c375ba', 'e5996a4', '37ff719', '25b9e45', '601ee01'],
+      'A streamgraph of hand-written seasons, then ribbons with fixed baselines once the peaks started shoving each other around.',
+    commits: ['d75fc5f', '8c375ba', 'e5996a4', '37ff719', '25b9e45', '601ee01'],
   },
   {
     id: 'banner',
-    blurb: 'The floating card that introduces the poster and holds its controls.',
     title: 'The banner',
+    blurb: 'The floating card that introduces the poster and holds its controls.',
     commits: ['1bfc740', '4148309', 'd366311', '5f5bdb3'],
   },
   {
     id: 'paper-size',
-    blurb: 'Letting a reader pick the sheet, and making the poster take its proportions from it.',
     title: 'Choosing the paper',
-    commits: ['db8ac1c', '9d58c43'],
+    blurb: 'Letting a reader pick the sheet, and making the poster take its proportions from it.',
+    commits: ['db8ac1c', '9d58c43', '376b232'],
   },
   {
     id: 'routing',
-    blurb: 'A second region stubbed out, and URLs that can name which one you are looking at.',
     title: 'Regions and routing',
+    blurb: 'A second region stubbed out, and URLs that can name which one you are looking at.',
     commits: ['bc5d243', 'afe4b18', 'b8b143c'],
   },
   {
     id: 'mars-first',
+    title: 'Finding USDA MARS',
     blurb:
       'A month-granular source is not enough, and USDA Market News turns out to publish weekly shipment volume.',
-    title: 'Finding USDA MARS',
-    commits: ['b331ed3', 'd7ad261'],
+    commits: ['b331ed3', 'd7ad261', 'db2b3d3'],
   },
   {
     id: 'svg-poster',
-    blurb: 'Abandoning HTML for the poster, so that what is on screen is what prints.',
     title: 'All the way to SVG',
+    blurb: 'Abandoning HTML for the poster, so that what is on screen is what prints.',
     commits: ['4d7dd3e', '48b8d30'],
   },
   {
     id: 'mars-terminal',
-    blurb: 'Switching to terminal reports, and turning the sheet upright.',
     title: 'Terminal data, and portrait',
+    blurb: 'Switching to terminal reports, and turning the sheet upright.',
     commits: ['1a32a3c', '523b2e5'],
   },
   {
     id: 'mars-movement',
-    blurb: 'Discovering the terminal reports were the wrong ones, and rebuilding around movement.',
     title: 'Movement reports, not prices',
+    blurb: 'Discovering the terminal reports were the wrong ones, and rebuilding around movement.',
     commits: ['ea78335', '4d45795', 'eac0893'],
   },
   {
     id: 'ridgeline',
-    blurb: 'Giving each crop its own baseline, so a quiet season reads as quiet rather than thin.',
     title: 'Streamgraph to ridgeline',
+    blurb: 'Giving each crop its own baseline, so a quiet season reads as quiet rather than thin.',
     commits: ['06d8a69'],
   },
   {
     id: 'peak-voting',
+    title: 'Deciding what "peak" means',
     blurb:
       'A first answer to which weeks are peak, six years of data to vote on it, and a band for where the years disagree.',
-    title: 'Deciding what "peak" means',
     commits: ['5fee654', '0fcd929', '06a6506', '251c265'],
   },
   {
     id: 'chart-labels',
-    blurb: 'Labels moved off the ridges, gridlines behind them, and a serif to set it all in.',
     title: 'Labels, gridlines and a serif',
+    blurb: 'Labels moved off the ridges, gridlines behind them, and a serif to set it all in.',
     commits: ['ee0bd55', 'f1b4d61', '633de99', 'cb95a5f'],
   },
   {
     id: 'district-filter',
+    title: 'Filtering to local districts',
     blurb:
       'Narrowing statewide volume to the districts a vendor could drive in from — and giving up on citrus.',
-    title: 'Filtering to local districts',
     commits: ['6527b18', '1d96ca6', 'ab39b1b', 'b4cda6c', '1a21e14'],
   },
   {
     id: 'playfair',
-    blurb: 'A display face for the headline, and nothing else.',
     title: 'Playfair for the headline',
+    blurb: 'A display face for the headline, and nothing else.',
     commits: ['66c5857'],
   },
   {
     id: 'poster-furniture',
-    blurb: 'The fine print, the parts the poster is assembled from, and one border removed.',
     title: 'Footer, frame and parts',
+    blurb: 'The fine print, the parts the poster is assembled from, and one border removed.',
     commits: ['c211566', 'd510101', '5283b95'],
   },
   {
     id: 'colors',
-    blurb: 'Pulling the saturation out of every crop, so twelve of them can sit together.',
     title: 'Desaturating the crops',
+    blurb: 'Pulling the saturation out of every crop, so twelve of them can sit together.',
     commits: ['fa81f8a'],
   },
   {
     id: 'whitespace',
-    blurb: 'Measuring the space the chart leaves empty, and putting the first watercolours in it.',
     title: 'Placing the watercolours',
-    commits: ['867a67b', '4796e0b'],
+    blurb: 'Measuring the space the chart leaves empty, and putting the first watercolours in it.',
+    commits: ['867a67b', '4796e0b', '4623970', '8b6ec4e'],
   },
   {
     id: 'crop-picker',
+    title: 'Choosing crops',
     blurb:
       'Letting a reader choose which crops appear, and keeping the plates tied to what is shown.',
-    title: 'Choosing crops',
     commits: ['4d337b2', '678d93b'],
   },
   {
     id: 'about-scaffold',
-    blurb: 'Somewhere to explain the project, and a namespace to keep the poster separate from it.',
     title: 'An about section',
+    blurb: 'Somewhere to explain the project, and a namespace to keep the poster separate from it.',
     commits: ['e7d2efd', 'd1a4b9a'],
   },
   {
     id: 'licenses',
-    blurb: 'What this is built from, and what anyone may do with it.',
     title: 'Licensing',
+    blurb: 'What this is built from, and what anyone may do with it.',
     commits: ['50717ed', '15098ee'],
   },
   {
     id: 'sources-page',
-    blurb: 'Where the data came from, how it was interpreted, and where a model wrote the words.',
     title: 'Saying where it came from',
+    blurb: 'Where the data came from, how it was interpreted, and where a model wrote the words.',
     commits: ['e05d4a2', '8f96690'],
   },
   {
     id: 'print',
-    blurb: 'Making the browser print dialog produce the artifact the whole project is for.',
     title: 'Printing, and better plates',
+    blurb: 'Making the browser print dialog produce the artifact the whole project is for.',
     commits: ['9782829', 'd930e31'],
   },
   {
     id: 'crop-defaults',
-    blurb: 'Deciding which crops a reader sees before choosing anything, declared crop by crop.',
     title: 'Which crops show by default',
+    blurb: 'Deciding which crops a reader sees before choosing anything, declared crop by crop.',
     commits: ['06cfffb', '6efa4d0'],
   },
   {
     id: 'season-smoothing',
+    title: 'Spikes, dips and the year boundary',
     blurb:
       'Second thoughts about the algorithm: one-week spikes, a crop ending on Dec 31, and weeks counted from zero.',
-    title: 'Spikes, dips and the year boundary',
     commits: ['41183d4', '80021f4', 'c2b1a7c', '96b9780', '0ffa40e'],
   },
   {
     id: 'ny-data',
-    blurb: 'New York, from a state harvest chart, because no shipment report covers it.',
     title: 'A second region',
+    blurb: 'New York, from a state harvest chart, because no shipment report covers it.',
     commits: ['49ad669'],
   },
   {
     id: 'ny-plates',
-    blurb: 'Plates for the second region, and the resolution to print them at.',
     title: 'New York plates, at print resolution',
+    blurb: 'Plates for the second region, and the resolution to print them at.',
     commits: ['3fdc0cc', '18be289', 'ff1110f', '73c7f8b'],
   },
   {
     id: 'ny-provenance',
-    blurb: 'What a state agency chart permits, which is not what a federal one does.',
     title: 'What New York data may be republished',
+    blurb: 'What a state agency chart permits, which is not what a federal one does.',
     commits: ['332d94a', '4dabc0b', '5310c07'],
   },
   {
     id: 'perf-mobile',
-    blurb: 'Measuring what the poster actually costs to load, and making it work on a phone.',
     title: 'Performance and small screens',
-    commits: ['620812b', '6bd998d'],
+    blurb: 'Measuring what the poster actually costs to load, and making it work on a phone.',
+    commits: ['620812b', '6bd998d', '406eddf'],
   },
   {
     id: 'curation',
-    title: 'Reading the session back',
+    title: 'Reading the session back, and splitting the bundle',
     blurb:
-      'Cutting the log into chapters and topics, so the conversation could be navigated rather than scrolled.',
-    commits: ['6c536b9'],
-  },
-  {
-    id: 'code-splitting',
-    title: 'Splitting the bundle',
-    blurb:
-      'Putting the written sections behind their own chunks, so a browser over a multi-megabyte transcript costs the poster nothing.',
-    commits: ['8f3086c'],
+      'Turning the raw log into something with chapters, and putting the browser behind its own chunk so the poster pays nothing for it.',
+    commits: ['6c536b9', '8f3086c'],
   },
   {
     id: 'browser-start',
@@ -981,7 +968,7 @@ export const TOPICS: Topic[] = [
     title: 'Search, and URLs that fail loudly',
     blurb:
       'Search as another way in rather than a parameter beside them, links that say so when they name nothing, and opening a single collapsed reply.',
-    commits: ['7d8ce41', 'a2be6c9', '4cb1e74', '9f26535'],
+    commits: ['7d8ce41', 'a2be6c9', '4cb1e74', '9f26535', '811d770', 'cfa5b78'],
   },
   {
     id: 'collections',
@@ -991,17 +978,11 @@ export const TOPICS: Topic[] = [
     commits: ['df4f2f4', '38964bd', '5d1747d'],
   },
   {
-    id: 'browser-defaults',
-    title: 'What the browser opens on',
-    blurb: 'A collection as the landing view, and how much of a turn a view shows before you ask.',
-    commits: ['b5eceee', '7c9c2ab'],
-  },
-  {
     id: 'browser-polish',
-    title: 'Phones, and a tidy-up',
+    title: 'What it opens on, and a tidy-up',
     blurb:
-      'Folding the contents away on a small screen, then cutting figures that had stopped being true and exports nothing used.',
-    commits: ['414d14d', 'c8ec501', '3aa364f'],
+      'A collection as the landing view, a density that follows from the kind of view, and then small screens, stale figures and unused exports.',
+    commits: ['b5eceee', '7c9c2ab', '414d14d', 'c8ec501', '3aa364f'],
   },
   {
     id: 'written-markdown',
@@ -1012,45 +993,33 @@ export const TOPICS: Topic[] = [
   },
   {
     id: 'identity',
-    title: 'A wordmark, an icon, and the last of the scaffold',
+    title: 'A wordmark, an icon, and copy written by hand',
     blurb:
-      'Setting the name one way everywhere, drawing the tab icon from it, and clearing out what the original install left behind.',
-    commits: ['4ec1713', '04b406e'],
-  },
-  {
-    id: 'handwritten',
-    title: 'Comments cut back, and copy written by hand',
-    blurb:
-      'A pass over every comment for what had quietly stopped being true, and then the pages written without a model.',
-    commits: ['0421a75', '5e0af21'],
+      'The name set one way everywhere and the tab icon drawn from it, the last of the scaffolding cleared out, every comment checked for what had stopped being true — and then the pages written without a model.',
+    commits: ['4ec1713', '04b406e', '0421a75', '5e0af21', 'bceb575'],
   },
   {
     id: 'transcript-finish',
-    title: 'Chapters recut, and a way onward',
+    title: 'Chapters recut, and the plates rebalanced',
     blurb:
-      'Six chapters over the whole session, each opening on a prompt that names it, and a footer that carries a reader from one to the next.',
-    commits: ['7e16d5f', 'fba44f9'],
-  },
-  {
-    id: 'plate-balance',
-    title: 'Rebalancing the plates',
-    blurb:
-      'Five watercolours instead of four, placed where they were asked for rather than drifting to the middle of the page.',
-    commits: ['4c1aa2f'],
+      'Six chapters over the whole session each opening on a prompt that names it, a footer that carries a reader onward, and five watercolours placed where they were asked for.',
+    commits: ['7e16d5f', 'fba44f9', '4c1aa2f'],
   },
   {
     id: 'going-live',
     title: 'Going live',
     blurb:
-      'A workflow that builds and deploys, a domain pointed at it, and the retired API key added to what the transcript scrubs — the log records what was typed, including a key that has since been rotated.',
-    commits: ['298b51a', 'b3c9ac6', '08b7f2c', '715a05e'],
-  },
-  {
-    id: 'late-copy',
-    title: 'Copy, and a lint warning that was right',
-    blurb:
-      'The banner tightened, a publication date added, and a memoised filter whose dependencies did not match what it read — the one warning that was a design smell rather than noise.',
-    commits: ['e997ee4', 'c725299', 'dd54574', 'e51019e'],
+      'A workflow that builds and deploys, a domain pointed at it, the retired API key added to what the transcript scrubs — then the banner tightened and a lint warning that turned out to be right.',
+    commits: [
+      '298b51a',
+      'b3c9ac6',
+      '08b7f2c',
+      '715a05e',
+      'e997ee4',
+      'c725299',
+      'dd54574',
+      'e51019e',
+    ],
   },
   {
     id: 'findable',
@@ -1067,16 +1036,7 @@ export const CHAPTERS: Chapter[] = [
     title: 'Prototyping with faked data',
     blurb:
       'A blank directory to a chart that draws, on hand-written seasons for one region, while the stack underneath was still being argued about.',
-    topics: [
-      'scaffold',
-      'first-data',
-      'toolchain',
-      'streamgraph',
-      'ribbons',
-      'banner',
-      'paper-size',
-      'routing',
-    ],
+    topics: ['scaffold', 'first-data', 'toolchain', 'ribbons', 'banner', 'paper-size', 'routing'],
   },
   {
     id: 'sfdata',
@@ -1127,14 +1087,12 @@ export const CHAPTERS: Chapter[] = [
       'Publishing this conversation as something readable: chapters over the log, a chat to read it in, links into any part of it, and collections picked by hand.',
     topics: [
       'curation',
-      'code-splitting',
       'browser-start',
       'browser-reading',
       'browser-contents',
       'browser-citing',
       'browser-search',
       'collections',
-      'browser-defaults',
       'browser-polish',
     ],
   },
@@ -1143,15 +1101,6 @@ export const CHAPTERS: Chapter[] = [
     title: 'Polish and publishing',
     blurb:
       'The written sections moved to Markdown so they could be written as prose, a wordmark and an icon, and the last of the scaffolding cleared out.',
-    topics: [
-      'written-markdown',
-      'identity',
-      'handwritten',
-      'transcript-finish',
-      'plate-balance',
-      'going-live',
-      'late-copy',
-      'findable',
-    ],
+    topics: ['written-markdown', 'identity', 'transcript-finish', 'going-live', 'findable'],
   },
 ];
