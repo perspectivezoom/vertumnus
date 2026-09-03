@@ -5,6 +5,7 @@ import source from '@/src/components/about/Licenses.md' with { type: 'text' };
 import { Article, ExternalLink, LINK_CLASS, Notice } from '@/src/components/about/Prose';
 import { DEPENDENCIES, TYPEFACES } from '@/src/lib/licenses';
 import { useTitle } from '@/src/lib/title';
+import { SECTIONS } from '@/src/lib/routes';
 
 /**
  * What this project is built from, and on what terms.
@@ -14,7 +15,7 @@ import { useTitle } from '@/src/lib/title';
  * and this file supplies them.
  */
 export function Licenses() {
-  useTitle('licenses');
+  useTitle(SECTIONS.licenses.title);
   return (
     <Article>
       <Notice label="AI usage">

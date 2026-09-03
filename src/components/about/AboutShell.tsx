@@ -1,38 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router';
 
-/**
- * The sections, in the order they answer a reader's questions: what this is, where it came from,
- * how it was made, what it is built on.
- */
-export const SECTIONS = [
-  {
-    path: '',
-    label: 'About',
-    blurb: 'Vertumnus overview and section summaries.',
-  },
-  {
-    path: 'sources',
-    label: 'Sources',
-    blurb:
-      'Where the raw data comes from, and the methodology and heuristics used to interpret the data.',
-  },
-  {
-    path: 'ai',
-    label: 'AI usage',
-    blurb: 'Write up on how AI was used in this project, and thoughts on coding with AI in 2026.',
-  },
-  {
-    path: 'transcript',
-    label: 'AI transcript',
-    blurb:
-      'The ~700 prompt AI conversation that built this project. Searchable, and grouped by chronological chapters and work items.',
-  },
-  {
-    path: 'licenses',
-    label: 'Licenses',
-    blurb: 'License declaration for typefaces, software, and public-domain artwork.',
-  },
-] as const;
+import { SECTIONS } from '@/src/lib/routes';
 
 /**
  * Chrome for the written sections: a way back to the poster, the section nav, and the page.
@@ -56,7 +24,7 @@ export function AboutShell() {
             vertumnus
           </Link>
           <nav className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
-            {SECTIONS.map((section) => (
+            {Object.values(SECTIONS).map((section) => (
               <NavLink
                 key={section.path}
                 to={section.path === '' ? '/about' : `/about/${section.path}`}

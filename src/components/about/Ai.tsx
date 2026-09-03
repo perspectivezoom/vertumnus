@@ -2,6 +2,7 @@ import { AboutMarkdown } from '@/src/components/about/AboutMarkdown';
 import source from '@/src/components/about/Ai.md' with { type: 'text' };
 import { Article, HiringNotice, Notice } from '@/src/components/about/Prose';
 import { useTitle } from '@/src/lib/title';
+import { SECTIONS } from '@/src/lib/routes';
 
 /**
  * How the project was built alongside a model, and the record of it.
@@ -10,7 +11,7 @@ import { useTitle } from '@/src/lib/title';
  * which is why it can be searched rather than summarised.
  */
 export function Ai() {
-  useTitle('ai usage');
+  useTitle(SECTIONS.ai.title);
   return (
     <Article>
       <Notice label="AI usage">

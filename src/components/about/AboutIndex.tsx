@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 
-import { SECTIONS } from '@/src/components/about/AboutShell';
+import { SECTIONS } from '@/src/lib/routes';
 import source from '@/src/components/about/AboutIndex.md' with { type: 'text' };
 import { AboutMarkdown } from '@/src/components/about/AboutMarkdown';
 import { Article, Notice, LINK_CLASS, HiringNotice } from '@/src/components/about/Prose';
@@ -13,7 +13,7 @@ import { useTitle } from '@/src/lib/title';
  * that exist rather than written down twice.
  */
 export function AboutIndex() {
-  useTitle('about');
+  useTitle(SECTIONS.about.title);
   return (
     <Article>
       <Notice label="AI usage">
@@ -38,19 +38,21 @@ export function AboutIndex() {
 function Sections() {
   return (
     <dl className="flex flex-col gap-2">
-      {SECTIONS.filter((section) => section.path !== '').map((section) => (
-        <div key={section.path} className="flex flex-col gap-1">
-          <dt>
-            <Link
-              to={`/about/${section.path}`}
-              className="font-medium text-green-800 underline underline-offset-2 hover:text-green-900"
-            >
-              {section.label}
-            </Link>
-          </dt>
-          <dd className="text-[15px] text-neutral-600">{section.blurb}</dd>
-        </div>
-      ))}
+      {Object.values(SECTIONS)
+        .filter((section) => section.path !== '')
+        .map((section) => (
+          <div key={section.path} className="flex flex-col gap-1">
+            <dt>
+              <Link
+                to={`/about/${section.path}`}
+                className="font-medium text-green-800 underline underline-offset-2 hover:text-green-900"
+              >
+                {section.label}
+              </Link>
+            </dt>
+            <dd className="text-[15px] text-neutral-600">{section.blurb}</dd>
+          </div>
+        ))}
     </dl>
   );
 }

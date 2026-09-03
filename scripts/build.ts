@@ -3,6 +3,9 @@ import { rm } from 'node:fs/promises';
 
 import tailwind from 'bun-plugin-tailwind';
 
+import { regions } from '@/data/regions';
+import { cardFor, type Route, ROUTES } from '@/src/lib/routes';
+
 // Deploy base: '/' for a root or custom-domain site, '/<repo>/' for a GitHub project page.
 // publicPath makes asset URLs absolute (so they load at any route depth); the define feeds
 // the same value to the client router (see src/App.tsx).
@@ -16,6 +19,11 @@ const BASE = '/';
  * and it keeps the fact in the repository rather than only in a settings page nobody diffs.
  */
 const DOMAIN = 'vertumnus.fyi';
+
+/** The site's own name, and the sentence the shell carries before a route replaces it. */
+const SITE = 'vertumnus';
+const DEFAULT_DESCRIPTION =
+  "Printable posters of what's in season at your local farmers' market. Produce data is specific to your region, with week-level granularity.";
 
 // Chunk and asset names carry a content hash, so a rebuild writes new files beside the old ones
 // rather than over them. Left alone the directory only grows, and every stale chunk from every
@@ -100,9 +108,51 @@ await Bun.write('dist/index.html', html.replace('</head>', `${preloads}</head>`)
 
 await Bun.write('dist/CNAME', `${DOMAIN}\n`);
 
-// Copied rather than imported: the sharing card is named in a `<meta>` tag by absolute URL, and
-// the bundler only rewrites the references it understands — so this one has to keep its name.
-await Bun.write('dist/og.png', Bun.file('src/images/og.png'));
+// Copied rather than imported: a sharing card is named in a `<meta>` tag by absolute URL, and the
+// bundler only rewrites the references it understands — so these have to keep their names.
+for (const region of regions) {
+  await Bun.write(`dist${cardFor(region.id)}`, Bun.file(`src/images${cardFor(region.id)}`));
+}
+
+/**
+ * Write a copy of the shell for every route, with that route's words in its head.
+ *
+ * Not server rendering: the body stays `<div id="root"></div>` and the app boots and draws the
+ * page exactly as it does today. What changes is that Pages finds a file and answers 200 instead
+ * of falling back to 404.html — a crawler indexes a 200 and skips a 404 — and that each file can
+ * carry its own title, description and card, which the app cannot do because a crawler runs none
+ * of it.
+ *
+ * Every substitution is checked. A silent miss would publish the wrong description on every page,
+ * and nothing downstream would notice.
+ */
+const shell = readFileSync('dist/index.html', 'utf8');
+
+function pageFor(route: Route): string {
+  const swap = (html: string, from: string, to: string): string => {
+    if (!html.includes(from))
+      throw new Error(`pre-render: the shell has no ${JSON.stringify(from)}`);
+    return html.replace(from, to);
+  };
+  let html = swap(shell, '<title>vertumnus</title>', `<title>${route.title} · ${SITE}</title>`);
+  html = swap(html, `content="https://${DOMAIN}/"`, `content="https://${DOMAIN}${route.path}"`);
+  html = swap(
+    html,
+    `content="https://${DOMAIN}/og-sfbay.png"`,
+    `content="https://${DOMAIN}${route.image}"`,
+  );
+  // Both the plain description and og:description carry the same sentence, so both are replaced.
+  while (html.includes(DEFAULT_DESCRIPTION))
+    html = html.replace(DEFAULT_DESCRIPTION, route.description);
+  return html;
+}
+
+for (const route of ROUTES) {
+  // '/' is index.html, already written by the bundler with the site-level words.
+  if (route.path === '/') continue;
+  await Bun.write(`dist${route.path}/index.html`, pageFor(route));
+}
+console.log(`pre-rendered ${ROUTES.length - 1} routes beside index.html`);
 
 // SPA fallback: GitHub Pages serves 404.html for any unmatched path (including nested
 // routes like /about/licenses), which boots the app and lets the client router take over.

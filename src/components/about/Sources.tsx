@@ -4,9 +4,10 @@ import { AboutMarkdown } from '@/src/components/about/AboutMarkdown';
 import { Article, LINK_CLASS, Notice } from '@/src/components/about/Prose';
 import source from '@/src/components/about/Sources.md' with { type: 'text' };
 import { useTitle } from '@/src/lib/title';
+import { SECTIONS } from '@/src/lib/routes';
 
 export function Sources() {
-  useTitle('sources');
+  useTitle(SECTIONS.sources.title);
   return (
     <Article>
       <Notice label="AI usage">
