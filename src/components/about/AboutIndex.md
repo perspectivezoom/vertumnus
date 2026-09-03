@@ -18,7 +18,7 @@ The best I've seen is this New York State Department of Agriculture [harvest cha
 
 Compared to the New York harvest chart, the San Francisco Foodwise [seasonality chart](https://foodwise.org/eat-seasonally/seasonality-charts/seasonality-chart-fruit-and-nuts) also features "In season" and "In the market" availabilities, but its granularity is per month.
 
-In both charts, there is no affordance for produce customization, nor is there an attempt to make the chart aesthetically pleasing. Which is fine for the chart's goals: They're designed as reference material to be handed out as leaflets, not wall art. I don't know if vertumnus is quite good enough to be wall art, but it's as close as I can get in 40 days.
+In both charts, there is no affordance for produce customization, nor is there an attempt to make the chart aesthetically pleasing. Which is fine for the chart's goals: They're designed as reference material to be handed out as leaflets, not wall art. I don't know if vertumnus is quite good enough to be wall art, but it's as close as I can get in 46 days.
 
 ## Target audience
 

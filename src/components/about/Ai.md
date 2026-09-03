@@ -1,6 +1,6 @@
 # A snapshot in time: Reflections on AI usage for vertumnus
 
-[vertumnus](/) was created in a single 700 prompt Claude Opus 5 session over a 40 day period. A complete transcript of the session, including search, chronological chapters, and notable cross-chapter topics, can be found at [/about/transcript](/about/transcript). This page is a handwritten account describing and reflecting the usage of AI in 2026.
+[vertumnus](/) was created in a single 731 prompt Claude Opus 5 session over 22 days within a 46 day period, from July 20th to September 2nd, 2026. A complete transcript of the session, including search, chronological chapters, and notable cross-chapter topics, can be found at [/about/transcript](/about/transcript). This page is a handwritten account describing and reflecting the usage of AI in 2026.
 
 In general, while I found AI indispensible for the scoping and execution of the project, its default code quality is still suspect. I remain uncomfortable with relinquishing commit-by-commit review, for as long as I am feasibly able to, whilst acknowledging that surrender is inevitable.
 

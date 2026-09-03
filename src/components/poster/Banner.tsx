@@ -129,7 +129,7 @@ function Intro() {
         <BannerLink href="/about">on the /about page</BannerLink>.
       </p>
       <p className="text-xs leading-relaxed text-neutral-600">
-        vertumnus was wildly overengineered in a single 700 prompt Claude Opus 5 session over a 40
+        vertumnus was wildly overengineered in a single 731 prompt Claude Opus 5 session over a 46
         day period. Read more at <BannerLink href="/about/ai">/about/ai</BannerLink>, or browse all
         prompts at <BannerLink href="/about/transcript">/about/transcript</BannerLink>.
       </p>

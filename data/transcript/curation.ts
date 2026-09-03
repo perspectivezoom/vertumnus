@@ -191,7 +191,7 @@ export const COLLECTIONS: Record<string, Collection> = {
   discovery: {
     title: 'Where Claude found something',
     blurb:
-      'Exchanges where the model turned up something neither of us knew going in. A selection with no total behind it: nothing here is decided by a rule a reader could apply.',
+      'Exchanges where the model turned up something neither of us knew going in. A selection with no total behind it: nothing here is decided by a rule a reader could apply. Most consequential first.',
     entries: [
       {
         exchange: '66899c90-d693-4973-90cc-5ecafb384a20',
@@ -199,7 +199,27 @@ export const COLLECTIONS: Record<string, Collection> = {
       },
       {
         exchange: '16ac61dc-397d-4b45-8d90-b4ce475216fd',
-        note: 'Asked for a regional graphic and expecting a landmark, Claude proposed the USDA Pomological Watercolor Collection instead: 7,497 public-domain fruit paintings held by the same department that publishes the shipment data.',
+        note: "Asked for a regional graphic and expecting a landmark, Claude proposed the USDA Pomological Watercolor Collection instead: 7,497 public-domain fruit paintings held by the same department that publishes the shipment data. It became the poster's whole look.",
+      },
+      {
+        exchange: 'e4b9eba1-87a1-47b8-b2e4-da461e8c3643',
+        note: "With tile-packing rejected and lanes too sparse, the ridgeline turned up as the form that buys density without letting one crop's curve move another's baseline. It is what the poster is today.",
+      },
+      {
+        exchange: 'e150d1c6-05ee-408d-b530-8fa0bb6ea36f',
+        note: 'The weekly curve did exist in one citable artifact after all: Figure 5 of an open-access 2024 paper, production volume by district and time of year.',
+      },
+      {
+        exchange: '28f068a7-0298-4e25-9844-83d9062e2e21',
+        note: 'Asking whether components work inside Markdown turned out to be the question that unlocked the written sections: a tag resolves against an overrides map, so a page can say `<Dependencies />` and mean it.',
+      },
+      {
+        exchange: '2e48ee9d-f81e-405a-8047-c7bdf237944f',
+        note: 'No linter can catch an Astro component that silently loses its click handlers, because the interactivity and the hydration directive live in different files. One of the reasons Astro did not survive.',
+      },
+      {
+        exchange: 'ba426b03-9676-4008-9a22-c8b01c657ee7',
+        note: "Bun's build result exposes no import graph at all, but Bun.Transpiler.scanImports parses one and names the static/dynamic distinction directly, replacing a regex run over the bundler's own output.",
       },
       {
         exchange: '630b9005-6933-43a0-ba2e-5d39eb72996b',
@@ -210,51 +230,59 @@ export const COLLECTIONS: Record<string, Collection> = {
         note: "oxfmt's line-width ceiling is compiled into its native Rust core, and its JSON schema advertises a limit two hundred times higher than the validator will accept.",
       },
       {
-        exchange: 'e4b9eba1-87a1-47b8-b2e4-da461e8c3643',
-        note: "With tile-packing rejected and lanes too sparse, the ridgeline turned up as the form that buys density without letting one crop's curve move another's baseline. It is what the poster is today.",
-      },
-      {
-        exchange: 'ba426b03-9676-4008-9a22-c8b01c657ee7',
-        note: "Bun's build result exposes no import graph at all, but Bun.Transpiler.scanImports parses one and names the static/dynamic distinction directly, replacing a regex run over the bundler's own output.",
-      },
-      {
-        exchange: '2e48ee9d-f81e-405a-8047-c7bdf237944f',
-        note: 'No linter can catch an Astro component that silently loses its click handlers, because the interactivity and the hydration directive live in different files. One of the reasons Astro did not survive.',
-      },
-      {
         exchange: 'c5697a89-250c-4e7c-ac95-79f7307db186',
         note: "Reading d3's source rather than recalling it showed that stack offset and stack order are independent, so the wiggle baseline could be adopted without the ordering it usually ships with.",
-      },
-      {
-        exchange: 'e150d1c6-05ee-408d-b530-8fa0bb6ea36f',
-        note: 'The weekly curve did exist in one citable artifact after all: Figure 5 of an open-access 2024 paper, production volume by district and time of year.',
       },
     ],
   },
   pushback: {
     title: 'Where I pushed back',
     blurb:
-      'A selection from roughly seventy exchanges where Claude took the wrong direction, asserted something untrue, or assumed what it should have asked — and I said so.',
+      'A selection from roughly seventy exchanges where Claude took the wrong direction, asserted something untrue, or assumed what it should have asked — and I said so. Most consequential first.',
     entries: [
       {
         exchange: 'ac474e79-f8a1-412d-aed2-f1db2b1b17b3',
-        note: 'A source line reading "community judgment" with a null URL was an opaque synthesis dressed up as a citation. The standing rule against inventing sources dates from this exchange.',
-      },
-      {
-        exchange: '692b43f3-52ed-430e-bc61-ddff97fb31e8',
-        note: "Claude reached for brew install to read a PDF. Installing software on someone's machine is not a step you take without asking.",
+        note: 'A source line reading "community judgment" with a null URL was an opaque synthesis dressed up as a citation. The standing rule against inventing sources dates from this exchange, and governs every claim the site makes.',
       },
       {
         exchange: '8bee2e18-31d7-4320-b740-ad5cbd1ff16e',
         note: 'Bay Area produce was being sourced from the Los Angeles terminal because that was the report Claude had already fetched. Local knowledge caught what the pipeline did not.',
       },
       {
+        exchange: '05a2c66c-daa6-40e0-b5e2-579c71ffa406',
+        note: '"There shouldn\'t be any top bias at all with the current approach. Where is the top bias coming from?" The explanation Claude had given did not follow from its own description, and the real mechanism was somewhere else entirely.',
+      },
+      {
+        exchange: 'e8cb45de-90d6-4124-b27f-634e9dea10d3',
+        note: "Claude had checked the live site and pronounced it fine. It had checked over one scheme and not the other, and the bare domain was serving GitHub's 404 to anyone who typed it.",
+      },
+      {
         exchange: '90b6b73c-70e9-4da4-8736-24b8fb8e2e97',
         note: 'Claude proposed upgrading to a version of Bun that does not exist, and kept recommending it after the install failed.',
       },
       {
+        exchange: 'd2e30550-5f7d-4b3e-9fd5-5154b4ea0720',
+        note: 'Titling was being done by parsing the URL and looking the answer up, with a fallback for when the lookup missed. A section knows what it is.',
+      },
+      {
+        exchange: '4739ae75-5ae2-4cb9-8c1a-b39846437ff1',
+        note: 'Claude could not reproduce its own image pipeline from the session history it had been told to read, and had reconstructed it by guesswork instead of saying so.',
+      },
+      {
+        exchange: '837ef90a-d86b-4d4d-9b0a-3c7ee904e556',
+        note: '"Wouldn\'t load-bearing attributes fail loudly?" The comment claimed the opposite of what the code did, and the failure turned out to be spectacularly loud.',
+      },
+      {
+        exchange: '692b43f3-52ed-430e-bc61-ddff97fb31e8',
+        note: "Claude reached for brew install to read a PDF. Installing software on someone's machine is not a step you take without asking.",
+      },
+      {
         exchange: 'c232af71-fa7e-4389-b666-a22015003d0a',
         note: 'display: contents worked, but it was cleverness covering for padding Claude had added itself. The robust fix was to match one gap at two levels.',
+      },
+      {
+        exchange: '3c035802-8031-4c58-aa18-a910ba454a66',
+        note: 'Asked to migrate one crop, Claude bundled citrus into the same change. Two things in one commit is one thing too many.',
       },
       {
         exchange: '9f2aedec-9bfa-420d-beb2-0e1811d6178e',
@@ -268,32 +296,36 @@ export const COLLECTIONS: Record<string, Collection> = {
         exchange: 'fb5e3a36-a9f0-47d2-bdcf-bd47a9e786a3',
         note: 'A filter regex was silently excluding every report whose name began with Apr, which is also how April abbreviates.',
       },
-      {
-        exchange: '3c035802-8031-4c58-aa18-a910ba454a66',
-        note: 'Asked to migrate one crop, Claude bundled citrus into the same change. Two things in one commit is one thing too many.',
-      },
-      {
-        exchange: '4739ae75-5ae2-4cb9-8c1a-b39846437ff1',
-        note: 'Claude could not reproduce its own image pipeline from the session history it had been told to read, and had reconstructed it by guesswork instead of saying so.',
-      },
     ],
   },
   praise: {
     title: 'Where Claude got it right',
     blurb:
-      'Nearly all of the dozen times I said something was good, found by the prompt that followed it. Each entry links to the work rather than to the compliment.',
+      'Nearly all of the dozen times I said something was good, found by the prompt that followed it. Each entry links to the work rather than to the compliment. Most consequential first.',
     entries: [
-      {
-        exchange: 'f91f7213-d204-4372-9a0b-640341a19dec',
-        note: 'Splitting the sidebar into a presentation commit and a selection commit, so each was reviewable on its own: "Good call on splitting up presentation and functionality."',
-      },
       {
         exchange: 'cee4f050-4577-4c78-91e3-d1f321b8d0d1',
         note: 'The argument that a hand-drawn face would read as a printing defect at label size, which redirected the whole type search: "I can accept that pushback."',
       },
       {
+        exchange: 'f91f7213-d204-4372-9a0b-640341a19dec',
+        note: 'Splitting the sidebar into a presentation commit and a selection commit, so each was reviewable on its own: "Good call on splitting up presentation and functionality."',
+      },
+      {
+        exchange: 'af2e81a2-1517-49f6-8490-b63ea2cdfe38',
+        note: 'Proposing a test that renders each section and fails on any tag React did not resolve, rather than grepping the Markdown for tag names: "way better than what is effectively a regex test."',
+      },
+      {
         exchange: '4448aca4-8cb6-4d69-9359-1fbd5a8e1e5a',
         note: 'A controlled A/B of the bundle with splitting off and on, five runs each, showing the poster got smaller and stayed at one fetch wave: "Okay, great. No additional round trip waterfalls."',
+      },
+      {
+        exchange: 'cba78245-7495-42fc-a01e-dcfcde980ba2',
+        note: 'Explaining why a volume tolerance was badly conditioned on exactly the flat crops it was meant to fix, and proposing cumulative share instead: "Okay, this makes sense to me."',
+      },
+      {
+        exchange: 'ce08d511-19c7-4a83-a34f-2cd174a9f56d',
+        note: 'A configuration shape where regions and sections each stay their own source of truth and the route table is derived from both: "This makes sense to me."',
       },
       {
         exchange: 'c015a80a-bfcb-4036-9f71-ad7cc9501935',
@@ -308,16 +340,12 @@ export const COLLECTIONS: Record<string, Collection> = {
         note: 'Anchoring the streamgraph to a fixed total height so one crop\'s decline stopped shoving another\'s label around: "Yes, this is much better."',
       },
       {
-        exchange: 'cba78245-7495-42fc-a01e-dcfcde980ba2',
-        note: 'Explaining why a volume tolerance was badly conditioned on exactly the flat crops it was meant to fix, and proposing cumulative share instead: "Okay, this makes sense to me."',
-      },
-      {
         exchange: '5f5ac9dc-5185-4951-96df-b1b19680ef1e',
-        note: 'Researching the state of Bun, Astro and TanStack Start rather than recommending from recall, which settled the stack for a month: "Okay, I am aligned on Astro 6 + Bun."',
+        note: 'Researching the state of Bun, Astro and TanStack Start rather than recommending from recall, which settled the stack for a month: "Okay, I\'m aligned on Astro 6 + Bun."',
       },
       {
         exchange: '0b61a02a-96fd-4eef-8655-a38db29e3c51',
-        note: 'Starting the crop list from what is actually sold at Bay Area markets and filtering to what the data supports, rather than the other way round: "Okay, going with your suggestion seems okay."',
+        note: 'Starting the crop list from what is actually sold at Bay Area markets and filtering to what the data supports, rather than the other way round.',
       },
       {
         exchange: '59e56b5d-bb53-4723-a063-fc3951a10200',
@@ -328,7 +356,7 @@ export const COLLECTIONS: Record<string, Collection> = {
   verbosity: {
     title: 'Where I asked for less',
     blurb:
-      'Every request to cut the comments down, from the first chapter to the last. Comprehensive, and the one correction that never stopped being necessary.',
+      'Every request to cut the comments down, from the first chapter to the last. Comprehensive, and the one correction that never stopped being necessary. Most consequential first.',
     entries: [
       {
         exchange: '578d7de2-a462-4593-b273-649f19b45861',
@@ -399,11 +427,31 @@ export const COLLECTIONS: Record<string, Collection> = {
   measured: {
     title: 'Where a guess became a measurement',
     blurb:
-      'A selection from the exchanges where a claim one of us was confident about got tested, and the answer came back different.',
+      'A selection from the exchanges where a claim one of us was confident about got tested, and the answer came back different. Most consequential first.',
     entries: [
       {
         exchange: '789e56a9-a1dc-4f53-a94b-b3d0583eaabf',
         note: 'One question — does an exchange have exactly one reply? — turned into a measurement: 95% span more than one message and 79% have text after a tool call. The data model was wrong and got rebuilt.',
+      },
+      {
+        exchange: 'b0ef1d1a-9e19-4453-a75a-afe640f9e47f',
+        note: 'A threshold sweep meant to tune one number showed that no threshold reproduces the ground truth, because the two sources were measuring different things.',
+      },
+      {
+        exchange: '8bf6cb67-5e2d-4261-9c89-02bfa33e3af9',
+        note: 'Late-August corn looked like an outlier against the poster. All six seasons on record shipped corn that week: the poster was wrong, not the intuition.',
+      },
+      {
+        exchange: '9b9a3c6f-077e-42f1-ab81-541e6a9b78d3',
+        note: '"I assume the build would fail?" It does not. A typo in a Markdown tag passes type-checking, linting, every test and a production build, and ships a page with a section missing.',
+      },
+      {
+        exchange: '66b3b3b6-40fc-48fc-aa85-c9b19a6256ff',
+        note: 'Asked whether the browser could handle section links natively, the measurement said it handles exactly one of the three ways in — and lands at the top of the page for the other two.',
+      },
+      {
+        exchange: '07919222-5c4b-4154-a0bf-fda4a48a35c9',
+        note: 'Six plates instead of four, tested across four seedings: the top third of the poster went from 3.4% covered to 9.3%, and the mechanism was not the one either of us had assumed.',
       },
       {
         exchange: '3b2a3365-4963-4d43-aa4c-66fecdc9893a',
@@ -418,27 +466,19 @@ export const COLLECTIONS: Record<string, Collection> = {
         note: 'The formatter was blamed for being slow. It formats the whole repo in 134 ms; the real problem was that it turned a 469-line data file into 11,221 lines.',
       },
       {
-        exchange: 'b0ef1d1a-9e19-4453-a75a-afe640f9e47f',
-        note: 'A threshold sweep meant to tune one number showed that no threshold reproduces the ground truth, because the two sources were measuring different things.',
-      },
-      {
-        exchange: '8bf6cb67-5e2d-4261-9c89-02bfa33e3af9',
-        note: 'Late-August corn looked like an outlier against the poster. All six seasons on record shipped corn that week: the poster was wrong, not the intuition.',
+        exchange: 'c5524b06-b782-44c1-b7fb-d22b35b5ed9f',
+        note: 'Persimmons were assumed to wrap around the year boundary. Pooled across six seasons they ship 4.0M lb in weeks 50–52 and 0.2M lb in weeks 1–8.',
       },
       {
         exchange: '11d79838-bdbc-4ed7-9aad-58761d414b54',
         note: "The chat spacing was fixed and then measured rather than eyeballed — one distinct gap of 12px, and the two voices' text starting at the same left edge.",
-      },
-      {
-        exchange: 'c5524b06-b782-44c1-b7fb-d22b35b5ed9f',
-        note: 'Persimmons were assumed to wrap around the year boundary. Pooled across six seasons they ship 4.0M lb in weeks 50–52 and 0.2M lb in weeks 1–8.',
       },
     ],
   },
   sources: {
     title: "What the sources wouldn't say",
     blurb:
-      'A selection from fifteen or so exchanges where the data would not support what the poster wanted to claim. The standing rule against invented sources was written here.',
+      'A selection from fifteen or so exchanges where the data would not support what the poster wanted to claim. The standing rule against invented sources was written here. Most consequential first.',
     entries: [
       {
         exchange: 'ac474e79-f8a1-412d-aed2-f1db2b1b17b3',
@@ -461,6 +501,10 @@ export const COLLECTIONS: Record<string, Collection> = {
         note: 'A good regional source that only resolves to the month, for a poster whose entire premise is the week.',
       },
       {
+        exchange: '3c05b2d6-8ab5-47ba-9edf-5f59dc323be4',
+        note: 'Data from USDA offices that have since closed is still queryable, and still the best record of what those regions grew.',
+      },
+      {
         exchange: '2686f026-e1ec-47fd-820c-b96eb3fc176b',
         note: 'Asking whether one tomato report had quietly merged several varietals into a single curve.',
       },
@@ -468,24 +512,16 @@ export const COLLECTIONS: Record<string, Collection> = {
         exchange: '7bbc9ce2-f0ed-4053-a519-4f6481e9ccd8',
         note: 'Lima beans and dry beans appeared in the New York data. Asking whether they are really grown there removed them.',
       },
-      {
-        exchange: '3c05b2d6-8ab5-47ba-9edf-5f59dc323be4',
-        note: 'Data from USDA offices that have since closed is still queryable, and still the best record of what those regions grew.',
-      },
     ],
   },
   abandoned: {
     title: 'What we tried first',
     blurb:
-      'A selection from about twenty approaches built far enough to judge, then dropped: Astro, Playwright, Biome, jsonc, the streamgraph, imitation watercolour, and a browser written all at once.',
+      'A selection from about twenty approaches built far enough to judge, then dropped: Astro, Playwright, Biome, jsonc, the streamgraph, imitation watercolour, and a browser written all at once. Most consequential first.',
     entries: [
       {
         exchange: '696e379b-2ffb-4b03-b9f8-0439ad8011e4',
-        note: 'Astro, questioned after most decisions had turned into compatibility checks against it, and dropped for plain Bun.',
-      },
-      {
-        exchange: '9e524a37-8b2f-4005-8530-53dd90a0aa50',
-        note: 'Playwright, abandoned once a Bun issue confirmed it cannot run under Bun at all. Screenshots moved to Bun.WebView.',
+        note: 'Astro, questioned after most decisions had turned into compatibility checks against it, and dropped for plain Bun. The largest reversal in the project.',
       },
       {
         exchange: 'd7694b2b-3e17-41ff-9896-89550a425737',
@@ -496,6 +532,18 @@ export const COLLECTIONS: Record<string, Collection> = {
         note: 'Three separate techniques for imitating watercolour — layered daubs, turbulence, single-pigment density — none of which beat flat desaturated colour.',
       },
       {
+        exchange: 'd0407555-4402-409c-905f-b6f7723f5e37',
+        note: "The streamgraph, which real data made illegible: one crop's hump made every band below it wiggle.",
+      },
+      {
+        exchange: '9e524a37-8b2f-4005-8530-53dd90a0aa50',
+        note: 'Playwright, abandoned once a Bun issue confirmed it cannot run under Bun at all. Screenshots moved to Bun.WebView.',
+      },
+      {
+        exchange: 'ffa36c2d-5a04-4802-ad40-469a31c042f7',
+        note: 'Hand-written heading ids and a hook to scroll to them, reset away an hour later when converting the licences page to Markdown made all of it unnecessary.',
+      },
+      {
         exchange: '391e8c4c-3312-4473-a4d2-ae83d544d12a',
         note: 'Biome, dropped for oxlint and oxfmt because neither it nor anything else could lint Tailwind class names.',
       },
@@ -504,16 +552,12 @@ export const COLLECTIONS: Record<string, Collection> = {
         note: 'jsonc as the region format, abandoned for plain TypeScript once the bundler shims needed to support it became the problem.',
       },
       {
-        exchange: 'd0407555-4402-409c-905f-b6f7723f5e37',
-        note: "The streamgraph, which real data made illegible: one crop's hump made every band below it wiggle.",
+        exchange: 'f2a668db-540d-4e99-8665-0cf42fcd6870',
+        note: 'File-based routing, given up when nothing in the Bun ecosystem provided it and hand-maintaining a generator was worse than the problem.',
       },
       {
         exchange: 'b181a987-86fd-48c4-8275-77d83ca82e01',
         note: 'Stencil faces for the headline, rejected on inspection because the stencil breaks fall in places letters do not expect.',
-      },
-      {
-        exchange: 'f2a668db-540d-4e99-8665-0cf42fcd6870',
-        note: 'File-based routing, given up when nothing in the Bun ecosystem provided it and hand-maintaining a generator was worse than the problem.',
       },
     ],
   },
@@ -994,6 +1038,27 @@ export const TOPICS: Topic[] = [
       'Five watercolours instead of four, placed where they were asked for rather than drifting to the middle of the page.',
     commits: ['4c1aa2f'],
   },
+  {
+    id: 'going-live',
+    title: 'Going live',
+    blurb:
+      'A workflow that builds and deploys, a domain pointed at it, and the retired API key added to what the transcript scrubs — the log records what was typed, including a key that has since been rotated.',
+    commits: ['298b51a', 'b3c9ac6', '08b7f2c', '715a05e'],
+  },
+  {
+    id: 'late-copy',
+    title: 'Copy, and a lint warning that was right',
+    blurb:
+      'The banner tightened, a publication date added, and a memoised filter whose dependencies did not match what it read — the one warning that was a design smell rather than noise.',
+    commits: ['e997ee4', 'c725299', 'dd54574', 'e51019e'],
+  },
+  {
+    id: 'findable',
+    title: 'Titles, cards, and a page a crawler can read',
+    blurb:
+      "A title per route, a sharing card rendered from each region's own poster, and a file per route so the site answers 200 with its own words rather than falling back to a 404.",
+    commits: ['d8d4d24', '178fdf2', 'ab9a56a'],
+  },
 ];
 
 export const CHAPTERS: Chapter[] = [
@@ -1078,6 +1143,15 @@ export const CHAPTERS: Chapter[] = [
     title: 'Polish and publishing',
     blurb:
       'The written sections moved to Markdown so they could be written as prose, a wordmark and an icon, and the last of the scaffolding cleared out.',
-    topics: ['written-markdown', 'identity', 'handwritten', 'transcript-finish', 'plate-balance'],
+    topics: [
+      'written-markdown',
+      'identity',
+      'handwritten',
+      'transcript-finish',
+      'plate-balance',
+      'going-live',
+      'late-copy',
+      'findable',
+    ],
   },
 ];
