@@ -100,6 +100,10 @@ await Bun.write('dist/index.html', html.replace('</head>', `${preloads}</head>`)
 
 await Bun.write('dist/CNAME', `${DOMAIN}\n`);
 
+// Copied rather than imported: the sharing card is named in a `<meta>` tag by absolute URL, and
+// the bundler only rewrites the references it understands — so this one has to keep its name.
+await Bun.write('dist/og.png', Bun.file('src/images/og.png'));
+
 // SPA fallback: GitHub Pages serves 404.html for any unmatched path (including nested
 // routes like /about/licenses), which boots the app and lets the client router take over.
 await Bun.write('dist/404.html', Bun.file('dist/index.html'));
