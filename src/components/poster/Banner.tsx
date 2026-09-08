@@ -6,7 +6,6 @@ import { RoundButton } from '@/src/components/poster/RoundButton';
 import { PaperSizeSelector } from '@/src/components/poster/PaperSizeSelector';
 import { RegionPicker } from '@/src/components/poster/RegionPicker';
 import { useQueryParams, useSetQueryParams } from '@/src/lib/params';
-import { HiringMessage } from '@/src/components/about/Prose';
 
 // All banner timing derives from one morph duration.
 const MORPH_S = 0.35;
@@ -132,9 +131,6 @@ function Intro() {
         vertumnus was wildly overengineered in a single 731 prompt Claude Opus 5 session over a 46
         day period. Read more at <BannerLink href="/about/ai">/about/ai</BannerLink>, or browse all
         prompts at <BannerLink href="/about/transcript">/about/transcript</BannerLink>.
-      </p>
-      <p className="text-xs leading-relaxed text-neutral-600">
-        <HiringMessage />
       </p>
     </div>
   );
