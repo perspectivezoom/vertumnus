@@ -2,7 +2,7 @@
 
 [vertumnus](/) is a tool to create customized printable posters of what's in season at local farmers' markets.
 
-Named for the [Roman god of seasons, change and plant growth](https://en.wikipedia.org/wiki/Vertumnus).
+Named for the [Roman god of seasons, change and plant growth](https://en.wikipedia.org/wiki/Vertumnus). Repo is on [Github](https://github.com/perspectivezoom/vertumnus).
 
 ## Sections
 
