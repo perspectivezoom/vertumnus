@@ -52,6 +52,26 @@ export function Notice({ label, children }: { label: string; children: React.Rea
   );
 }
 
+export function HiringNotice() {
+  return (
+    <Notice label="Open to opportunities">
+      <p>
+        <HiringMessage />
+      </p>
+    </Notice>
+  );
+}
+
+export function HiringMessage() {
+  return (
+    <>
+      As of September 2026, the project author is looking for new opportunities. Those interested
+      should reach out on{' '}
+      <ExternalLink href="https://www.linkedin.com/in/perspectivezoom">LinkedIn</ExternalLink>.
+    </>
+  );
+}
+
 /** Worn by any link in prose, so one that stays on the site matches one that leaves it. */
 export const LINK_CLASS = 'text-green-700 underline underline-offset-2 hover:text-green-900';
 
