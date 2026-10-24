@@ -1,6 +1,6 @@
 import { AboutMarkdown } from '@/src/components/about/AboutMarkdown';
 import source from '@/src/components/about/Ai.md' with { type: 'text' };
-import { Article, HiringNotice, Notice } from '@/src/components/about/Prose';
+import { Article, Notice } from '@/src/components/about/Prose';
 import { useTitle } from '@/src/lib/title';
 import { SECTIONS } from '@/src/lib/routes';
 
@@ -18,7 +18,6 @@ export function Ai() {
         <p>The copy on this page was handwritten from scratch.</p>
       </Notice>
       <AboutMarkdown>{source}</AboutMarkdown>
-      <HiringNotice />
     </Article>
   );
 }

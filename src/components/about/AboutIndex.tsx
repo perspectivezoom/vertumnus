@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { SECTIONS } from '@/src/lib/routes';
 import source from '@/src/components/about/AboutIndex.md' with { type: 'text' };
 import { AboutMarkdown } from '@/src/components/about/AboutMarkdown';
-import { Article, Notice, LINK_CLASS, HiringNotice } from '@/src/components/about/Prose';
+import { Article, Notice, LINK_CLASS } from '@/src/components/about/Prose';
 import { useTitle } from '@/src/lib/title';
 
 /**
@@ -30,7 +30,6 @@ export function AboutIndex() {
         </p>
       </Notice>
       <AboutMarkdown overrides={{ Sections: { component: Sections } }}>{source}</AboutMarkdown>
-      <HiringNotice />
     </Article>
   );
 }
